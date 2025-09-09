@@ -1,0 +1,5 @@
+{
+  "name": "AI Question Paper Generator",
+  "description": "An intelligent tool to generate customized question papers for various subjects and chapters based on user-defined criteria like question types, marks, and difficulty level.",
+  "requestFramePermissions": []
+}
