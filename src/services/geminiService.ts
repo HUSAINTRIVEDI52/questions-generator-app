@@ -55,7 +55,10 @@ const responseSchema = {
 
 
 export const generateQuestionPaper = async (formData: FormState): Promise<QuestionPaper> => {
-  const { institutionName, grade, medium, subject, chapters, difficulty, totalMarks, mcqCount, shortAnswerCount, longAnswerCount } = formData;
+  const { 
+    institutionName, grade, medium, subject, chapters, difficulty, totalMarks, 
+    mcqCount, trueFalseCount, fillInTheBlanksCount, shortAnswerCount, longAnswerCount 
+  } = formData;
 
   const prompt = `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
@@ -72,16 +75,20 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
 
     **Required Question Breakdown:**
     - Multiple Choice Questions (MCQs): ${mcqCount}
+    - True/False Questions: ${trueFalseCount}
+    - Fill in the Blanks Questions: ${fillInTheBlanksCount}
     - Short Answer Questions (2-3 sentences): ${shortAnswerCount}
     - Long Answer Questions (1-2 paragraphs): ${longAnswerCount}
 
     **Instructions:**
-    1.  Generate the exact number of questions requested for each type. Create distinct sections for each question type if multiple types are requested.
+    1.  Generate the exact number of questions requested for each type. Create distinct sections for each question type if its count is greater than 0.
     2.  Distribute the ${totalMarks} marks logically across all questions. The sum of marks for all questions must equal the total marks.
     3.  For MCQs, provide exactly 4 distinct options and identify the correct one.
-    4.  For Short and Long Answer questions, provide a model correct answer.
-    5.  Ensure the questions are diverse, high-quality, and cover the specified chapters thoroughly.
-    6.  The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown formatting, or explanations before or after the JSON object.
+    4.  For True/False questions, provide the options ["True", "False"] and identify the correct one.
+    5.  For Fill in the Blanks questions, the 'question_text' should contain a blank represented by '____'. Do not provide options. The 'correct_answer' should be the word(s) that fill the blank.
+    6.  For Short and Long Answer questions, provide a model correct answer and do not provide options.
+    7.  Ensure the questions are diverse, high-quality, and cover the specified chapters thoroughly.
+    8.  The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown formatting, or explanations before or after the JSON object.
     `;
 
   try {

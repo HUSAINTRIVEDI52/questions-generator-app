@@ -31,6 +31,8 @@ export interface FormState {
     difficulty: 'Easy' | 'Medium' | 'Hard';
     totalMarks: number;
     mcqCount: number;
+    trueFalseCount: number;
+    fillInTheBlanksCount: number;
     shortAnswerCount: number;
     longAnswerCount: number;
 }

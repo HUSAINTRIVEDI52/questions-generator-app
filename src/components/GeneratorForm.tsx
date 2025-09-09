@@ -23,6 +23,8 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
   const [totalMarks, setTotalMarks] = useState<number>(50);
   const [mcqCount, setMcqCount] = useState<number>(5);
+  const [trueFalseCount, setTrueFalseCount] = useState<number>(0);
+  const [fillInTheBlanksCount, setFillInTheBlanksCount] = useState<number>(0);
   const [shortAnswerCount, setShortAnswerCount] = useState<number>(5);
   const [longAnswerCount, setLongAnswerCount] = useState<number>(3);
 
@@ -87,6 +89,8 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       difficulty,
       totalMarks,
       mcqCount,
+      trueFalseCount,
+      fillInTheBlanksCount,
       shortAnswerCount,
       longAnswerCount
     });
@@ -175,6 +179,14 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
             <div className="grid grid-cols-3 items-center gap-2">
                 <label htmlFor="mcqCount" className="text-sm col-span-2">MCQs</label>
                 <input type="number" id="mcqCount" value={mcqCount} onChange={e => setMcqCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+            </div>
+             <div className="grid grid-cols-3 items-center gap-2">
+                <label htmlFor="trueFalseCount" className="text-sm col-span-2">True/False</label>
+                <input type="number" id="trueFalseCount" value={trueFalseCount} onChange={e => setTrueFalseCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+            </div>
+             <div className="grid grid-cols-3 items-center gap-2">
+                <label htmlFor="fillInTheBlanksCount" className="text-sm col-span-2">Fill in the Blanks</label>
+                <input type="number" id="fillInTheBlanksCount" value={fillInTheBlanksCount} onChange={e => setFillInTheBlanksCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
             </div>
              <div className="grid grid-cols-3 items-center gap-2">
                 <label htmlFor="shortAnswerCount" className="text-sm col-span-2">Short Answers</label>
