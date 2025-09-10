@@ -20,12 +20,13 @@ interface QuestionPaperDisplayProps {
 
 export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper }) => {
   const [showAnswers, setShowAnswers] = useState(false);
+  const [exportWithAnswers, setExportWithAnswers] = useState(false);
 
   const handlePrint = () => {
     window.print();
   };
   
-  const handleDocxExport = () => {
+  const handleDocxExport = (includeAnswers: boolean) => {
     const docSections = paper.sections.flatMap((section) => {
         const questions = section.questions.map((q, qIndex) => {
             const questionParts = [
@@ -48,12 +49,14 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                 });
             }
             
-            questionParts.push(new Paragraph({
-                 children: [
-                     new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "4CAF50" }),
-                 ],
-                 spacing: { after: 200 },
-            }));
+            if (includeAnswers) {
+                questionParts.push(new Paragraph({
+                     children: [
+                         new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "4CAF50" }),
+                     ],
+                     spacing: { after: 200 },
+                }));
+            }
 
             return questionParts;
         });
@@ -63,7 +66,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                 text: section.section_title,
                 heading: HeadingLevel.HEADING_2,
                 style: "wellSpaced",
-                // FIX: The property for border style is 'style', not 'value'.
                 border: { bottom: { color: "auto", space: 1, style: "single", size: 6 } },
                 spacing: { after: 200 }
             }),
@@ -83,7 +85,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                         new TextRun({ text: `\tDuration: ${paper.duration_minutes} minutes` }),
                     ],
                     alignment: AlignmentType.CENTER,
-                    // FIX: The property for border style is 'style', not 'value'.
                     border: { top: { size: 4, style: "single" }, bottom: { size: 4, style: "single" } },
                     spacing: { before: 200, after: 400 },
                 }),
@@ -96,7 +97,10 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${paper.subject}_${paper.grade}_Question_Paper.docx`;
+        const fileName = includeAnswers
+            ? `${paper.subject}_${paper.grade}_Paper_with_Answers.docx`
+            : `${paper.subject}_${paper.grade}_Question_Paper.docx`;
+        a.download = fileName;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -108,7 +112,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-container">
         <div className="p-6 border-b border-slate-200 flex justify-between items-center no-print">
             <h2 className="text-xl font-bold text-slate-700">Generated Paper</h2>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
                 <button
                     onClick={() => setShowAnswers(!showAnswers)}
                     className={`flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors ${showAnswers ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
@@ -117,13 +121,26 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                     <KeyIcon />
                     {showAnswers ? 'Hide Answers' : 'Show Answers'}
                 </button>
-                <button
-                    onClick={handleDocxExport}
-                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                >
-                    <DocxIcon />
-                    Export as DOCX
-                </button>
+                <div className="flex items-center border border-slate-200 rounded-md">
+                    <button
+                        onClick={() => handleDocxExport(exportWithAnswers)}
+                        className="flex items-center gap-2 py-2 px-4 rounded-l-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                    >
+                        <DocxIcon />
+                        Export as DOCX
+                    </button>
+                    <div className="flex items-center gap-1.5 px-3 border-l border-slate-200 bg-slate-50 h-full">
+                        <input 
+                            type="checkbox" 
+                            id="includeAnswers" 
+                            checked={exportWithAnswers} 
+                            onChange={(e) => setExportWithAnswers(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                        />
+                        <label htmlFor="includeAnswers" className="text-sm font-medium text-slate-600 select-none cursor-pointer">Answers</label>
+                    </div>
+                </div>
+
                 <button
                     onClick={handlePrint}
                     className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
