@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { FormState, QuestionPaper } from '../types';
 
@@ -102,7 +103,12 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
         }
     });
     
-    const jsonText = response.text.trim();
+    const text = response.text;
+    if (text === undefined) {
+      throw new Error("The model returned an empty response. This could be due to safety filters or an internal error.");
+    }
+    const jsonText = text.trim();
+
     if (!jsonText.startsWith('{') || !jsonText.endsWith('}')) {
         console.error("Received non-JSON response:", jsonText);
         throw new Error("The model returned a non-JSON response. Please try again.");
