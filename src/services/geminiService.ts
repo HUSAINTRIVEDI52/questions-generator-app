@@ -1,8 +1,7 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { FormState, QuestionPaper } from '../types';
 
-// FIX: Per coding guidelines, the API key must be obtained exclusively from process.env.API_KEY.
-// This also resolves the TypeScript error "Property 'env' does not exist on type 'ImportMeta'".
 if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable not set");
 }
@@ -36,7 +35,7 @@ const responseSchema = {
                 question_text: { type: Type.STRING },
                 options: { 
                     type: Type.ARRAY,
-                    description: "Array of 4 option strings for MCQs. Omit for other question types.",
+                    description: "Array of option strings. Required for MCQs (4 options) and True/False (2 options). Omit for other types.",
                     items: { type: Type.STRING } 
                 },
                 correct_answer: { type: Type.STRING, description: "The correct answer. For MCQs, it should match one of the options exactly." },
@@ -57,8 +56,13 @@ const responseSchema = {
 export const generateQuestionPaper = async (formData: FormState): Promise<QuestionPaper> => {
   const { 
     institutionName, grade, medium, subject, chapters, difficulty, totalMarks, 
-    mcqCount, trueFalseCount, fillInTheBlanksCount, shortAnswerCount, longAnswerCount 
+    marksDistribution
   } = formData;
+
+  const breakdown = marksDistribution
+    .filter(item => item.count > 0 && item.marks > 0)
+    .map(item => `- ${item.count} ${item.type} question(s), each worth ${item.marks} mark(s).`)
+    .join('\n');
 
   const prompt = `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
@@ -74,15 +78,11 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
     **Total Marks:** ${totalMarks}
 
     **Required Question Breakdown:**
-    - Multiple Choice Questions (MCQs): ${mcqCount}
-    - True/False Questions: ${trueFalseCount}
-    - Fill in the Blanks Questions: ${fillInTheBlanksCount}
-    - Short Answer Questions (2-3 sentences): ${shortAnswerCount}
-    - Long Answer Questions (1-2 paragraphs): ${longAnswerCount}
+    ${breakdown}
 
     **Instructions:**
-    1.  Generate the exact number of questions requested for each type. Create distinct sections for each question type if its count is greater than 0.
-    2.  Distribute the ${totalMarks} marks logically across all questions. The sum of marks for all questions must equal the total marks.
+    1.  Generate the exact number of questions requested for each type and mark value. Create distinct sections for each question type if its count is greater than 0 (e.g., 'Section A: MCQs', 'Section B: Short Answers'). Do not mix different question types in the same section.
+    2.  The total marks of the generated paper MUST be exactly ${totalMarks}. Ensure the marks assigned to each question strictly match the breakdown above.
     3.  For MCQs, provide exactly 4 distinct options and identify the correct one.
     4.  For True/False questions, provide the options ["True", "False"] and identify the correct one.
     5.  For Fill in the Blanks questions, the 'question_text' should contain a blank represented by '____'. Do not provide options. The 'correct_answer' should be the word(s) that fill the blank.

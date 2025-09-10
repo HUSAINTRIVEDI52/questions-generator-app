@@ -1,3 +1,4 @@
+
 export interface Question {
   question_text: string;
   options?: string[];
@@ -22,6 +23,15 @@ export interface QuestionPaper {
   sections: QuestionSection[];
 }
 
+export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'Short Answer' | 'Long Answer';
+
+export interface MarksDistribution {
+  id: string;
+  marks: number;
+  count: number;
+  type: QuestionType;
+}
+
 export interface FormState {
     institutionName: string;
     grade: string;
@@ -29,10 +39,6 @@ export interface FormState {
     subject: string;
     chapters: string[];
     difficulty: 'Easy' | 'Medium' | 'Hard';
+    marksDistribution: MarksDistribution[];
     totalMarks: number;
-    mcqCount: number;
-    trueFalseCount: number;
-    fillInTheBlanksCount: number;
-    shortAnswerCount: number;
-    longAnswerCount: number;
 }

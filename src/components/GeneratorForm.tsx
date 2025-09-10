@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
-import type { FormState } from '../types';
+import type { FormState, MarksDistribution, QuestionType } from '../types';
 import { GSEB_CURRICULUM } from '../constants';
 
 interface GeneratorFormProps {
@@ -8,6 +9,11 @@ interface GeneratorFormProps {
 }
 
 const grades = Object.keys(GSEB_CURRICULUM).sort((a, b) => parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1]));
+
+const questionTypes: QuestionType[] = ['MCQ', 'True/False', 'Fill in the Blanks', 'Short Answer', 'Long Answer'];
+
+const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
+const MinusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 
 
 export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) => {
@@ -21,12 +27,18 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
   const [selectAll, setSelectAll] = useState<boolean>(false);
   
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
-  const [totalMarks, setTotalMarks] = useState<number>(50);
-  const [mcqCount, setMcqCount] = useState<number>(5);
-  const [trueFalseCount, setTrueFalseCount] = useState<number>(0);
-  const [fillInTheBlanksCount, setFillInTheBlanksCount] = useState<number>(0);
-  const [shortAnswerCount, setShortAnswerCount] = useState<number>(5);
-  const [longAnswerCount, setLongAnswerCount] = useState<number>(3);
+  
+  const [marksDistribution, setMarksDistribution] = useState<MarksDistribution[]>([
+    { id: crypto.randomUUID(), marks: 1, count: 10, type: 'MCQ' },
+    { id: crypto.randomUUID(), marks: 2, count: 5, type: 'Short Answer' },
+    { id: crypto.randomUUID(), marks: 3, count: 5, type: 'Short Answer' },
+    { id: crypto.randomUUID(), marks: 5, count: 3, type: 'Long Answer' },
+  ]);
+
+  const totalMarks = useMemo(() => {
+    return marksDistribution.reduce((total, row) => total + (row.marks * row.count), 0);
+  }, [marksDistribution]);
+
 
   // Memoized derived values for cascading dropdowns
   const availableMediums = useMemo(() => grade ? Object.keys(GSEB_CURRICULUM[grade] || {}) : [], [grade]);
@@ -40,9 +52,6 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
     } else {
       setMedium('');
     }
-    setSubject('');
-    setSelectedChapters([]);
-    setSelectAll(false);
   }, [grade, availableMediums]);
 
   useEffect(() => {
@@ -51,14 +60,12 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
     } else {
       setSubject('');
     }
-    setSelectedChapters([]);
-    setSelectAll(false);
   }, [medium, availableSubjects]);
   
   useEffect(() => {
     setSelectedChapters([]);
     setSelectAll(false);
-  }, [subject]);
+  }, [grade, medium, subject]);
 
   const handleChapterToggle = (chapter: string) => {
     const newSelection = selectedChapters.includes(chapter) 
@@ -74,10 +81,27 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
     setSelectedChapters(newSelectAll ? [...availableChapters] : []);
   }
 
+  const handleDistributionChange = (id: string, field: keyof Omit<MarksDistribution, 'id'>, value: string | number) => {
+    setMarksDistribution(prev => prev.map(row => row.id === id ? { ...row, [field]: value } : row));
+  };
+
+  const addDistributionRow = () => {
+    setMarksDistribution(prev => [...prev, { id: crypto.randomUUID(), marks: 1, count: 5, type: 'MCQ' }]);
+  };
+
+  const removeDistributionRow = (id: string) => {
+    setMarksDistribution(prev => prev.filter(row => row.id !== id));
+  };
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedChapters.length === 0) {
       alert("Please select at least one chapter.");
+      return;
+    }
+    if (totalMarks <= 0) {
+      alert("Total marks must be greater than 0. Please add some questions.");
       return;
     }
     onGenerate({
@@ -87,16 +111,12 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       subject,
       chapters: selectedChapters,
       difficulty,
-      totalMarks,
-      mcqCount,
-      trueFalseCount,
-      fillInTheBlanksCount,
-      shortAnswerCount,
-      longAnswerCount
+      marksDistribution,
+      totalMarks
     });
   };
 
-  const isSubmitDisabled = isLoading || selectedChapters.length === 0 || !grade || !medium || !subject;
+  const isSubmitDisabled = isLoading || selectedChapters.length === 0 || !grade || !medium || !subject || totalMarks === 0;
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
@@ -136,7 +156,6 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
         </div>
       </div>
       
-
       {/* Chapters */}
       <div>
         <label className="block text-sm font-semibold text-slate-600 mb-2">Chapters</label>
@@ -156,9 +175,8 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
         </div>
       </div>
 
-      {/* Difficulty and Marks */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
+      {/* Difficulty */}
+      <div>
           <label htmlFor="difficulty" className="block text-sm font-semibold text-slate-600 mb-1">Difficulty</label>
           <select id="difficulty" value={difficulty} onChange={e => setDifficulty(e.target.value as 'Easy' | 'Medium' | 'Hard')} className="w-full p-2 bg-white border border-slate-300 rounded-md shadow-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
             <option>Easy</option>
@@ -166,36 +184,34 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
             <option>Hard</option>
           </select>
         </div>
-        <div>
-          <label htmlFor="totalMarks" className="block text-sm font-semibold text-slate-600 mb-1">Total Marks</label>
-          <input type="number" id="totalMarks" value={totalMarks} onChange={e => setTotalMarks(Number(e.target.value))} min="10" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-        </div>
-      </div>
       
-      {/* Question Counts */}
+      {/* Question Distribution */}
       <div>
-        <p className="block text-sm font-semibold text-slate-600 mb-2">Number of Questions</p>
+        <div className="flex justify-between items-center mb-2">
+            <p className="block text-sm font-semibold text-slate-600">Question Distribution</p>
+            <p className="text-sm font-bold text-slate-700 bg-slate-200 px-2 py-1 rounded-md">Total Marks: {totalMarks}</p>
+        </div>
         <div className="space-y-2">
-            <div className="grid grid-cols-3 items-center gap-2">
-                <label htmlFor="mcqCount" className="text-sm col-span-2">MCQs</label>
-                <input type="number" id="mcqCount" value={mcqCount} onChange={e => setMcqCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+            <div className="grid grid-cols-12 gap-2 text-xs font-bold text-slate-500 px-2">
+                <div className="col-span-3">Marks</div>
+                <div className="col-span-3">Count</div>
+                <div className="col-span-5">Type</div>
             </div>
-             <div className="grid grid-cols-3 items-center gap-2">
-                <label htmlFor="trueFalseCount" className="text-sm col-span-2">True/False</label>
-                <input type="number" id="trueFalseCount" value={trueFalseCount} onChange={e => setTrueFalseCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-            </div>
-             <div className="grid grid-cols-3 items-center gap-2">
-                <label htmlFor="fillInTheBlanksCount" className="text-sm col-span-2">Fill in the Blanks</label>
-                <input type="number" id="fillInTheBlanksCount" value={fillInTheBlanksCount} onChange={e => setFillInTheBlanksCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-            </div>
-             <div className="grid grid-cols-3 items-center gap-2">
-                <label htmlFor="shortAnswerCount" className="text-sm col-span-2">Short Answers</label>
-                <input type="number" id="shortAnswerCount" value={shortAnswerCount} onChange={e => setShortAnswerCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-            </div>
-             <div className="grid grid-cols-3 items-center gap-2">
-                <label htmlFor="longAnswerCount" className="text-sm col-span-2">Long Answers</label>
-                <input type="number" id="longAnswerCount" value={longAnswerCount} onChange={e => setLongAnswerCount(Number(e.target.value))} min="0" className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-            </div>
+            {marksDistribution.map((row, index) => (
+                <div key={row.id} className="grid grid-cols-12 gap-2 items-center">
+                    <input type="number" value={row.marks} onChange={e => handleDistributionChange(row.id, 'marks', Number(e.target.value))} min="1" className="col-span-3 w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+                    <input type="number" value={row.count} onChange={e => handleDistributionChange(row.id, 'count', Number(e.target.value))} min="0" className="col-span-3 w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+                    <select value={row.type} onChange={e => handleDistributionChange(row.id, 'type', e.target.value)} className="col-span-5 w-full p-2 bg-white border border-slate-300 rounded-md shadow-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        {questionTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                    </select>
+                    <button type="button" onClick={() => removeDistributionRow(row.id)} disabled={marksDistribution.length <= 1} className="col-span-1 flex items-center justify-center h-full text-red-500 hover:text-red-700 disabled:text-slate-300 disabled:cursor-not-allowed">
+                        <MinusIcon />
+                    </button>
+                </div>
+            ))}
+            <button type="button" onClick={addDistributionRow} className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 py-2 rounded-md transition-colors">
+                <PlusIcon /> Add Question Type
+            </button>
         </div>
       </div>
 
