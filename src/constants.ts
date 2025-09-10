@@ -9,14 +9,26 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
         "Real Numbers", "Polynomials", "Pair of Linear Equations in Two Variables", "Quadratic Equations", "Arithmetic Progressions", "Triangles", "Coordinate Geometry", "Introduction to Trigonometry", "Some Applications of Trigonometry", "Circles", "Areas Related to Circles", "Surface Areas and Volumes", "Statistics", "Probability"
       ],
       "Social Science": [
-        // History
-        "The Rise of Nationalism in Europe", "Nationalism in India", "The Making of a Global World", "Print Culture and the Modern World",
-        // Geography
-        "Resources and Development", "Forest and Wildlife Resources", "Water Resources", "Agriculture", "Minerals and Energy Resources", "Manufacturing Industries", "Lifelines of National Economy",
-        // Political Science
-        "Power-sharing", "Federalism", "Gender, Religion and Caste", "Political Parties", "Outcomes of Democracy",
-        // Economics
-        "Development", "Sectors of the Indian Economy", "Money and Credit", "Globalisation and the Indian Economy"
+        "Heritage of India",
+        "Cultural Heritage of India: Traditional Handicraft and Fine Arts",
+        "Cultural Heritage of India: Sculpture and Architecture",
+        "Literary Heritage of India",
+        "India's Heritage of Science and Technology",
+        "Places of Indian Cultural Heritage",
+        "Preservation of Our Heritage",
+        "Natural Resources",
+        "Forest and Wildlife Resources",
+        "India: Agriculture",
+        "India: Water Resources",
+        "India: Mineral and Energy Resources",
+        "Manufacturing Industries",
+        "Transport, Communication and Trade",
+        "Economic Development",
+        "Economic Liberalization and Globalization",
+        "Price Rise and Consumer Awareness",
+        "Human Development",
+        "Social Problems of India and Challenges",
+        "Social Change"
       ],
       "English": [
         // First Flight (Prose & Poem)
@@ -33,14 +45,26 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
             "વાસ્તવિક સંખ્યાઓ", "બહુપદીઓ", "દ્વિચલ સુરેખ સમીકરણ યુગ્મ", "દ્વિઘાત સમીકરણ", "સમાંતર શ્રેણી", "ત્રિકોણ", "યામ ભૂમિતિ", "ત્રિકોણમિતિનો પરિચય", "ત્રિકોણમિતિના ઉપયોગો", "વર્તુળ", "વર્તુળ સંબંધિત ક્ષેત્રફળ", "પૃષ્ઠફળ અને ઘનફળ", "આંકડાશાસ્ત્ર", "સંભાવના"
         ],
         "સામાજિક વિજ્ઞાન (Social Science)": [
-            // ઇતિહાસ
-            "યુરોપમાં રાષ્ટ્રવાદનો ઉદય", "ભારતમાં રાષ્ટ્રવાદ", "ભૂમંડલીકૃત વિશ્વનું નિર્માણ", "મુદ્રણ સંસ્કૃતિ અને આધુનિક વિશ્વ",
-            // ભૂગોળ
-            "સંસાધન અને વિકાસ", "વન અને વન્યજીવ સંસાધનો", "જળ સંસાધનો", "કૃષિ", "ખનીજ અને ઊર્જા સંસાધનો", "વિનિર્માણ ઉદ્યોગો", "રાષ્ટ્રીય અર્થતંત્રની જીવાદોરી",
-            // રાજનીતિ વિજ્ઞાન
-            "સત્તાની ભાગીદારી", "સંઘવાદ", "જાતિ, ધર્મ અને લૈંગિક મુદ્દાઓ", "રાજકીય પક્ષો", "લોકશાહીના પરિણામો",
-            // અર્થશાસ્ત્ર
-            "વિકાસ", "ભારતીય અર્થતંત્રના ક્ષેત્રો", "નાણું અને ધિરાણ", "વૈશ્વિકીકરણ અને ભારતીય અર્થતંત્ર"
+            "ભારતનો વારસો",
+            "ભારતનો સાંસ્કૃતિક વારસો: પરંપરાઓ - હસ્ત અને લલિતકલા",
+            "ભારતનો સાંસ્કૃતિક વારસો: શિલ્પ અને સ્થાપત્ય",
+            "ભારતનો સાહિત્યિક વારસો",
+            "ભારતનો વિજ્ઞાન અને ટેકનોલોજીનો વારસો",
+            "ભારતના સાંસ્કૃતિક વારસાના સ્થળો",
+            "આપણા વારસાનું જતન",
+            "કુદરતી સંસાધનો",
+            "વન અને વન્યજીવ સંસાધન",
+            "ભારત: કૃષિ",
+            "ભારત: જળ સંસાધન",
+            "ભારત: ખનીજ અને ઊર્જા સંસાધન",
+            "ઉત્પાદન ઉદ્યોગો",
+            "પરિવહન, સંદેશાવ્યવહાર અને વ્યાપાર",
+            "આર્થિક વિકાસ",
+            "આર્થિક ઉદારીકરણ અને વૈશ્વિકીકરણ",
+            "ભાવવધારો અને ગ્રાહક જાગૃતિ",
+            "માનવ વિકાસ",
+            "ભારતની સામાજિક સમસ્યાઓ અને પડકારો",
+            "સામાજિક પરિવર્તન"
         ]
     }
   },
