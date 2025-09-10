@@ -36,7 +36,7 @@ const responseSchema = {
                 question_text: { type: Type.STRING },
                 options: { 
                     type: Type.ARRAY,
-                    description: "Array of option strings. Required for MCQs (4 options) and True/False (2 options). Omit for other types.",
+                    description: "Array of 4 option strings for MCQs. Omit for other question types.",
                     items: { type: Type.STRING } 
                 },
                 correct_answer: { type: Type.STRING, description: "The correct answer. For MCQs, it should match one of the options exactly." },
@@ -55,14 +55,13 @@ const responseSchema = {
 
 
 export const generateQuestionPaper = async (formData: FormState): Promise<QuestionPaper> => {
-  const { 
-    institutionName, grade, medium, subject, chapters, difficulty, totalMarks, 
-    marksDistribution
-  } = formData;
+  // FIX: The form state was updated to use a flexible `marksDistribution` array.
+  // This function is updated to handle the new structure, replacing the old fixed question counts.
+  const { institutionName, grade, medium, subject, chapters, difficulty, totalMarks, marksDistribution } = formData;
 
-  const breakdown = marksDistribution
-    .filter(item => item.count > 0 && item.marks > 0)
-    .map(item => `- ${item.count} ${item.type} question(s), each worth ${item.marks} mark(s).`)
+  const questionBreakdown = marksDistribution
+    .filter(row => row.count > 0)
+    .map(row => `- ${row.count} ${row.type} questions of ${row.marks} marks each.`)
     .join('\n');
 
   const prompt = `
@@ -79,17 +78,15 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
     **Total Marks:** ${totalMarks}
 
     **Required Question Breakdown:**
-    ${breakdown}
+    ${questionBreakdown}
 
     **Instructions:**
-    1.  Generate the exact number of questions requested for each type and mark value. Create distinct sections for each question type if its count is greater than 0 (e.g., 'Section A: MCQs', 'Section B: Short Answers'). Do not mix different question types in the same section.
-    2.  The total marks of the generated paper MUST be exactly ${totalMarks}. Ensure the marks assigned to each question strictly match the breakdown above.
-    3.  For MCQs, provide exactly 4 distinct options and identify the correct one.
-    4.  For True/False questions, provide the options ["True", "False"] and identify the correct one.
-    5.  For Fill in the Blanks questions, the 'question_text' should contain a blank represented by '____'. Do not provide options. The 'correct_answer' should be the word(s) that fill the blank.
-    6.  For Short and Long Answer questions, provide a model correct answer and do not provide options.
-    7.  Ensure the questions are diverse, high-quality, and cover the specified chapters thoroughly.
-    8.  The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown formatting, or explanations before or after the JSON object.
+    1.  Generate the exact number of questions for each category specified in the breakdown. You should group questions of the same type (e.g., 'Short Answer') into one section, even if they have different marks. For example, all 'Short Answer' questions should be under a 'Section B: Short Answer Questions' heading.
+    2.  The sum of marks for all generated questions MUST equal the **Total Marks** (${totalMarks}). Adhere strictly to the marks-per-question specified in the breakdown.
+    3.  For MCQs, provide exactly 4 distinct options and identify the correct one. For True/False, provide the correct answer as 'True' or 'False'. For Fill in the Blanks, provide the correct word/phrase.
+    4.  For other question types (Short Answer, Long Answer, etc.), provide a model correct answer.
+    5.  Ensure the questions are diverse, high-quality, and cover the specified chapters thoroughly.
+    6.  The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown formatting, or explanations before or after the JSON object.
     `;
 
   try {
