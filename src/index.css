@@ -23,4 +23,13 @@
       box-shadow: none;
       border: none;
   }
+  /* By default, hide the answer blocks when printing */
+  .printable-answer {
+    display: none !important;
+  }
+
+  /* When the parent container has the 'print-with-answers' class, force the answer blocks to be visible */
+  .print-with-answers .printable-answer {
+    display: block !important;
+  }
 }

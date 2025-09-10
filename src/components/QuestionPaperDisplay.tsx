@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type { QuestionPaper } from '../types';
 import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 
@@ -21,9 +21,27 @@ interface QuestionPaperDisplayProps {
 export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper }) => {
   const [showAnswers, setShowAnswers] = useState(false);
   const [exportWithAnswers, setExportWithAnswers] = useState(false);
+  const [printWithAnswers, setPrintWithAnswers] = useState(false);
+  const printablePaperRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
+    const paperElement = printablePaperRef.current;
+    if (!paperElement) {
+      window.print();
+      return;
+    }
+
+    if (printWithAnswers) {
+      paperElement.classList.add('print-with-answers');
+    }
+
+    // This is a blocking call, code after it will run when the print dialog closes.
     window.print();
+    
+    // Clean up the class after printing is done.
+    if (printWithAnswers) {
+      paperElement.classList.remove('print-with-answers');
+    }
   };
   
   const handleDocxExport = (includeAnswers: boolean) => {
@@ -131,26 +149,38 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                     <div className="flex items-center gap-1.5 px-3 border-l border-slate-200 bg-slate-50 h-full">
                         <input 
                             type="checkbox" 
-                            id="includeAnswers" 
+                            id="includeAnswersDocx" 
                             checked={exportWithAnswers} 
                             onChange={(e) => setExportWithAnswers(e.target.checked)}
                             className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
                         />
-                        <label htmlFor="includeAnswers" className="text-sm font-medium text-slate-600 select-none cursor-pointer">Answers</label>
+                        <label htmlFor="includeAnswersDocx" className="text-sm font-medium text-slate-600 select-none cursor-pointer">Answers</label>
                     </div>
                 </div>
 
-                <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >
-                    <PrintIcon />
-                    Print / PDF
-                </button>
+                <div className="flex items-center border border-slate-200 rounded-md">
+                    <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-2 py-2 px-4 rounded-l-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    >
+                        <PrintIcon />
+                        Print / PDF
+                    </button>
+                     <div className="flex items-center gap-1.5 px-3 border-l border-slate-200 bg-slate-50 h-full">
+                        <input 
+                            type="checkbox" 
+                            id="printAnswers" 
+                            checked={printWithAnswers} 
+                            onChange={(e) => setPrintWithAnswers(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                        />
+                        <label htmlFor="printAnswers" className="text-sm font-medium text-slate-600 select-none cursor-pointer">Answers</label>
+                    </div>
+                </div>
             </div>
         </div>
       
-        <div className="p-6 md:p-10" id="printable-paper">
+        <div className="p-6 md:p-10" id="printable-paper" ref={printablePaperRef}>
             <header className="text-center mb-8">
                 <h1 className="text-3xl font-bold">{paper.institution_name}</h1>
                 <h2 className="text-xl font-semibold text-slate-700 mt-1">{paper.title}</h2>
@@ -182,13 +212,11 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                                     ))}
                                 </ul>
                                 )}
-                                {showAnswers && (
-                                    <div className="mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md">
-                                        <p className="text-sm font-semibold text-green-800">
-                                            Correct Answer: <span className="font-normal">{q.correct_answer}</span>
-                                        </p>
-                                    </div>
-                                )}
+                                <div className={`mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md printable-answer ${showAnswers ? '' : 'hidden'}`}>
+                                    <p className="text-sm font-semibold text-green-800">
+                                        Correct Answer: <span className="font-normal">{q.correct_answer}</span>
+                                    </p>
+                                </div>
                             </li>
                         ))}
                     </ol>
