@@ -65,7 +65,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
             new Paragraph({
                 text: section.section_title,
                 heading: HeadingLevel.HEADING_2,
-                // FIX: The 'value' property for border options is incorrect. It should be 'style'.
                 border: { bottom: { color: "auto", space: 1, style: "single", size: 6 } },
                 spacing: { after: 200 }
             }),
@@ -85,7 +84,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                         new TextRun({ text: `\tDuration: ${paper.duration_minutes} minutes` }),
                     ],
                     alignment: AlignmentType.CENTER,
-                    // FIX: The 'value' property for border options is incorrect. It should be 'style'.
                     border: { top: { size: 4, style: "single" }, bottom: { size: 4, style: "single" } },
                     spacing: { before: 200, after: 400 },
                 }),
