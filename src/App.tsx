@@ -37,9 +37,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-main)' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-main)' }}>
       <Header />
-      <main className="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 flex-grow">
         <div className={`lg:col-span-4 xl:col-span-3 no-print ${questionPaper ? 'hidden lg:block' : 'block'}`}>
           <div className="sticky top-24">
             <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />
@@ -99,6 +99,11 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
+      <footer className="text-center p-4 border-t border-slate-200 no-print" style={{ backgroundColor: 'var(--color-surface)' }}>
+        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+          For support or inquiries, contact Husain M Trivedi at <a href="tel:7698379853" className="font-semibold hover:underline" style={{ color: 'var(--color-primary)' }}>7698379853</a>.
+        </p>
+      </footer>
     </div>
   );
 };
