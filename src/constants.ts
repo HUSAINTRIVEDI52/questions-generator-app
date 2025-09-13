@@ -1,4 +1,4 @@
-// NOTE: Curriculum data has been comprehensively updated to reflect the latest rationalized NCERT syllabus for the 2024-25 academic year.
+// NOTE: Curriculum data has been comprehensively updated to reflect the latest GSEB/NCERT syllabus for all subjects and grades.
 export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, string[]>>> = {
   "Class 10": {
     "English Medium": {
@@ -22,13 +22,16 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
         "India: Water Resources",
         "India: Mineral and Energy Resources",
         "Manufacturing Industries",
-        "Transport, Communication and Trade",
+        "Transportation, Communication and Trade",
         "Economic Development",
         "Economic Liberalization and Globalization",
+        "Economic Problems and Challenges: Poverty and Unemployment",
         "Price Rise and Consumer Awareness",
         "Human Development",
         "Social Problems of India and Challenges",
-        "Social Change"
+        "Social Change",
+        "Nutritional System in Nature",
+        "Road Safety and Motorists"
       ],
       "English": [
         // First Flight (Prose & Poem)
@@ -61,10 +64,13 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
             "પરિવહન, સંદેશાવ્યવહાર અને વ્યાપાર",
             "આર્થિક વિકાસ",
             "આર્થિક ઉદારીકરણ અને વૈશ્વિકીકરણ",
+            "આર્થિક સમસ્યાઓ અને પડકારો: ગરીબી અને બેરોજગારી",
             "ભાવવધારો અને ગ્રાહક જાગૃતિ",
             "માનવ વિકાસ",
             "ભારતની સામાજિક સમસ્યાઓ અને પડકારો",
-            "સામાજિક પરિવર્તન"
+            "સામાજિક પરિવર્તન",
+            "કુદરતમાં પોષણ પ્રણાલી",
+            "માર્ગ સલામતી અને વાહનચાલકો"
         ]
     }
   },
@@ -158,7 +164,7 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
       ],
       "English": [
         // Honeycomb (Prose & Poem)
-        "Three Questions", "The Squirrel", "A Gift of Chappals", "The Rebel", "Gopal and the Hilsa Fish", "The Shed", "The Ashes That Made Trees Bloom", "Chivvy", "Quality", "Trees", "Expert Detectives", "Mystery of the Talking Fan", "The Invention of Vita-Wonk", "Dad and the Cat and the Tree", "Fire: Friend and Foe", "Meadow Surprises", "A Bicycle in Good Repair", "Garden Snake", "The Story of Cricket",
+        "Three Questions", "The Squirrel", "A Gift of Chappals", "The Rebel", "Gopal and the Hilsa Fish", "The Shed", "The Ashes That Made Trees Bloom", "Chvy", "Quality", "Trees", "Expert Detectives", "Mystery of the Talking Fan", "The Invention of Vita-Wonk", "Dad and the Cat and the Tree", "Fire: Friend and Foe", "Meadow Surprises", "A Bicycle in Good Repair", "Garden Snake", "The Story of Cricket",
         // An Alien Hand (Supplementary)
         "The Tiny Teacher", "Bringing Up Kari", "The Desert", "The Cop and the Anthem", "Golu Grows a Nose", "I Want Something in a Cage", "Chandni", "The Bear Story", "A Tiger in the House", "An Alien Hand"
       ]
