@@ -69,7 +69,7 @@ const App: React.FC = () => {
             <p>{error}</p>
           </div>
         )}
-        {questionPaper && !isLoading && <QuestionPaperDisplay paper={questionPaper} onNewPaper={handleNewPaper} />}
+        {questionPaper && !isLoading && <QuestionPaperDisplay key={questionPaper.title + questionPaper.total_marks} paper={questionPaper} onNewPaper={handleNewPaper} />}
         {!questionPaper && !isLoading && !error && <HomePage onStart={() => {}} isDesktop={true} />}
       </div>
     </main>
@@ -90,7 +90,7 @@ const App: React.FC = () => {
               <p>{error}</p>
             </div>
           )}
-          {questionPaper && !isLoading && <QuestionPaperDisplay paper={questionPaper} onNewPaper={handleNewPaper} />}
+          {questionPaper && !isLoading && <QuestionPaperDisplay key={questionPaper.title + questionPaper.total_marks} paper={questionPaper} onNewPaper={handleNewPaper} />}
         </div>
       )}
     </main>
