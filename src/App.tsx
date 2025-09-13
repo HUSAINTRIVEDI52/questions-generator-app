@@ -7,6 +7,7 @@ import { HomePage } from './components/HomePage';
 import { generateQuestionPaper } from './services/geminiService';
 import type { FormState, QuestionPaper } from './types';
 
+// Custom hook to detect if the view is desktop
 const useIsDesktop = () => {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
@@ -24,86 +25,72 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<'home' | 'generator'>('home');
+
   const isDesktop = useIsDesktop();
 
   const handleGenerate = async (formData: FormState) => {
     setIsLoading(true);
     setError(null);
     setQuestionPaper(null);
+    if (!isDesktop) {
+      setPage('home'); // Switch to home to show loader/paper
+    }
     try {
       const paper = await generateQuestionPaper(formData);
       setQuestionPaper(paper);
-      if (!isDesktop) {
-        window.scrollTo(0, 0); // Scroll to top on mobile to see the new paper
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleNewPaper = () => {
+  const handleStartNew = () => {
     setQuestionPaper(null);
     setError(null);
+    setPage('generator');
   };
   
-  const goToHome = () => {
-      handleNewPaper();
+  const handleGoHome = () => {
       setPage('home');
   }
 
-  const renderDesktop = () => (
-    <main className="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 flex-grow">
-      <div className="lg:col-span-4 xl:col-span-3 no-print">
-        <div className="sticky top-24">
-          <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />
-        </div>
-      </div>
-      <div className="lg:col-span-8 xl:col-span-9">
+  const formView = <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />;
+  
+  const contentView = (
+      <>
         {isLoading && <Loader />}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-md shadow-sm" role="alert" style={{ backgroundColor: 'rgba(254, 226, 226, 0.5)'}}>
-            <p className="font-bold">Generation Failed</p>
-            <p>{error}</p>
-          </div>
-        )}
-        {questionPaper && !isLoading && <QuestionPaperDisplay key={questionPaper.title + questionPaper.total_marks} paper={questionPaper} onNewPaper={handleNewPaper} />}
-        {!questionPaper && !isLoading && !error && <HomePage onStart={() => {}} isDesktop={true} />}
-      </div>
-    </main>
-  );
-
-  const renderMobile = () => (
-    <main className="container mx-auto p-4 md:p-8 flex-grow">
-      {page === 'home' && <HomePage onStart={() => setPage('generator')} isDesktop={false} />}
-      {page === 'generator' && (
-        <div>
-          <div className={questionPaper || isLoading || error ? 'hidden' : 'block'}>
-            <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />
-          </div>
-          {isLoading && <Loader />}
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-md shadow-sm" role="alert" style={{ backgroundColor: 'rgba(254, 226, 226, 0.5)'}}>
-              <p className="font-bold">Generation Failed</p>
-              <p>{error}</p>
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md animate-fade-in-up" role="alert">
+                <p className="font-bold">Generation Failed</p>
+                <p>{error}</p>
             </div>
-          )}
-          {questionPaper && !isLoading && <QuestionPaperDisplay key={questionPaper.title + questionPaper.total_marks} paper={questionPaper} onNewPaper={handleNewPaper} />}
-        </div>
-      )}
-    </main>
+        )}
+        {questionPaper && !isLoading && <QuestionPaperDisplay key={questionPaper.title + questionPaper.total_marks} paper={questionPaper} onNewPaper={handleStartNew} />}
+        {!questionPaper && !isLoading && !error && (
+            <HomePage onStart={handleStartNew} isDesktop={isDesktop} />
+        )}
+      </>
   );
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-main)' }}>
-      <Header onGoHome={goToHome} isMobile={!isDesktop} />
-      {isDesktop ? renderDesktop() : renderMobile()}
-      <footer className="text-center p-4 border-t border-slate-200 no-print" style={{ backgroundColor: 'var(--color-surface)' }}>
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-          For support or inquiries, contact Husain M Trivedi at <a href="tel:7698379853" className="font-semibold hover:underline" style={{ color: 'var(--color-primary)' }}>7698379853</a>.
-        </p>
+    <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
+      <Header isMobile={!isDesktop} onGoHome={handleGoHome} />
+      <main className="container mx-auto p-4 md:p-8 flex-grow">
+        {isDesktop ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-4 xl:col-span-3">
+              <div className="sticky top-24">{formView}</div>
+            </div>
+            <div className="lg:col-span-8 xl:col-span-9">{contentView}</div>
+          </div>
+        ) : (
+           page === 'generator' ? formView : contentView
+        )}
+      </main>
+      <footer className="w-full text-center p-4 mt-8 border-t" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}>
+          <p className="text-sm">An initiative by <strong className="font-semibold" style={{ color: 'var(--color-primary)'}}>Husain M Trivedi</strong></p>
+          <p className="text-sm">Contact: <a href="tel:7698379853" className="font-semibold hover:underline" style={{ color: 'var(--color-primary)'}}>7698379853</a></p>
       </footer>
     </div>
   );

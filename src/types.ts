@@ -1,4 +1,3 @@
-
 export interface Question {
   question_text: string;
   options?: string[];
@@ -34,12 +33,12 @@ export interface MarksDistribution {
 
 export interface FormState {
     institutionName: string;
-    title: string;
+    title: string; // Added field for paper title
     grade: string;
     medium: string;
     subject: string;
     chapters: string[];
     difficulty: 'Easy' | 'Medium' | 'Hard';
-    marksDistribution: MarksDistribution[];
+    marksDistribution: MarksDistribution[]; // Consolidated question structure
     totalMarks: number;
 }

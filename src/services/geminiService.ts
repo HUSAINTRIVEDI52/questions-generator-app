@@ -55,9 +55,9 @@ const responseSchema = {
 export const generateQuestionPaper = async (formData: FormState): Promise<QuestionPaper> => {
   const { institutionName, title, grade, medium, subject, chapters, difficulty, totalMarks, marksDistribution } = formData;
 
-  const questionBreakdown = marksDistribution
-    .filter(row => row.count > 0)
-    .map(row => `- ${row.count} ${row.type} questions of ${row.marks} marks each.`)
+  const distributionText = marksDistribution
+    .filter(dist => dist.count > 0)
+    .map(dist => `- ${dist.count} ${dist.type} question(s), each worth ${dist.marks} marks.`)
     .join('\n');
 
   const prompt = `
@@ -66,7 +66,7 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
     The questions must be relevant to the latest and most current GSEB curriculum for the specified grade, medium, subject, and chapters.
 
     **Institution Name:** ${institutionName}
-    **Title for the Paper:** ${title}
+    **Paper Title:** ${title}
     **Grade:** ${grade}
     **Medium:** ${medium}
     **Subject:** ${subject}
@@ -75,13 +75,13 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
     **Total Marks:** ${totalMarks}
 
     **Required Question Breakdown:**
-    ${questionBreakdown}
+    ${distributionText}
 
     **Instructions:**
-    1.  Generate the exact number of questions for each category specified in the breakdown. You should group questions of the same type (e.g., 'Short Answer') into one section, even if they have different marks. For example, all 'Short Answer' questions should be under a 'Section B: Short Answer Questions' heading.
-    2.  The sum of marks for all generated questions MUST equal the **Total Marks** (${totalMarks}). Adhere strictly to the marks-per-question specified in the breakdown.
-    3.  For MCQs, provide exactly 4 distinct options and identify the correct one. For True/False, provide the correct answer as 'True' or 'False'. For Fill in the Blanks, provide the correct word/phrase.
-    4.  For other question types (Short Answer, Long Answer, etc.), provide a model correct answer.
+    1.  Generate the exact number of questions for each type as specified in the breakdown. Create distinct sections for each question type or group them logically (e.g., 'Section A: MCQs', 'Section B: Short Answers').
+    2.  The marks for each question must be exactly as specified in the breakdown. The sum of marks for all questions must equal the **Total Marks**.
+    3.  For MCQs, provide exactly 4 distinct options and identify the correct one. For 'True/False', the answer should be 'True' or 'False'. For 'Fill in the Blanks', provide the missing word(s).
+    4.  For Short and Long Answer questions, provide a model correct answer.
     5.  Ensure the questions are diverse, high-quality, and cover the specified chapters thoroughly.
     6.  The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown formatting, or explanations before or after the JSON object.
     `;
@@ -97,15 +97,10 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
         }
     });
     
-    const text = response.text;
-    if (text === undefined) {
-      throw new Error("The model returned an empty response. This could be due to safety filters or an internal error.");
-    }
-    const jsonText = text.trim();
-
+    const jsonText = response.text.trim();
     if (!jsonText.startsWith('{') || !jsonText.endsWith('}')) {
         console.error("Received non-JSON response:", jsonText);
-        throw new Error("The model returned a non-JSON response. Please try again.");
+        throw new Error("The model returned a non-JSON response. Please check your prompt and try again.");
     }
     const parsedPaper: QuestionPaper = JSON.parse(jsonText);
     return parsedPaper;
@@ -118,6 +113,6 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
     if (error instanceof SyntaxError) {
         throw new Error("Failed to parse the question paper from the model. The response was not valid JSON.");
     }
-    throw new Error("Failed to generate question paper. The model may have returned an invalid format or an error occurred.");
+    throw new Error("Failed to generate question paper. The AI model might be overloaded. Please try again in a moment.");
   }
 };
