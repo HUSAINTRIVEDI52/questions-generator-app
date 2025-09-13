@@ -33,12 +33,12 @@ export interface MarksDistribution {
 
 export interface FormState {
     institutionName: string;
-    title: string; // Added field for paper title
+    title: string;
     grade: string;
     medium: string;
     subject: string;
     chapters: string[];
     difficulty: 'Easy' | 'Medium' | 'Hard';
-    marksDistribution: MarksDistribution[]; // Consolidated question structure
+    marksDistribution: MarksDistribution[];
     totalMarks: number;
 }

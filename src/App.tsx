@@ -41,6 +41,14 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   };
+  
+  const handleNewPaper = () => {
+    setQuestionPaper(null);
+    setError(null);
+    if (isMobile) {
+        setMobileView('form');
+    }
+  }
 
   const handleGoHome = () => {
     setQuestionPaper(null);
@@ -55,23 +63,22 @@ const App: React.FC = () => {
     if (isLoading) return <Loader />;
     if (error) {
       return (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md animate-fade-in-up" role="alert">
           <p className="font-bold">Generation Failed</p>
           <p>{error}</p>
         </div>
       );
     }
-    if (questionPaper) return <QuestionPaperDisplay paper={questionPaper} />;
+    if (questionPaper) return <QuestionPaperDisplay paper={questionPaper} onNewPaper={handleNewPaper} isMobile={isMobile} />;
     return null;
   };
 
   const showResults = isLoading || error || questionPaper;
 
   return (
-    <div className="bg-slate-100 min-h-screen text-slate-700">
-      {/* FIX: Pass required props to Header to resolve missing properties error. */}
+    <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--color-background)'}}>
       <Header isMobile={isMobile} onGoHome={handleGoHome} />
-      <main className="container mx-auto p-4 md:p-8">
+      <main className="container mx-auto p-4 md:p-8 flex-grow">
         {isMobile ? (
           <>
             {mobileView === 'home' && <HomePage onStart={() => setMobileView('form')} isDesktop={false} />}
@@ -80,17 +87,21 @@ const App: React.FC = () => {
           </>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-4 xl:col-span-3 no-print">
+            <div className="lg:col-span-4 xl:col-span-3">
               <div className="sticky top-24">
                 <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />
               </div>
             </div>
-            <div className="lg:col-span-8 xl:col-span-9">
+            <div className="lg:col-span-8 xl-col-span-9">
               {showResults ? renderResults() : <HomePage onStart={() => {}} isDesktop={true} />}
             </div>
           </div>
         )}
       </main>
+      <footer className="w-full text-center p-4 mt-8" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-sm font-medium">An initiative by <span className="font-bold text-blue-700">Husain M Trivedi</span></p>
+        <p className="text-sm">Contact: <a href="tel:7698379853" className="font-semibold hover:underline">7698379853</a></p>
+      </footer>
       <Analytics />
     </div>
   );

@@ -122,7 +122,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
   const labelStyles = "block text-sm font-semibold text-slate-600 mb-1";
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 rounded-xl space-y-6" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)'}}>
+    <form onSubmit={handleSubmit} className="p-1 sm:p-6 rounded-xl space-y-6" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)'}}>
       <h2 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-3">Paper Configuration</h2>
       
       <div className="space-y-4">
@@ -135,7 +135,10 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
               <label htmlFor="title" className={labelStyles}>Paper Title</label>
               <input type="text" id="title" value={title} onChange={e => setTitle(e.target.value)} className={inputStyles} placeholder="e.g., Annual Examination"/>
             </div>
-            <div>
+        </AccordionSection>
+
+        <AccordionSection title="Content Selection" defaultOpen>
+             <div>
               <label htmlFor="grade" className={labelStyles}>Grade</label>
               <select id="grade" value={grade} onChange={e => setGrade(e.target.value)} className={selectStyles}>
                 {grades.map(g => <option key={g} value={g}>{g}</option>)}
@@ -155,9 +158,6 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
                 {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-        </AccordionSection>
-        
-        <AccordionSection title="Content Selection">
             <div>
                 <label className={labelStyles}>Chapters</label>
                 <div className="border border-slate-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition">
@@ -165,7 +165,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
                     <input id="select-all" type="checkbox" checked={selectAll} onChange={handleSelectAll} disabled={availableChapters.length === 0} className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
                     <label htmlFor="select-all" className="text-sm text-slate-700 font-medium select-none">Select All Chapters</label>
                 </div>
-                <div className="max-h-80 overflow-y-auto p-2 bg-slate-50/50">
+                <div className="max-h-60 overflow-y-auto p-2 bg-slate-50/50">
                     {availableChapters.length > 0 ? availableChapters.map(chapter => (
                     <div key={chapter} className="flex items-center py-1.5 px-1 rounded-md hover:bg-slate-100">
                         <input id={chapter} type="checkbox" checked={selectedChapters.includes(chapter)} onChange={() => handleChapterToggle(chapter)} className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
@@ -185,30 +185,30 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
             </div>
         </AccordionSection>
         
-        <AccordionSection title="Question Structure">
+        <AccordionSection title="Question Structure" defaultOpen>
             <div className="flex justify-between items-center mb-2">
                 <p className="block text-sm font-semibold text-slate-600">Question Distribution</p>
                 <p className="text-sm font-bold text-slate-700 bg-slate-200 px-2 py-1 rounded-md">Total: {totalMarks}</p>
             </div>
             <div className="space-y-3">
                 {marksDistribution.map((row) => (
-                    <div key={row.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 p-2 border border-slate-200 rounded-md bg-slate-50/50">
-                        <div className="col-span-1 md:col-span-3">
-                            <label className="text-xs md:hidden font-medium text-slate-500">Marks</label>
+                    <div key={row.id} className="grid grid-cols-12 gap-2 p-2 border border-slate-200 rounded-md bg-slate-50/50">
+                        <div className="col-span-12 sm:col-span-3">
+                            <label className="text-xs font-medium text-slate-500">Marks</label>
                             <input type="number" value={row.marks} onChange={e => handleDistributionChange(row.id, 'marks', Number(e.target.value))} min="1" className={`${inputStyles} text-center`} />
                         </div>
-                        <div className="col-span-1 md:col-span-3">
-                            <label className="text-xs md:hidden font-medium text-slate-500">Count</label>
+                        <div className="col-span-12 sm:col-span-3">
+                            <label className="text-xs font-medium text-slate-500">Count</label>
                             <input type="number" value={row.count} onChange={e => handleDistributionChange(row.id, 'count', Number(e.target.value))} min="0" className={`${inputStyles} text-center`} />
                         </div>
-                        <div className="col-span-1 md:col-span-5">
-                            <label className="text-xs md:hidden font-medium text-slate-500">Type</label>
+                        <div className="col-span-10 sm:col-span-5">
+                            <label className="text-xs font-medium text-slate-500">Type</label>
                             <select value={row.type} onChange={e => handleDistributionChange(row.id, 'type', e.target.value)} className={selectStyles}>
                                 {questionTypes.map(type => <option key={type} value={type}>{type}</option>)}
                             </select>
                         </div>
-                         <div className="col-span-1 md:col-span-1 flex items-center justify-end md:justify-center">
-                            <button type="button" onClick={() => removeDistributionRow(row.id)} disabled={marksDistribution.length <= 1} className="flex items-center justify-center h-full text-red-500 hover:text-red-700 disabled:text-slate-300 disabled:cursor-not-allowed">
+                         <div className="col-span-2 sm:col-span-1 flex items-end justify-center">
+                            <button type="button" onClick={() => removeDistributionRow(row.id)} disabled={marksDistribution.length <= 1} className="flex items-center justify-center h-10 w-10 text-red-500 hover:text-red-700 disabled:text-slate-300 disabled:cursor-not-allowed">
                                 <MinusIcon />
                             </button>
                         </div>

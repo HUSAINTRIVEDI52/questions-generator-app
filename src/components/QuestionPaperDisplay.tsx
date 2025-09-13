@@ -1,106 +1,224 @@
 import React, { useState } from 'react';
-import type { QuestionPaper } from '../types';
+import type { QuestionPaper, QuestionSection } from '../types';
 
-// This tells TypeScript that the 'docx' object is available globally,
-// loaded from the script tag in index.html.
 declare var docx: any;
+declare var jspdf: any;
 
-const PrintIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-);
+// Icons
+const KeyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>;
+const DocxIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>;
+const PdfIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M10 12v6"></path><path d="M10 15h2a2 2 0 1 0 0-4h-2v4Z"></path><path d="M16 12h-1a2 2 0 0 0-2 2v4"></path><path d="M16 18h-2"></path></svg>;
+const CopyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
+const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>;
+const CreateIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
 
-const KeyIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>
-);
-
-const DocxIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>
-);
-
-// FIX: Define the QuestionPaperDisplayProps interface for the component props.
 interface QuestionPaperDisplayProps {
   paper: QuestionPaper;
+  onNewPaper: () => void;
+  isMobile: boolean;
 }
 
-export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper }) => {
-  const [showAnswers, setShowAnswers] = useState(false);
+const generatePlainText = (paper: QuestionPaper, includeAnswers: boolean): string => {
+    let text = "";
+    text += `${paper.institution_name}\n`;
+    text += `${paper.title}\n`;
+    text += `${paper.grade} - ${paper.subject}\n\n`;
+    text += `Total Marks: ${paper.total_marks}\tDuration: ${paper.duration_minutes} minutes\n`;
+    text += "--------------------------------------------------\n\n";
 
-  const handlePrint = () => {
-    window.print();
+    paper.sections.forEach(section => {
+        text += `${section.section_title}\n`;
+        section.questions.forEach((q, qIndex) => {
+            text += `${qIndex + 1}. ${q.question_text} [${q.marks} Marks]\n`;
+            if (q.options) {
+                q.options.forEach((option, optIndex) => {
+                    text += `   ${String.fromCharCode(97 + optIndex)}) ${option}\n`;
+                });
+            }
+            if (includeAnswers) {
+                text += `   Answer: ${q.correct_answer}\n`;
+            }
+            text += "\n";
+        });
+    });
+    return text;
+};
+
+
+export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper, isMobile }) => {
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [includeAnswersInExport, setIncludeAnswersInExport] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
+
+  const handleToggleAnswers = () => {
+      const newShowState = !showAnswers;
+      setShowAnswers(newShowState);
+      setIncludeAnswersInExport(newShowState);
+  }
+
+  const handleCopy = () => {
+    const textToCopy = generatePlainText(paper, includeAnswersInExport);
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        setCopyStatus('copied');
+        setTimeout(() => setCopyStatus('idle'), 2000);
+    });
+  }
+
+  const handleShare = async () => {
+      if (navigator.share) {
+          try {
+              await navigator.share({
+                  title: 'AI Question Paper Generator',
+                  text: `Check out this question paper generator I used!`,
+                  url: window.location.href
+              });
+          } catch (error) {
+              console.error('Error sharing:', error);
+          }
+      }
+  }
+
+  const handlePdfExport = () => {
+    const { jsPDF } = jspdf;
+    const doc = new jsPDF();
+    
+    let y = 15;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 15;
+
+    const checkPageBreak = (spaceNeeded: number) => {
+        if (y + spaceNeeded > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+        }
+    }
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(paper.institution_name, 105, y, { align: 'center' });
+    y += 7;
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'normal');
+    doc.text(paper.title, 105, y, { align: 'center' });
+    y += 6;
+    doc.text(`${paper.grade} - ${paper.subject}`, 105, y, { align: 'center' });
+    y += 10;
+    
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, 210 - margin, y);
+    y += 7;
+    doc.setFontSize(11);
+    doc.text(`Total Marks: ${paper.total_marks}`, margin, y);
+    doc.text(`Duration: ${paper.duration_minutes} minutes`, 210 - margin, y, { align: 'right' });
+    y += 2;
+    doc.line(margin, y, 210 - margin, y);
+    y += 10;
+    
+    paper.sections.forEach(section => {
+        checkPageBreak(10);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text(section.section_title, margin, y);
+        y += 8;
+
+        section.questions.forEach((q, qIndex) => {
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            
+            const questionText = `${qIndex + 1}. ${q.question_text}`;
+            const marksText = `[${q.marks} Marks]`;
+            const splitQuestion = doc.splitTextToSize(questionText, 180 - margin - doc.getTextWidth(marksText) - 5);
+            checkPageBreak(splitQuestion.length * 5 + 5);
+            
+            doc.text(splitQuestion, margin, y, { align: 'left' });
+            doc.text(marksText, 210 - margin, y, { align: 'right' });
+            y += splitQuestion.length * 5;
+
+            if (q.options) {
+                y += 2;
+                q.options.forEach((option, optIndex) => {
+                    const optionLine = `   ${String.fromCharCode(97 + optIndex)}) ${option}`;
+                    const splitOption = doc.splitTextToSize(optionLine, 180 - margin);
+                    checkPageBreak(splitOption.length * 5 + 2);
+                    doc.text(splitOption, margin, y);
+                    y += splitOption.length * 5;
+                });
+            }
+            if (includeAnswersInExport) {
+                y += 2;
+                doc.setFont('helvetica', 'bold');
+                const answerText = `   Answer: ${q.correct_answer}`;
+                const splitAnswer = doc.splitTextToSize(answerText, 180 - margin);
+                checkPageBreak(splitAnswer.length * 5 + 5);
+                doc.text(splitAnswer, margin, y);
+                y += splitAnswer.length * 5;
+            }
+            y+= 5;
+        });
+    });
+
+    doc.save(`${paper.subject}_${paper.grade}_Paper.pdf`);
   };
   
   const handleDocxExport = () => {
-    const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+    const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = docx;
 
-    const sections = paper.sections.flatMap((section, sectionIndex) => {
-        const questions = section.questions.map((q, qIndex) => {
-            const questionParts = [
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: `${qIndex + 1}. `, bold: true }),
-                        new TextRun(q.question_text),
-                        new TextRun({ text: ` [${q.marks} Marks]`, bold: true, italics: true }),
-                    ],
-                    spacing: { after: 100 },
-                })
-            ];
+    const children = [
+      new Paragraph({ text: paper.institution_name, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+      new Paragraph({ text: paper.title, heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER }),
+      new Paragraph({ text: `${paper.grade} - ${paper.subject}`, heading: HeadingLevel.HEADING_3, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
+      new Paragraph({
+        children: [ new TextRun(`Total Marks: ${paper.total_marks}\tDuration: ${paper.duration_minutes} minutes`) ],
+        alignment: AlignmentType.CENTER,
+        border: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 } },
+        spacing: { before: 200, after: 400 },
+      }),
+    ];
 
-            if (q.options) {
-                q.options.forEach((option, optIndex) => {
-                    questionParts.push(new Paragraph({
-                        children: [new TextRun(`\t${String.fromCharCode(97 + optIndex)}) ${option}`)],
-                        spacing: { after: 50 },
-                    }));
-                });
-            }
-            
-            questionParts.push(new Paragraph({
-                 children: [
-                     new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "4CAF50" }),
-                 ],
-                 spacing: { after: 200 },
+    paper.sections.forEach(section => {
+      children.push(new Paragraph({
+        text: section.section_title,
+        heading: HeadingLevel.HEADING_2,
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "auto", space: 1 } },
+        spacing: { after: 200 }
+      }));
+
+      section.questions.forEach((q, qIndex) => {
+        children.push(new Paragraph({
+          children: [
+            new TextRun({ text: `${qIndex + 1}. `, bold: true }),
+            new TextRun(q.question_text),
+            new TextRun({ text: `\t[${q.marks} Marks]`, bold: true, italics: true }),
+          ],
+          spacing: { after: 100 },
+        }));
+        if (q.options) {
+          q.options.forEach((option, optIndex) => {
+            children.push(new Paragraph({
+              children: [new TextRun(`\t${String.fromCharCode(97 + optIndex)}) ${option}`)],
+              spacing: { after: 50 },
+              indent: { left: 720 },
             }));
-
-            return questionParts;
-        });
-
-        return [
-            new Paragraph({
-                text: section.section_title,
-                heading: HeadingLevel.HEADING_2,
-                style: "wellSpaced",
-                border: { bottom: { color: "auto", space: 1, style: "single", size: 6 } },
-                spacing: { after: 200 }
-            }),
-            ...questions.flat()
-        ];
+          });
+        }
+        if (includeAnswersInExport) {
+          children.push(new Paragraph({
+            children: [ new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "008000" }) ],
+            spacing: { after: 200 },
+            indent: { left: 720 },
+          }));
+        }
+      });
     });
 
-    const doc = new Document({
-        sections: [{
-            children: [
-                new Paragraph({ text: paper.institution_name, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
-                new Paragraph({ text: paper.title, heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER }),
-                new Paragraph({ text: `${paper.grade} - ${paper.subject}`, heading: HeadingLevel.HEADING_3, alignment: AlignmentType.CENTER }),
-                new Paragraph({
-                    children: [
-                        new TextRun(`Total Marks: ${paper.total_marks}`),
-                        new TextRun({ text: `\tDuration: ${paper.duration_minutes} minutes`, break: 1 }),
-                    ],
-                    alignment: AlignmentType.CENTER,
-                    border: { top: { size: 4, style: "single" }, bottom: { size: 4, style: "single" } },
-                    spacing: { before: 200, after: 400 },
-                }),
-                ...sections
-            ],
-        }],
-    });
+    const doc = new Document({ sections: [{ children }] });
 
     Packer.toBlob(doc).then(blob => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${paper.subject}_${paper.grade}_Question_Paper.docx`;
+        a.download = `${paper.subject}_${paper.grade}_Paper.docx`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -109,41 +227,46 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-container">
-        <div className="p-6 border-b border-slate-200 flex justify-between items-center no-print">
-            <h2 className="text-xl font-bold text-slate-700">Generated Paper</h2>
-            <div className="flex items-center gap-2 flex-wrap">
-                <button
-                    onClick={() => setShowAnswers(!showAnswers)}
-                    className={`flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors ${showAnswers ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                    aria-pressed={showAnswers}
-                    >
-                    <KeyIcon />
-                    {showAnswers ? 'Hide Answers' : 'Show Answers'}
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 animate-fade-in-up">
+        <div className="p-4 md:p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 no-print">
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+                {isMobile && (
+                    <button onClick={onNewPaper} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors transform active:scale-95">
+                        <CreateIcon /> New Paper
+                    </button>
+                )}
+                <button onClick={handleToggleAnswers} className={`flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors transform active:scale-95 ${showAnswers ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} aria-pressed={showAnswers}>
+                    <KeyIcon /> {showAnswers ? 'Hide Answers' : 'Show Answers'}
                 </button>
-                <button
-                    onClick={handleDocxExport}
-                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                >
-                    <DocxIcon />
-                    Export as DOCX
+            </div>
+            <div className="flex items-center gap-2 flex-wrap justify-center bg-slate-100 p-2 rounded-lg">
+                <div className="flex items-center">
+                    <button onClick={handlePdfExport} className="flex items-center gap-2 py-2 pl-4 pr-2 rounded-l-md text-sm font-semibold bg-white text-slate-600 hover:bg-slate-50 transition-colors transform active:scale-95 border border-slate-200"><PdfIcon /> PDF</button>
+                    <button onClick={handleDocxExport} className="flex items-center gap-2 py-2 pl-4 pr-2 rounded-none text-sm font-semibold bg-white text-slate-600 hover:bg-slate-50 transition-colors transform active:scale-95 border-y border-r border-slate-200"><DocxIcon /> DOCX</button>
+                    <div className="flex items-center pl-2 bg-white rounded-r-md border-y border-r border-slate-200 h-full">
+                        <input type="checkbox" id="include-answers" checked={includeAnswersInExport} onChange={(e) => setIncludeAnswersInExport(e.target.checked)} className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
+                        <label htmlFor="include-answers" className="ml-2 text-sm text-slate-600 pr-3 select-none">Answers</label>
+                    </div>
+                </div>
+            </div>
+             <div className="flex items-center gap-2 flex-wrap justify-center">
+                <button onClick={handleCopy} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors transform active:scale-95">
+                    <CopyIcon /> {copyStatus === 'copied' ? 'Copied!' : 'Copy Content'}
                 </button>
-                <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >
-                    <PrintIcon />
-                    Print / PDF
-                </button>
+                 {navigator.share && (
+                    <button onClick={handleShare} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors transform active:scale-95">
+                        <ShareIcon /> Share
+                    </button>
+                 )}
             </div>
         </div>
       
         <div className="p-6 md:p-10" id="printable-paper">
             <header className="text-center mb-8">
-                <h1 className="text-3xl font-bold">{paper.institution_name}</h1>
-                <h2 className="text-xl font-semibold text-slate-700 mt-1">{paper.title}</h2>
-                <h3 className="text-lg font-medium text-slate-600">{paper.grade} - {paper.subject}</h3>
-                <div className="flex justify-between items-center mt-4 text-sm max-w-lg mx-auto border-t border-b py-2">
+                <h1 className="text-3xl font-bold" style={{color: 'var(--color-text-main)'}}>{paper.institution_name}</h1>
+                <h2 className="text-xl font-semibold mt-1" style={{color: 'var(--color-text-main)'}}>{paper.title}</h2>
+                <h3 className="text-lg font-medium" style={{color: 'var(--color-text-muted)'}}>{paper.grade} - {paper.subject}</h3>
+                <div className="flex justify-between items-center mt-4 text-sm max-w-lg mx-auto border-t border-b py-2" style={{borderColor: 'var(--color-border)'}}>
                     <span><strong>Total Marks:</strong> {paper.total_marks}</span>
                     <span><strong>Duration:</strong> {paper.duration_minutes} minutes</span>
                 </div>
@@ -151,13 +274,13 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
 
             {paper.sections.map((section, sectionIndex) => (
                 <section key={sectionIndex} className="mb-8">
-                    <h3 className="text-lg font-bold border-b-2 border-slate-400 pb-2 mb-4">{section.section_title}</h3>
+                    <h3 className="text-lg font-bold border-b-2 pb-2 mb-4" style={{borderColor: '#94a3b8'}}>{section.section_title}</h3>
                     <ol className="list-decimal list-inside space-y-6">
                         {section.questions.map((q, qIndex) => (
                             <li key={qIndex} className="break-words">
                                 <div className="flex justify-between items-start">
-                                    <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
-                                    <span className="text-sm font-semibold ml-4 whitespace-nowrap">[{q.marks} Marks]</span>
+                                    <p className="font-semibold text-slate-800 pr-4">{q.question_text}</p>
+                                    <span className="text-sm font-bold text-slate-600 ml-4 whitespace-nowrap">[{q.marks} Marks]</span>
                                 </div>
 
                                 {q.options && (
