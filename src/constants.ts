@@ -83,14 +83,28 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
         "Number Systems", "Polynomials", "Coordinate Geometry", "Linear Equations in Two Variables", "Introduction to Euclid's Geometry", "Lines and Angles", "Triangles", "Quadrilaterals", "Circles", "Heron's Formula", "Surface Areas and Volumes", "Statistics"
       ],
       "Social Science": [
-        // History
-        "The French Revolution", "Socialism in Europe and the Russian Revolution", "Nazism and the Rise of Hitler", "Forest Society and Colonialism",
-        // Geography
-        "India - Size and Location", "Physical Features of India", "Drainage", "Climate", "Natural Vegetation and Wildlife",
-        // Political Science
-        "What is Democracy? Why Democracy?", "Constitutional Design", "Electoral Politics", "Working of Institutions", "Democratic Rights",
-        // Economics
-        "The Story of Village Palampur", "People as Resource", "Poverty as a Challenge", "Food Security in India"
+        "Rise of British Rule in India",
+        "First World War and Russian Revolution",
+        "Movement Towards A New World",
+        "National Movements in India",
+        "Movement Towards Independence",
+        "World After 1945",
+        "Post - Independence India",
+        "Framing of Constitution and Its Features",
+        "Fundamental Rights, Fundamental Duties and Directive Principles of State Policy",
+        "Organs of Government",
+        "Indian Judiciary",
+        "Indian Democracy",
+        "India: Location, Geological Structure and Physiography-I",
+        "India: Location, Geological Structure and Physiography-II",
+        "Drainage System",
+        "Climate",
+        "Natural Vegetation",
+        "Wild Life",
+        "India: Human Life Style",
+        "Disaster Management",
+        "History of Indian Agriculture and Introduction to Natural Farming",
+        "Road Safety: Vehicles and Roads"
       ],
        "English": [
          // Beehive (Prose & Poem)
@@ -107,14 +121,28 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
             "સંખ્યા પદ્ધતિ", "બહુપદીઓ", "યામ ભૂમિતિ", "દ્વિચલ સુરેખ સમીકરણો", "યુક્લિડની ભૂમિતિનો પરિચય", "રેખાઓ અને ખૂણાઓ", "ત્રિકોણ", "ચતુષ્કોણ", "વર્તુળ", "હેરોનનું સૂત્ર", "પૃષ્ઠફળ અને ઘનફળ", "આંકડાશાસ્ત્ર"
         ],
         "સામાજિક વિજ્ઞાન (Social Science)": [
-            // ઇતિહાસ
-            "ફ્રેન્ચ ક્રાંતિ", "યુરોપમાં સમાજવાદ અને રશિયન ક્રાંતિ", "નાઝીવાદ અને હિટલરનો ઉદય", "વન સમાજ અને સંસ્થાનવાદ",
-            // ભૂગોળ
-            "ભારત - કદ અને સ્થાન", "ભારતની ભૌતિક સુવિધાઓ", "જળપરિવાહ", "આબોહવા", "કુદરતી વનસ્પતિ અને વન્યજીવન",
-            // રાજનીતિ વિજ્ઞાન
-            "લોકશાહી શું છે? શા માટે લોકશાહી?", "બંધારણીય ડિઝાઇન", "ચૂંટણી રાજકારણ", "સંસ્થાઓનું કાર્ય", "લોકશાહી અધિકારો",
-            // અર્થશાસ્ત્ર
-            "પાલમપુર ગામની વાર્તા", "લોકો સંસાધન તરીકે", "પડકાર તરીકે ગરીબી", "ભારતમાં ખાદ્ય સુરક્ષા"
+            "ભારતમાં બ્રિટિશ સત્તાનો ઉદય",
+            "પ્રથમ વિશ્વયુદ્ધ અને રશિયન ક્રાંતિ",
+            "નૂતન વિશ્વ તરફ પ્રયાણ",
+            "ભારતની રાષ્ટ્રીય ચળવળો",
+            "ભારત: આઝાદી તરફ પ્રયાણ",
+            "1945 પછીનું વિશ્વ",
+            "સ્વાતંત્ર્યોત્તર ભારત",
+            "ભારતના રાજ્યબંધારણનું ઘડતર અને લક્ષણો",
+            "મૂળભૂત હકો, મૂળભૂત ફરજો અને રાજ્યનીતિના માર્ગદર્શક સિદ્ધાંતો",
+            "સરકારના અંગો",
+            "ભારતનું ન્યાયતંત્ર",
+            "ભારતીય લોકશાહી",
+            "ભારત: સ્થાન, ભૂસ્તરીય રચના અને ભૃપૃષ્ઠ - ભાગ 1",
+            "ભારત: સ્થાન, ભૂસ્તરીય રચના અને ભૃપૃષ્ઠ - ભાગ 2",
+            "જળપરિવાહ",
+            "આબોહવા",
+            "કુદરતી વનસ્પતિ",
+            "વન્યજીવન",
+            "ભારત: લોકજીવન",
+            "આપત્તિ વ્યવસ્થાપન",
+            "ભારતીય કૃષિનો ઇતિહાસ અને પ્રાકૃતિક ખેતીનો પરિચય",
+            "માર્ગ સલામતી: વાહનો અને રસ્તાઓ"
         ]
     }
   },
