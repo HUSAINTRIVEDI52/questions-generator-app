@@ -1,5 +1,3 @@
-
-
 import { GoogleGenAI, Type } from "@google/genai";
 import type { FormState, QuestionPaper } from '../types';
 
@@ -55,8 +53,6 @@ const responseSchema = {
 
 
 export const generateQuestionPaper = async (formData: FormState): Promise<QuestionPaper> => {
-  // FIX: The form state was updated to use a flexible `marksDistribution` array.
-  // This function is updated to handle the new structure, replacing the old fixed question counts.
   const { institutionName, grade, medium, subject, chapters, difficulty, totalMarks, marksDistribution } = formData;
 
   const questionBreakdown = marksDistribution
