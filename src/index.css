@@ -1,17 +1,36 @@
+/* FONT IMPORTS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* TAILWIND DIRECTIVES */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* CSS VARIABLES FOR THEME */
 @layer base {
+  :root {
+    --color-background: #f8f9fa; /* Off-white background */
+    --color-surface: #ffffff;    /* Card/component background */
+    --color-primary: #2563eb;    /* Vibrant blue for actions */
+    --color-primary-hover: #1d4ed8;
+    --color-text-main: #1f2937;  /* Dark gray for main text */
+    --color-text-muted: #6b7280; /* Lighter gray for secondary text */
+    --color-border: #e5e7eb;     /* Border color */
+  }
+
   body {
     font-family: 'Inter', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-main);
   }
 }
 
+/* PRINT STYLES */
 @media print {
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    background-color: #fff;
   }
   .no-print {
     display: none !important;

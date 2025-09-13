@@ -31,7 +31,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-100 min-h-screen text-slate-700">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-main)' }}>
       <Header />
       <main className="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-4 xl:col-span-3 no-print">
@@ -42,50 +42,50 @@ const App: React.FC = () => {
         <div className="lg:col-span-8 xl:col-span-9">
           {isLoading && <Loader />}
           {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-md shadow-sm" role="alert" style={{ backgroundColor: 'rgba(254, 226, 226, 0.5)'}}>
               <p className="font-bold">Generation Failed</p>
               <p>{error}</p>
             </div>
           )}
           {questionPaper && !isLoading && <QuestionPaperDisplay paper={questionPaper} />}
           {!questionPaper && !isLoading && !error && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 min-h-[500px]">
+            <div className="p-8 min-h-[500px]" style={{ backgroundColor: 'var(--color-surface)', borderRadius: '0.75rem', border: '1px solid var(--color-border)', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }}>
                 <div className="text-center">
-                    <div className="inline-block bg-blue-100 text-blue-600 rounded-full p-3 mb-4">
+                    <div className="inline-block bg-blue-100 text-primary rounded-full p-3 mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22h6a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v10"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4Z"/></svg>
                     </div>
-                    <h2 className="text-3xl font-bold text-slate-800">Create Custom Question Papers in Seconds</h2>
-                    <p className="text-slate-500 mt-3 max-w-2xl mx-auto">
+                    <h2 className="text-3xl font-bold" style={{ color: 'var(--color-text-main)' }}>Create Custom Question Papers in Seconds</h2>
+                    <p className="mt-3 max-w-2xl mx-auto" style={{ color: 'var(--color-text-muted)' }}>
                         Your intelligent assistant for generating high-quality papers tailored to the Gujarat State Education Board (GSEB) curriculum. This tool is designed for teachers, students, and parents to effortlessly create practice tests and exam papers.
                     </p>
                 </div>
                 
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                     <div className="flex flex-col items-center">
-                        <div className="flex items-center justify-center h-12 w-12 rounded-full bg-slate-100 text-slate-600 mb-3">
+                        <div className="flex items-center justify-center h-12 w-12 rounded-full mb-3" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-muted)' }}>
                            <FeatureIcon1 />
                         </div>
-                        <h3 className="font-bold text-lg text-slate-700">Fully Customizable</h3>
-                        <p className="text-sm text-slate-500 mt-1">Select grade, subject, medium, and specific chapters to focus on.</p>
+                        <h3 className="font-bold text-lg" style={{ color: 'var(--color-text-main)' }}>Fully Customizable</h3>
+                        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>Select grade, subject, medium, and specific chapters to focus on.</p>
                     </div>
                      <div className="flex flex-col items-center">
-                        <div className="flex items-center justify-center h-12 w-12 rounded-full bg-slate-100 text-slate-600 mb-3">
+                        <div className="flex items-center justify-center h-12 w-12 rounded-full mb-3" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-muted)' }}>
                            <FeatureIcon2 />
                         </div>
-                        <h3 className="font-bold text-lg text-slate-700">Flexible Paper Structure</h3>
-                        <p className="text-sm text-slate-500 mt-1">Define the exact number and type of questions—from MCQs to long answers.</p>
+                        <h3 className="font-bold text-lg" style={{ color: 'var(--color-text-main)' }}>Flexible Paper Structure</h3>
+                        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>Define the exact number and type of questions—from MCQs to long answers.</p>
                     </div>
                      <div className="flex flex-col items-center">
-                        <div className="flex items-center justify-center h-12 w-12 rounded-full bg-slate-100 text-slate-600 mb-3">
+                        <div className="flex items-center justify-center h-12 w-12 rounded-full mb-3" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-muted)' }}>
                           <FeatureIcon3 />
                         </div>
-                        <h3 className="font-bold text-lg text-slate-700">Multiple Export Options</h3>
-                        <p className="text-sm text-slate-500 mt-1">Print directly, save as PDF, or export as a DOCX file for easy editing.</p>
+                        <h3 className="font-bold text-lg" style={{ color: 'var(--color-text-main)' }}>Multiple Export Options</h3>
+                        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>Print directly, save as PDF, or export as a DOCX file for easy editing.</p>
                     </div>
                 </div>
 
-                <div className="mt-12 text-center bg-slate-50 p-6 rounded-lg">
-                    <p className="text-lg font-medium text-slate-800">
+                <div className="mt-12 text-center p-6 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
+                    <p className="text-lg font-medium" style={{ color: 'var(--color-text-main)' }}>
                         Ready to start? Fill out the form on the left to generate your first paper!
                     </p>
                 </div>
