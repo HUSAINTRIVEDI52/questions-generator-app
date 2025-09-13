@@ -37,6 +37,7 @@ const AccordionSection: React.FC<PropsWithChildren<{ title: string; defaultOpen?
 export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) => {
   // State for form inputs
   const [institutionName, setInstitutionName] = useState<string>('GSEB Academy');
+  const [title, setTitle] = useState<string>('Annual Examination');
   const [grade, setGrade] = useState<string>(grades[0]);
   const [medium, setMedium] = useState<string>('');
   const [subject, setSubject] = useState<string>('');
@@ -110,7 +111,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       alert("Total marks must be greater than 0. Please add some questions.");
       return;
     }
-    onGenerate({ institutionName, grade, medium, subject, chapters: selectedChapters, difficulty, marksDistribution, totalMarks });
+    onGenerate({ institutionName, title, grade, medium, subject, chapters: selectedChapters, difficulty, marksDistribution, totalMarks });
   };
 
   const isSubmitDisabled = isLoading || selectedChapters.length === 0 || !grade || !medium || !subject || totalMarks === 0;
@@ -128,6 +129,10 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
             <div>
               <label htmlFor="institutionName" className={labelStyles}>Institution Name</label>
               <input type="text" id="institutionName" value={institutionName} onChange={e => setInstitutionName(e.target.value)} className={inputStyles} />
+            </div>
+            <div>
+              <label htmlFor="title" className={labelStyles}>Paper Title</label>
+              <input type="text" id="title" value={title} onChange={e => setTitle(e.target.value)} className={inputStyles} placeholder="e.g., Annual Examination"/>
             </div>
             <div>
               <label htmlFor="grade" className={labelStyles}>Grade</label>

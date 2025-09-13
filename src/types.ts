@@ -34,6 +34,7 @@ export interface MarksDistribution {
 
 export interface FormState {
     institutionName: string;
+    title: string;
     grade: string;
     medium: string;
     subject: string;

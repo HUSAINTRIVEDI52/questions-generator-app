@@ -22,6 +22,14 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   const [copyStatus, setCopyStatus] = useState('Copy Link');
   const printablePaperRef = useRef<HTMLDivElement>(null);
 
+  const handleToggleShowAnswers = () => {
+    const newShowState = !showAnswers;
+    setShowAnswers(newShowState);
+    // Sync other answer controls for a more intuitive default
+    setExportWithAnswers(newShowState);
+    setPrintWithAnswers(newShowState);
+  };
+
   const handlePrint = () => {
     const paperElement = printablePaperRef.current;
     if (paperElement) {
@@ -56,7 +64,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   };
   
   const handleDocxExport = (includeAnswers: boolean) => {
-    // DOCX generation logic remains the same
     const docSections = paper.sections.flatMap((section) => {
         const questions = section.questions.map((q, qIndex) => {
             const questionParts = [ new Paragraph({ children: [ new TextRun({ text: `${qIndex + 1}. `, bold: true }), new TextRun(q.question_text), new TextRun({ text: ` [${q.marks} Marks]`, bold: true, italics: true }), ], spacing: { after: 100 }, }) ];
@@ -84,7 +91,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
             <h2 className="text-xl font-bold text-slate-800">Generated Paper</h2>
             <div className="flex items-center gap-3 flex-wrap">
                 <button
-                    onClick={() => setShowAnswers(!showAnswers)}
+                    onClick={handleToggleShowAnswers}
                     className={`flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors ${showAnswers ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                     aria-pressed={showAnswers}
                     >

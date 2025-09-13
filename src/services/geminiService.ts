@@ -53,7 +53,7 @@ const responseSchema = {
 
 
 export const generateQuestionPaper = async (formData: FormState): Promise<QuestionPaper> => {
-  const { institutionName, grade, medium, subject, chapters, difficulty, totalMarks, marksDistribution } = formData;
+  const { institutionName, title, grade, medium, subject, chapters, difficulty, totalMarks, marksDistribution } = formData;
 
   const questionBreakdown = marksDistribution
     .filter(row => row.count > 0)
@@ -66,6 +66,7 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
     The questions must be relevant to the latest and most current GSEB curriculum for the specified grade, medium, subject, and chapters.
 
     **Institution Name:** ${institutionName}
+    **Title for the Paper:** ${title}
     **Grade:** ${grade}
     **Medium:** ${medium}
     **Subject:** ${subject}
