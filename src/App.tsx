@@ -22,6 +22,7 @@ const App: React.FC = () => {
     try {
       const paper = await generateQuestionPaper(formData);
       setQuestionPaper(paper);
+      window.scrollTo(0, 0); // Scroll to top on mobile to see the new paper
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
       console.error(err);
@@ -30,16 +31,21 @@ const App: React.FC = () => {
     }
   };
 
+  const handleNewPaper = () => {
+    setQuestionPaper(null);
+    setError(null);
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-main)' }}>
       <Header />
       <main className="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4 xl:col-span-3 no-print">
+        <div className={`lg:col-span-4 xl:col-span-3 no-print ${questionPaper ? 'hidden lg:block' : 'block'}`}>
           <div className="sticky top-24">
             <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />
           </div>
         </div>
-        <div className="lg:col-span-8 xl:col-span-9">
+        <div className={questionPaper ? 'col-span-12' : 'lg:col-span-8 xl:col-span-9'}>
           {isLoading && <Loader />}
           {error && (
             <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-md shadow-sm" role="alert" style={{ backgroundColor: 'rgba(254, 226, 226, 0.5)'}}>
@@ -47,7 +53,7 @@ const App: React.FC = () => {
               <p>{error}</p>
             </div>
           )}
-          {questionPaper && !isLoading && <QuestionPaperDisplay paper={questionPaper} />}
+          {questionPaper && !isLoading && <QuestionPaperDisplay paper={questionPaper} onNewPaper={handleNewPaper} />}
           {!questionPaper && !isLoading && !error && (
             <div className="p-8 min-h-[500px]" style={{ backgroundColor: 'var(--color-surface)', borderRadius: '0.75rem', border: '1px solid var(--color-border)', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }}>
                 <div className="text-center">
@@ -80,7 +86,7 @@ const App: React.FC = () => {
                           <FeatureIcon3 />
                         </div>
                         <h3 className="font-bold text-lg" style={{ color: 'var(--color-text-main)' }}>Multiple Export Options</h3>
-                        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>Print directly, save as PDF, or export as a DOCX file for easy editing.</p>
+                        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>Save as PDF, or export as a DOCX file for easy editing.</p>
                     </div>
                 </div>
 
