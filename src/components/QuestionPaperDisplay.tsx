@@ -86,7 +86,6 @@ class PdfWriter {
 
         this.doc.addFileToVFS('NotoSans-Regular.ttf', fontBase64);
         this.doc.addFont('NotoSans-Regular.ttf', this.fontName, 'normal');
-        this.doc.addFont('NotoSans-Regular.ttf', this.fontName, 'bold');
     }
 
     checkPageBreak(spaceNeeded: number) {
@@ -100,7 +99,7 @@ class PdfWriter {
 
     addPageNumber() {
         this.doc.setFontSize(9);
-        this.doc.setFont(this.fontName, 'italic');
+        this.doc.setFont(this.fontName, 'normal');
         this.doc.text(`Page ${this.pageNumber}`, this.pageWidth / 2, this.pageHeight - 20, { align: 'center' });
     }
 
@@ -109,7 +108,7 @@ class PdfWriter {
     }
 
     writeHeader(paper: QuestionPaper) {
-        this.doc.setFont(this.fontName, 'bold').setFontSize(20);
+        this.doc.setFont(this.fontName, 'normal').setFontSize(20);
         this.doc.text(paper.institution_name, this.pageWidth / 2, this.y, { align: 'center' });
         this.y += this.getLineHeight(20);
 
@@ -125,7 +124,7 @@ class PdfWriter {
         this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
         this.y += this.getLineHeight(12) * 1.2;
         
-        this.doc.setFont(this.fontName, 'bold').setFontSize(12);
+        this.doc.setFont(this.fontName, 'normal').setFontSize(12);
         this.doc.text(`Total Marks: ${paper.total_marks}`, this.margin, this.y);
         this.doc.text(`Duration: ${paper.duration_minutes} minutes`, this.pageWidth - this.margin, this.y, { align: 'right' });
         this.y += this.getLineHeight(12) * 0.8;
@@ -136,7 +135,7 @@ class PdfWriter {
     writeQuestion(q: Question, qIndex: number, includeAnswers: boolean) {
         const availableWidth = this.pageWidth - this.margin * 2;
         
-        this.doc.setFont(this.fontName, 'bold').setFontSize(12);
+        this.doc.setFont(this.fontName, 'normal').setFontSize(12);
         const marksText = `[${q.marks} Marks]`;
         const marksWidth = this.doc.getTextWidth(marksText);
 
@@ -145,7 +144,6 @@ class PdfWriter {
         const qNumText = `${qIndex}.`;
         const qNumWidth = this.doc.getTextWidth(qNumText);
         
-        this.doc.setFont(this.fontName, 'normal').setFontSize(12);
         const questionLines = this.doc.splitTextToSize(q.question_text, questionMaxWidth - qNumWidth);
         const questionBlockHeight = this.getLineHeight(12) * questionLines.length;
 
@@ -155,12 +153,10 @@ class PdfWriter {
         this.checkPageBreak(neededSpace);
 
         const startY = this.y;
-
-        this.doc.setFont(this.fontName, 'bold');
+        
         this.doc.text(marksText, this.pageWidth - this.margin, startY, { align: 'right' });
         
         this.doc.text(qNumText, this.margin, this.y, { align: 'left' });
-        this.doc.setFont(this.fontName, 'normal');
         this.doc.text(questionLines, this.margin + qNumWidth + 4, this.y);
 
         this.y += questionBlockHeight;
@@ -180,7 +176,7 @@ class PdfWriter {
 
         if (includeAnswers) {
             this.y += 6;
-            this.doc.setFont(this.fontName, 'bold').setFontSize(11);
+            this.doc.setFont(this.fontName, 'normal').setFontSize(11);
             this.doc.setTextColor('#006400');
             const answerText = `Answer: ${q.correct_answer}`;
             const splitAnswer = this.doc.splitTextToSize(answerText, availableWidth - 25);
@@ -198,7 +194,7 @@ class PdfWriter {
         this.writeHeader(paper);
         paper.sections.forEach(section => {
             this.checkPageBreak(30);
-            this.doc.setFont(this.fontName, 'bold').setFontSize(14);
+            this.doc.setFont(this.fontName, 'normal').setFontSize(14);
             const sectionTitleWidth = this.doc.getTextWidth(section.section_title);
             this.doc.text(section.section_title, this.margin, this.y);
             this.y += this.getLineHeight(14) * 0.1;
