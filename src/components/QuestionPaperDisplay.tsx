@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Question, QuestionPaper } from '../types';
+import { NOTO_SANS_BASE64 } from '../constants';
 
 declare var docx: any;
 declare var jspdf: any;
@@ -8,34 +9,17 @@ declare var jspdf: any;
 let fontDataCache: string | null = null;
 
 /**
- * Fetches a Unicode-compatible font (Noto Sans) as a Base64 string.
+ * Retrieves the Base64 encoded font data for Noto Sans.
  * This is crucial for rendering non-Latin characters (like Gujarati) correctly in the PDF.
- * The font data is cached after the first fetch to speed up subsequent exports.
+ * The font is embedded in the app bundle to ensure reliability and offline functionality.
  */
-const fetchFontAsBase64 = async (): Promise<string> => {
+const getFontBase64 = (): string => {
     if (fontDataCache) {
         return fontDataCache;
     }
-    try {
-        const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans-Regular.ttf';
-        const response = await fetch(fontUrl);
-        if (!response.ok) throw new Error(`Failed to fetch font: ${response.statusText}`);
-        
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64data = (reader.result as string).split(',')[1];
-                fontDataCache = base64data; // Cache for subsequent exports
-                resolve(base64data);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-    } catch (error) {
-        console.error("Could not load font for PDF:", error);
-        throw new Error("Could not load font required for PDF generation. Please check your internet connection.");
-    }
+    // The base64 string is imported from constants.ts, eliminating network requests.
+    fontDataCache = NOTO_SANS_BASE64;
+    return fontDataCache;
 };
 
 
@@ -317,13 +301,15 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
 
   const handleFileShare = async (format: 'pdf' | 'docx') => {
     setIsExporting(true);
+    // Allow UI to update to loading state before heavy processing
+    await new Promise(resolve => setTimeout(resolve, 50));
     try {
         let blob: Blob;
         let fileName: string;
         let fileType: string;
 
         if (format === 'pdf') {
-            const fontBase64 = await fetchFontAsBase64();
+            const fontBase64 = getFontBase64();
             const writer = new PdfWriter(fontBase64);
             blob = writer.getBlob(paper, includeAnswersInExport);
             fileName = `${paper.subject}_${paper.grade}_Paper.pdf`;
@@ -354,8 +340,10 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
 
   const handlePdfExport = async () => {
     setIsExporting(true);
+    // Allow UI to update to loading state before heavy processing
+    await new Promise(resolve => setTimeout(resolve, 50));
     try {
-        const fontBase64 = await fetchFontAsBase64();
+        const fontBase64 = getFontBase64();
         const writer = new PdfWriter(fontBase64);
         const blob = writer.getBlob(paper, includeAnswersInExport);
         const url = window.URL.createObjectURL(blob);
@@ -375,6 +363,8 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   
   const handleDocxExport = async () => {
     setIsExporting(true);
+    // Allow UI to update to loading state before heavy processing
+    await new Promise(resolve => setTimeout(resolve, 50));
     try {
         const blob = await createDocxBlob(paper, includeAnswersInExport);
         const url = window.URL.createObjectURL(blob);
