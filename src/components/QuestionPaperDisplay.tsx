@@ -4,6 +4,41 @@ import type { Question, QuestionPaper } from '../types';
 declare var docx: any;
 declare var jspdf: any;
 
+// Caching mechanism for the fetched font to avoid re-downloading
+let fontDataCache: string | null = null;
+
+/**
+ * Fetches a Unicode-compatible font (Noto Sans) as a Base64 string.
+ * This is crucial for rendering non-Latin characters (like Gujarati) correctly in the PDF.
+ * The font data is cached after the first fetch to speed up subsequent exports.
+ */
+const fetchFontAsBase64 = async (): Promise<string> => {
+    if (fontDataCache) {
+        return fontDataCache;
+    }
+    try {
+        const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans-Regular.ttf';
+        const response = await fetch(fontUrl);
+        if (!response.ok) throw new Error(`Failed to fetch font: ${response.statusText}`);
+        
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64data = (reader.result as string).split(',')[1];
+                fontDataCache = base64data; // Cache for subsequent exports
+                resolve(base64data);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error("Could not load font for PDF:", error);
+        throw new Error("Could not load font required for PDF generation. Please check your internet connection.");
+    }
+};
+
+
 // Icons
 const KeyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>;
 const DocxIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>;
@@ -11,6 +46,8 @@ const PdfIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height=
 const CopyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
 const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>;
 const CreateIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
+const SpinnerIcon = () => <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
+
 
 interface QuestionPaperDisplayProps {
   paper: QuestionPaper;
@@ -44,7 +81,6 @@ const generatePlainText = (paper: QuestionPaper, includeAnswers: boolean): strin
     return text;
 };
 
-
 class PdfWriter {
     doc: any;
     y: number;
@@ -53,15 +89,20 @@ class PdfWriter {
     margin: number;
     pageNumber: number;
     lineHeightFactor: number;
+    fontName: string = 'UnicodeFont';
 
-    constructor() {
-        this.doc = new jspdf.jsPDF({ unit: 'pt' }); // Use points for better control
+    constructor(fontBase64: string) {
+        this.doc = new jspdf.jsPDF({ unit: 'pt' });
         this.margin = 50;
         this.y = this.margin;
         this.pageWidth = this.doc.internal.pageSize.width;
         this.pageHeight = this.doc.internal.pageSize.height;
         this.pageNumber = 1;
-        this.lineHeightFactor = 1.4; // Increased for better readability
+        this.lineHeightFactor = 1.4;
+
+        this.doc.addFileToVFS('NotoSans-Regular.ttf', fontBase64);
+        this.doc.addFont('NotoSans-Regular.ttf', this.fontName, 'normal');
+        this.doc.addFont('NotoSans-Regular.ttf', this.fontName, 'bold');
     }
 
     checkPageBreak(spaceNeeded: number) {
@@ -75,7 +116,7 @@ class PdfWriter {
 
     addPageNumber() {
         this.doc.setFontSize(9);
-        this.doc.setFont('times', 'italic');
+        this.doc.setFont(this.fontName, 'italic');
         this.doc.text(`Page ${this.pageNumber}`, this.pageWidth / 2, this.pageHeight - 20, { align: 'center' });
     }
 
@@ -84,11 +125,11 @@ class PdfWriter {
     }
 
     writeHeader(paper: QuestionPaper) {
-        this.doc.setFont('times', 'bold').setFontSize(20);
+        this.doc.setFont(this.fontName, 'bold').setFontSize(20);
         this.doc.text(paper.institution_name, this.pageWidth / 2, this.y, { align: 'center' });
         this.y += this.getLineHeight(20);
 
-        this.doc.setFont('times', 'normal').setFontSize(16);
+        this.doc.setFont(this.fontName, 'normal').setFontSize(16);
         this.doc.text(paper.title, this.pageWidth / 2, this.y, { align: 'center' });
         this.y += this.getLineHeight(16);
         
@@ -100,7 +141,7 @@ class PdfWriter {
         this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
         this.y += this.getLineHeight(12) * 1.2;
         
-        this.doc.setFont('times', 'bold').setFontSize(12);
+        this.doc.setFont(this.fontName, 'bold').setFontSize(12);
         this.doc.text(`Total Marks: ${paper.total_marks}`, this.margin, this.y);
         this.doc.text(`Duration: ${paper.duration_minutes} minutes`, this.pageWidth - this.margin, this.y, { align: 'right' });
         this.y += this.getLineHeight(12) * 0.8;
@@ -111,16 +152,16 @@ class PdfWriter {
     writeQuestion(q: Question, qIndex: number, includeAnswers: boolean) {
         const availableWidth = this.pageWidth - this.margin * 2;
         
-        this.doc.setFont('times', 'bold').setFontSize(12);
+        this.doc.setFont(this.fontName, 'bold').setFontSize(12);
         const marksText = `[${q.marks} Marks]`;
         const marksWidth = this.doc.getTextWidth(marksText);
 
-        const questionMaxWidth = availableWidth - marksWidth - 15; // Increased buffer
+        const questionMaxWidth = availableWidth - marksWidth - 15;
 
         const qNumText = `${qIndex}.`;
         const qNumWidth = this.doc.getTextWidth(qNumText);
         
-        this.doc.setFont('times', 'normal').setFontSize(12);
+        this.doc.setFont(this.fontName, 'normal').setFontSize(12);
         const questionLines = this.doc.splitTextToSize(q.question_text, questionMaxWidth - qNumWidth);
         const questionBlockHeight = this.getLineHeight(12) * questionLines.length;
 
@@ -131,18 +172,18 @@ class PdfWriter {
 
         const startY = this.y;
 
-        this.doc.setFont('times', 'bold');
+        this.doc.setFont(this.fontName, 'bold');
         this.doc.text(marksText, this.pageWidth - this.margin, startY, { align: 'right' });
         
         this.doc.text(qNumText, this.margin, this.y, { align: 'left' });
-        this.doc.setFont('times', 'normal');
+        this.doc.setFont(this.fontName, 'normal');
         this.doc.text(questionLines, this.margin + qNumWidth + 4, this.y);
 
         this.y += questionBlockHeight;
 
         if (q.options) {
             this.y += 4;
-            this.doc.setFont('times', 'normal').setFontSize(12);
+            this.doc.setFont(this.fontName, 'normal').setFontSize(12);
             q.options.forEach((option: string, optIndex: number) => {
                 const optionLine = `${String.fromCharCode(97 + optIndex)}) ${option}`;
                 const splitOption = this.doc.splitTextToSize(optionLine, availableWidth - 25);
@@ -155,8 +196,8 @@ class PdfWriter {
 
         if (includeAnswers) {
             this.y += 6;
-            this.doc.setFont('times', 'bold').setFontSize(11);
-            this.doc.setTextColor('#006400'); // Dark Green
+            this.doc.setFont(this.fontName, 'bold').setFontSize(11);
+            this.doc.setTextColor('#006400');
             const answerText = `Answer: ${q.correct_answer}`;
             const splitAnswer = this.doc.splitTextToSize(answerText, availableWidth - 25);
             const answerHeight = this.getLineHeight(11) * splitAnswer.length;
@@ -166,19 +207,19 @@ class PdfWriter {
             this.doc.setTextColor('#000000');
         }
         
-        this.y += 12; // Space between questions
+        this.y += 12;
     }
 
     getBlob(paper: QuestionPaper, includeAnswers: boolean): Blob {
         this.writeHeader(paper);
         paper.sections.forEach(section => {
             this.checkPageBreak(30);
-            this.doc.setFont('times', 'bold').setFontSize(14);
+            this.doc.setFont(this.fontName, 'bold').setFontSize(14);
             const sectionTitleWidth = this.doc.getTextWidth(section.section_title);
             this.doc.text(section.section_title, this.margin, this.y);
             this.y += this.getLineHeight(14) * 0.1;
             this.doc.setLineWidth(0.5);
-            this.doc.line(this.margin, this.y, this.margin + sectionTitleWidth, this.y); // Underline
+            this.doc.line(this.margin, this.y, this.margin + sectionTitleWidth, this.y);
             this.y += this.getLineHeight(14) * 1.5;
 
             section.questions.forEach((q, qIndex) => {
@@ -189,7 +230,6 @@ class PdfWriter {
         return this.doc.output('blob');
     }
 }
-
 
 const createDocxBlob = (paper: QuestionPaper, includeAnswers: boolean): Promise<Blob> => {
     const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, TabStopType, TabStopPosition } = docx;
@@ -233,7 +273,7 @@ const createDocxBlob = (paper: QuestionPaper, includeAnswers: boolean): Promise<
             children.push(new Paragraph({
               text: `${String.fromCharCode(97 + optIndex)}) ${option}`,
               spacing: { after: 50 },
-              indent: { left: 720 }, // Indent options
+              indent: { left: 720 },
             }));
           });
         }
@@ -251,15 +291,14 @@ const createDocxBlob = (paper: QuestionPaper, includeAnswers: boolean): Promise<
     return Packer.toBlob(doc);
 };
 
-
 export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper, isMobile }) => {
   const [showAnswers, setShowAnswers] = useState(false);
   const [includeAnswersInExport, setIncludeAnswersInExport] = useState(false);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
   const [canShareFiles, setCanShareFiles] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    // Check for Web Share API support for files
     if ('share' in navigator && 'canShare' in navigator && typeof navigator.canShare === 'function') {
         const testFile = new File(["test"], "test.txt", { type: "text/plain" });
         if (navigator.canShare({ files: [testFile] })) {
@@ -267,10 +306,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
         }
     }
   }, []);
-
-  const handleToggleAnswers = () => {
-    setShowAnswers(prevShowState => !prevShowState);
-  };
 
   const handleCopy = () => {
     const textToCopy = generatePlainText(paper, includeAnswersInExport);
@@ -281,17 +316,19 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   }
 
   const handleFileShare = async (format: 'pdf' | 'docx') => {
+    setIsExporting(true);
     try {
         let blob: Blob;
         let fileName: string;
         let fileType: string;
 
         if (format === 'pdf') {
-            const writer = new PdfWriter();
+            const fontBase64 = await fetchFontAsBase64();
+            const writer = new PdfWriter(fontBase64);
             blob = writer.getBlob(paper, includeAnswersInExport);
             fileName = `${paper.subject}_${paper.grade}_Paper.pdf`;
             fileType = 'application/pdf';
-        } else { // docx
+        } else {
             blob = await createDocxBlob(paper, includeAnswersInExport);
             fileName = `${paper.subject}_${paper.grade}_Paper.docx`;
             fileType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -308,37 +345,54 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
     } catch (error) {
         if ((error as DOMException).name !== 'AbortError') {
             console.error('Error sharing file:', error);
-            alert('An error occurred while trying to share the file.');
+            alert(`An error occurred while trying to share the file: ${(error as Error).message}`);
         }
+    } finally {
+        setIsExporting(false);
     }
   };
 
-  const handlePdfExport = () => {
-    const writer = new PdfWriter();
-    const blob = writer.getBlob(paper, includeAnswersInExport);
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${paper.subject}_${paper.grade}_Paper.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+  const handlePdfExport = async () => {
+    setIsExporting(true);
+    try {
+        const fontBase64 = await fetchFontAsBase64();
+        const writer = new PdfWriter(fontBase64);
+        const blob = writer.getBlob(paper, includeAnswersInExport);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${paper.subject}_${paper.grade}_Paper.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } catch (error) {
+        alert((error as Error).message);
+    } finally {
+        setIsExporting(false);
+    }
   };
   
   const handleDocxExport = async () => {
-    const blob = await createDocxBlob(paper, includeAnswersInExport);
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${paper.subject}_${paper.grade}_Paper.docx`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    setIsExporting(true);
+    try {
+        const blob = await createDocxBlob(paper, includeAnswersInExport);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${paper.subject}_${paper.grade}_Paper.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } catch (error) {
+        alert(`Failed to export DOCX: ${(error as Error).message}`);
+    } finally {
+        setIsExporting(false);
+    }
   };
 
-  const actionButtonStyles = "flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors transform active:scale-95";
+  const actionButtonStyles = "flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60";
   const primaryButtonStyles = `${actionButtonStyles} bg-blue-600 text-white hover:bg-blue-700`;
   const secondaryButtonStyles = `${actionButtonStyles} bg-slate-100 text-slate-600 hover:bg-slate-200`;
 
@@ -351,25 +405,31 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                         <CreateIcon /> New Paper
                     </button>
                 )}
-                <button onClick={handleToggleAnswers} className={`${secondaryButtonStyles} ${showAnswers ? '!bg-blue-100 !text-blue-700' : ''}`} aria-pressed={showAnswers}>
+                <button onClick={() => setShowAnswers(s => !s)} className={`${secondaryButtonStyles} ${showAnswers ? '!bg-blue-100 !text-blue-700' : ''}`} aria-pressed={showAnswers}>
                     <KeyIcon /> {showAnswers ? 'Hide Answers' : 'Show Answers'}
                 </button>
             </div>
 
             <div className="flex items-center gap-4 flex-wrap justify-center">
-                {/* File actions */}
                 <div className="flex items-center gap-2 flex-wrap justify-center">
-                    <button onClick={handlePdfExport} className={secondaryButtonStyles}><PdfIcon /> Export PDF</button>
-                    <button onClick={handleDocxExport} className={secondaryButtonStyles}><DocxIcon /> Export DOCX</button>
+                    <button onClick={handlePdfExport} disabled={isExporting} className={secondaryButtonStyles}>
+                        {isExporting ? <SpinnerIcon /> : <PdfIcon />} {isExporting ? 'Preparing...' : 'Export PDF'}
+                    </button>
+                    <button onClick={handleDocxExport} disabled={isExporting} className={secondaryButtonStyles}>
+                        {isExporting ? <SpinnerIcon /> : <DocxIcon />}{isExporting ? 'Preparing...' : 'Export DOCX'}
+                    </button>
                     {canShareFiles && (
                         <>
-                            <button onClick={() => handleFileShare('pdf')} className={secondaryButtonStyles}><ShareIcon /> Share PDF</button>
-                            <button onClick={() => handleFileShare('docx')} className={secondaryButtonStyles}><ShareIcon /> Share DOCX</button>
+                            <button onClick={() => handleFileShare('pdf')} disabled={isExporting} className={secondaryButtonStyles}>
+                                {isExporting ? <SpinnerIcon /> : <ShareIcon />}{isExporting ? 'Preparing...' : 'Share PDF'}
+                            </button>
+                            <button onClick={() => handleFileShare('docx')} disabled={isExporting} className={secondaryButtonStyles}>
+                                {isExporting ? <SpinnerIcon /> : <ShareIcon />}{isExporting ? 'Preparing...' : 'Share DOCX'}
+                            </button>
                         </>
                     )}
                 </div>
 
-                {/* Other actions */}
                 <div className="flex items-center gap-2 flex-wrap justify-center">
                     <div className="flex items-center pl-2 bg-slate-100 rounded-md h-full">
                         <input type="checkbox" id="include-answers" checked={includeAnswersInExport} onChange={(e) => setIncludeAnswersInExport(e.target.checked)} className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
