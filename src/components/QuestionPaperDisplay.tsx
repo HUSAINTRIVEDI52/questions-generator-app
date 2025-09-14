@@ -55,13 +55,13 @@ class PdfWriter {
     lineHeightFactor: number;
 
     constructor() {
-        this.doc = new jspdf.jsPDF();
-        this.margin = 20;
+        this.doc = new jspdf.jsPDF({ unit: 'pt' }); // Use points for better control
+        this.margin = 50;
         this.y = this.margin;
         this.pageWidth = this.doc.internal.pageSize.width;
         this.pageHeight = this.doc.internal.pageSize.height;
         this.pageNumber = 1;
-        this.lineHeightFactor = 1.2; // Adjust for spacing between lines
+        this.lineHeightFactor = 1.4; // Increased for better readability
     }
 
     checkPageBreak(spaceNeeded: number) {
@@ -75,103 +75,114 @@ class PdfWriter {
 
     addPageNumber() {
         this.doc.setFontSize(9);
-        this.doc.setFont('helvetica', 'italic');
-        this.doc.text(`Page ${this.pageNumber}`, this.pageWidth - this.margin, this.pageHeight - 10, { align: 'right' });
+        this.doc.setFont('times', 'italic');
+        this.doc.text(`Page ${this.pageNumber}`, this.pageWidth / 2, this.pageHeight - 20, { align: 'center' });
     }
 
     getLineHeight(fontSize: number): number {
-        return fontSize / this.doc.internal.scaleFactor * this.lineHeightFactor;
+        return fontSize * this.lineHeightFactor;
     }
 
     writeHeader(paper: QuestionPaper) {
-        this.doc.setFontSize(18).setFont('helvetica', 'bold');
+        this.doc.setFont('times', 'bold').setFontSize(20);
         this.doc.text(paper.institution_name, this.pageWidth / 2, this.y, { align: 'center' });
-        this.y += this.getLineHeight(18) * 1.2;
+        this.y += this.getLineHeight(20);
 
-        this.doc.setFontSize(14).setFont('helvetica', 'normal');
+        this.doc.setFont('times', 'normal').setFontSize(16);
         this.doc.text(paper.title, this.pageWidth / 2, this.y, { align: 'center' });
+        this.y += this.getLineHeight(16);
+        
+        this.doc.setFontSize(14);
+        this.doc.text(`${paper.grade} - ${paper.subject}`, this.pageWidth / 2, this.y, { align: 'center' });
         this.y += this.getLineHeight(14);
         
-        this.doc.setFontSize(12).setFont('helvetica', 'normal');
-        this.doc.text(`${paper.grade} - ${paper.subject}`, this.pageWidth / 2, this.y, { align: 'center' });
-        this.y += this.getLineHeight(12) * 2;
-        
-        this.doc.setLineWidth(0.5);
+        this.doc.setLineWidth(1);
         this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
-        this.y += this.getLineHeight(11) * 1.5;
+        this.y += this.getLineHeight(12) * 1.2;
         
-        this.doc.setFontSize(11);
+        this.doc.setFont('times', 'bold').setFontSize(12);
         this.doc.text(`Total Marks: ${paper.total_marks}`, this.margin, this.y);
         this.doc.text(`Duration: ${paper.duration_minutes} minutes`, this.pageWidth - this.margin, this.y, { align: 'right' });
-        this.y += this.getLineHeight(11) * 0.8;
+        this.y += this.getLineHeight(12) * 0.8;
         this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
-        this.y += this.getLineHeight(11) * 2;
+        this.y += this.getLineHeight(12) * 2;
     }
 
     writeQuestion(q: Question, qIndex: number, includeAnswers: boolean) {
         const availableWidth = this.pageWidth - this.margin * 2;
         
-        this.doc.setFontSize(11).setFont('helvetica', 'bold');
-        const questionText = `${qIndex + 1}. ${q.question_text}`;
+        this.doc.setFont('times', 'bold').setFontSize(12);
         const marksText = `[${q.marks} Marks]`;
         const marksWidth = this.doc.getTextWidth(marksText);
-        const questionWidth = availableWidth - marksWidth - 5;
-        const splitQuestion = this.doc.splitTextToSize(questionText, questionWidth);
-        const questionHeight = this.getLineHeight(11) * splitQuestion.length;
 
-        // Smart page break: Check if question + at least one option/answer line fits
-        let neededSpace = questionHeight + 10;
-        if (q.options) neededSpace += this.getLineHeight(11);
-        if (includeAnswers) neededSpace += this.getLineHeight(11);
+        const questionMaxWidth = availableWidth - marksWidth - 15; // Increased buffer
+
+        const qNumText = `${qIndex + 1}.`;
+        const qNumWidth = this.doc.getTextWidth(qNumText);
+        
+        this.doc.setFont('times', 'normal').setFontSize(12);
+        const questionLines = this.doc.splitTextToSize(q.question_text, questionMaxWidth - qNumWidth);
+        const questionBlockHeight = this.getLineHeight(12) * questionLines.length;
+
+        let neededSpace = questionBlockHeight + 10;
+        if (q.options) neededSpace += (this.getLineHeight(12) * q.options.length) + 4;
+        if (includeAnswers) neededSpace += this.getLineHeight(10) + 4;
         this.checkPageBreak(neededSpace);
 
-        this.doc.text(splitQuestion, this.margin, this.y);
-        this.doc.setFont('helvetica', 'normal');
-        this.doc.text(marksText, this.pageWidth - this.margin, this.y, { align: 'right' });
-        this.y += questionHeight;
+        const startY = this.y;
+
+        this.doc.setFont('times', 'bold');
+        this.doc.text(marksText, this.pageWidth - this.margin, startY, { align: 'right' });
+        
+        this.doc.text(qNumText, this.margin, this.y, { align: 'left' });
+        this.doc.setFont('times', 'normal');
+        this.doc.text(questionLines, this.margin + qNumWidth + 4, this.y);
+
+        this.y += questionBlockHeight;
 
         if (q.options) {
             this.y += 4;
-            this.doc.setFontSize(11).setFont('helvetica', 'normal');
+            this.doc.setFont('times', 'normal').setFontSize(12);
             q.options.forEach((option: string, optIndex: number) => {
                 const optionLine = `${String.fromCharCode(97 + optIndex)}) ${option}`;
-                const splitOption = this.doc.splitTextToSize(optionLine, availableWidth - 10);
-                const optionHeight = this.getLineHeight(11) * splitOption.length;
+                const splitOption = this.doc.splitTextToSize(optionLine, availableWidth - 25);
+                const optionHeight = this.getLineHeight(12) * splitOption.length;
                 this.checkPageBreak(optionHeight);
-                this.doc.text(splitOption, this.margin + 5, this.y);
+                this.doc.text(splitOption, this.margin + 15, this.y);
                 this.y += optionHeight;
             });
         }
 
         if (includeAnswers) {
-            this.y += 4;
-            this.doc.setFontSize(10).setFont('helvetica', 'bold');
+            this.y += 6;
+            this.doc.setFont('times', 'bold').setFontSize(11);
             this.doc.setTextColor('#006400'); // Dark Green
             const answerText = `Answer: ${q.correct_answer}`;
-            const splitAnswer = this.doc.splitTextToSize(answerText, availableWidth - 10);
-            const answerHeight = this.getLineHeight(10) * splitAnswer.length;
+            const splitAnswer = this.doc.splitTextToSize(answerText, availableWidth - 25);
+            const answerHeight = this.getLineHeight(11) * splitAnswer.length;
             this.checkPageBreak(answerHeight);
-            this.doc.text(splitAnswer, this.margin + 5, this.y);
+            this.doc.text(splitAnswer, this.margin + 15, this.y);
             this.y += answerHeight;
-            this.doc.setTextColor('#000000'); // Reset color
+            this.doc.setTextColor('#000000');
         }
         
-        this.y += 8; // Space between questions
+        this.y += 12; // Space between questions
     }
 
     getBlob(paper: QuestionPaper, includeAnswers: boolean): Blob {
         this.writeHeader(paper);
         paper.sections.forEach(section => {
-            this.checkPageBreak(25); // Space for section header
-            this.doc.setFontSize(13).setFont('helvetica', 'bold');
+            this.checkPageBreak(30);
+            this.doc.setFont('times', 'bold').setFontSize(14);
+            const sectionTitleWidth = this.doc.getTextWidth(section.section_title);
             this.doc.text(section.section_title, this.margin, this.y);
-            this.y += this.getLineHeight(13) * 0.8;
-            this.doc.setLineWidth(0.2);
-            this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
-            this.y += this.getLineHeight(13) * 1.5;
+            this.y += this.getLineHeight(14) * 0.1;
+            this.doc.setLineWidth(0.5);
+            this.doc.line(this.margin, this.y, this.margin + sectionTitleWidth, this.y); // Underline
+            this.y += this.getLineHeight(14) * 1.5;
 
             section.questions.forEach((q, qIndex) => {
-                this.writeQuestion(q, qIndex, includeAnswers);
+                this.writeQuestion(q, qIndex + 1, includeAnswers);
             });
         });
         this.addPageNumber();
@@ -181,14 +192,18 @@ class PdfWriter {
 
 
 const createDocxBlob = (paper: QuestionPaper, includeAnswers: boolean): Promise<Blob> => {
-    const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = docx;
+    const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, TabStopType, TabStopPosition } = docx;
 
     const children = [
       new Paragraph({ text: paper.institution_name, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
       new Paragraph({ text: paper.title, heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER }),
       new Paragraph({ text: `${paper.grade} - ${paper.subject}`, heading: HeadingLevel.HEADING_3, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
       new Paragraph({
-        children: [ new TextRun(`Total Marks: ${paper.total_marks}\tDuration: ${paper.duration_minutes} minutes`) ],
+        children: [
+          new TextRun(`Total Marks: ${paper.total_marks}`),
+          new TextRun({ children: ["\t", `Duration: ${paper.duration_minutes} minutes`]}),
+        ],
+        tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
         alignment: AlignmentType.CENTER,
         border: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 } },
         spacing: { before: 200, after: 400 },
@@ -206,18 +221,19 @@ const createDocxBlob = (paper: QuestionPaper, includeAnswers: boolean): Promise<
       section.questions.forEach((q, qIndex) => {
         children.push(new Paragraph({
           children: [
-            new TextRun({ text: `${qIndex + 1}. `, bold: true }),
-            new TextRun(q.question_text),
-            new TextRun({ text: `\t[${q.marks} Marks]`, bold: true, italics: true }),
+            new TextRun(`${qIndex + 1}. ${q.question_text}`),
+            new TextRun({ children: ["\t", `[${q.marks} Marks]`], bold: true }),
           ],
+          tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { after: 100 },
         }));
+
         if (q.options) {
           q.options.forEach((option, optIndex) => {
             children.push(new Paragraph({
-              children: [new TextRun(`\t${String.fromCharCode(97 + optIndex)}) ${option}`)],
+              text: `${String.fromCharCode(97 + optIndex)}) ${option}`,
               spacing: { after: 50 },
-              indent: { left: 720 },
+              indent: { left: 720 }, // Indent options
             }));
           });
         }
