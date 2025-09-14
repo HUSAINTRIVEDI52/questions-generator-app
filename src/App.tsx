@@ -69,7 +69,7 @@ const App: React.FC = () => {
         </div>
       );
     }
-    if (questionPaper) return <QuestionPaperDisplay paper={questionPaper} onNewPaper={handleNewPaper} isMobile={isMobile} />;
+    if (questionPaper) return <QuestionPaperDisplay key={Date.now()} paper={questionPaper} onNewPaper={handleNewPaper} isMobile={isMobile} />;
     return null;
   };
 
@@ -92,13 +92,13 @@ const App: React.FC = () => {
                 <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />
               </div>
             </div>
-            <div className="lg:col-span-8 xl-col-span-9">
+            <div className="lg:col-span-8 xl:col-span-9">
               {showResults ? renderResults() : <HomePage onStart={() => {}} isDesktop={true} />}
             </div>
           </div>
         )}
       </main>
-      <footer className="w-full text-center p-4 mt-8" style={{ color: 'var(--color-text-muted)' }}>
+      <footer className="w-full text-center p-4 mt-8 no-print" style={{ color: 'var(--color-text-muted)' }}>
         <p className="text-sm font-medium">An initiative by <span className="font-bold text-blue-700">Husain M Trivedi</span></p>
         <p className="text-sm">Contact: <a href="tel:7698379853" className="font-semibold hover:underline">7698379853</a></p>
       </footer>

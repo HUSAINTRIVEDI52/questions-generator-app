@@ -97,10 +97,9 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
         }
     });
     
-    const jsonText = response.text.trim();
-    if (!jsonText.startsWith('{') || !jsonText.endsWith('}')) {
-        console.error("Received non-JSON response:", jsonText);
-        throw new Error("The model returned a non-JSON response. Please check your prompt and try again.");
+    const jsonText = (response.text ?? '').trim();
+    if (!jsonText) {
+       throw new Error("The model returned an empty response. It might be overloaded. Please try again in a moment.");
     }
     const parsedPaper: QuestionPaper = JSON.parse(jsonText);
     return parsedPaper;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { QuestionPaper, QuestionSection } from '../types';
+import type { Question, QuestionPaper } from '../types';
 
 declare var docx: any;
 declare var jspdf: any;
@@ -45,6 +45,141 @@ const generatePlainText = (paper: QuestionPaper, includeAnswers: boolean): strin
 };
 
 
+class PdfWriter {
+    doc: any;
+    y: number;
+    pageWidth: number;
+    pageHeight: number;
+    margin: number;
+    pageNumber: number;
+    lineHeightFactor: number;
+
+    constructor() {
+        this.doc = new jspdf.jsPDF();
+        this.margin = 20;
+        this.y = this.margin;
+        this.pageWidth = this.doc.internal.pageSize.width;
+        this.pageHeight = this.doc.internal.pageSize.height;
+        this.pageNumber = 1;
+        this.lineHeightFactor = 1.2; // Adjust for spacing between lines
+    }
+
+    checkPageBreak(spaceNeeded: number) {
+        if (this.y + spaceNeeded > this.pageHeight - this.margin) {
+            this.addPageNumber();
+            this.doc.addPage();
+            this.y = this.margin;
+            this.pageNumber++;
+        }
+    }
+
+    addPageNumber() {
+        this.doc.setFontSize(9);
+        this.doc.setFont('helvetica', 'italic');
+        this.doc.text(`Page ${this.pageNumber}`, this.pageWidth - this.margin, this.pageHeight - 10, { align: 'right' });
+    }
+
+    getLineHeight(fontSize: number): number {
+        return fontSize / this.doc.internal.scaleFactor * this.lineHeightFactor;
+    }
+
+    writeHeader(paper: QuestionPaper) {
+        this.doc.setFontSize(18).setFont('helvetica', 'bold');
+        this.doc.text(paper.institution_name, this.pageWidth / 2, this.y, { align: 'center' });
+        this.y += this.getLineHeight(18) * 1.2;
+
+        this.doc.setFontSize(14).setFont('helvetica', 'normal');
+        this.doc.text(paper.title, this.pageWidth / 2, this.y, { align: 'center' });
+        this.y += this.getLineHeight(14);
+        
+        this.doc.setFontSize(12).setFont('helvetica', 'normal');
+        this.doc.text(`${paper.grade} - ${paper.subject}`, this.pageWidth / 2, this.y, { align: 'center' });
+        this.y += this.getLineHeight(12) * 2;
+        
+        this.doc.setLineWidth(0.5);
+        this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
+        this.y += this.getLineHeight(11) * 1.5;
+        
+        this.doc.setFontSize(11);
+        this.doc.text(`Total Marks: ${paper.total_marks}`, this.margin, this.y);
+        this.doc.text(`Duration: ${paper.duration_minutes} minutes`, this.pageWidth - this.margin, this.y, { align: 'right' });
+        this.y += this.getLineHeight(11) * 0.8;
+        this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
+        this.y += this.getLineHeight(11) * 2;
+    }
+
+    writeQuestion(q: Question, qIndex: number, includeAnswers: boolean) {
+        const availableWidth = this.pageWidth - this.margin * 2;
+        
+        this.doc.setFontSize(11).setFont('helvetica', 'bold');
+        const questionText = `${qIndex + 1}. ${q.question_text}`;
+        const marksText = `[${q.marks} Marks]`;
+        const marksWidth = this.doc.getTextWidth(marksText);
+        const questionWidth = availableWidth - marksWidth - 5;
+        const splitQuestion = this.doc.splitTextToSize(questionText, questionWidth);
+        const questionHeight = this.getLineHeight(11) * splitQuestion.length;
+
+        // Smart page break: Check if question + at least one option/answer line fits
+        let neededSpace = questionHeight + 10;
+        if (q.options) neededSpace += this.getLineHeight(11);
+        if (includeAnswers) neededSpace += this.getLineHeight(11);
+        this.checkPageBreak(neededSpace);
+
+        this.doc.text(splitQuestion, this.margin, this.y);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text(marksText, this.pageWidth - this.margin, this.y, { align: 'right' });
+        this.y += questionHeight;
+
+        if (q.options) {
+            this.y += 4;
+            this.doc.setFontSize(11).setFont('helvetica', 'normal');
+            q.options.forEach((option: string, optIndex: number) => {
+                const optionLine = `${String.fromCharCode(97 + optIndex)}) ${option}`;
+                const splitOption = this.doc.splitTextToSize(optionLine, availableWidth - 10);
+                const optionHeight = this.getLineHeight(11) * splitOption.length;
+                this.checkPageBreak(optionHeight);
+                this.doc.text(splitOption, this.margin + 5, this.y);
+                this.y += optionHeight;
+            });
+        }
+
+        if (includeAnswers) {
+            this.y += 4;
+            this.doc.setFontSize(10).setFont('helvetica', 'bold');
+            this.doc.setTextColor('#006400'); // Dark Green
+            const answerText = `Answer: ${q.correct_answer}`;
+            const splitAnswer = this.doc.splitTextToSize(answerText, availableWidth - 10);
+            const answerHeight = this.getLineHeight(10) * splitAnswer.length;
+            this.checkPageBreak(answerHeight);
+            this.doc.text(splitAnswer, this.margin + 5, this.y);
+            this.y += answerHeight;
+            this.doc.setTextColor('#000000'); // Reset color
+        }
+        
+        this.y += 8; // Space between questions
+    }
+
+    generate(paper: QuestionPaper, includeAnswers: boolean) {
+        this.writeHeader(paper);
+        paper.sections.forEach(section => {
+            this.checkPageBreak(25); // Space for section header
+            this.doc.setFontSize(13).setFont('helvetica', 'bold');
+            this.doc.text(section.section_title, this.margin, this.y);
+            this.y += this.getLineHeight(13) * 0.8;
+            this.doc.setLineWidth(0.2);
+            this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
+            this.y += this.getLineHeight(13) * 1.5;
+
+            section.questions.forEach((q, qIndex) => {
+                this.writeQuestion(q, qIndex, includeAnswers);
+            });
+        });
+        this.addPageNumber();
+        this.doc.save(`${paper.subject}_${paper.grade}_Paper.pdf`);
+    }
+}
+
+
 export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper, isMobile }) => {
   const [showAnswers, setShowAnswers] = useState(false);
   const [includeAnswersInExport, setIncludeAnswersInExport] = useState(false);
@@ -64,101 +199,19 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
     });
   }
 
-  const handleShare = async () => {
+  const handleShare = () => {
       if (navigator.share) {
-          try {
-              await navigator.share({
-                  title: 'AI Question Paper Generator',
-                  text: `Check out this question paper generator I used!`,
-                  url: window.location.href
-              });
-          } catch (error) {
-              console.error('Error sharing:', error);
-          }
+          navigator.share({
+              title: 'AI Question Paper Generator',
+              text: `Check out this question paper generator I used!`,
+              url: window.location.href
+          }).catch((error) => console.error('Error sharing:', error));
       }
   }
 
   const handlePdfExport = () => {
-    const { jsPDF } = jspdf;
-    const doc = new jsPDF();
-    
-    let y = 15;
-    const pageHeight = doc.internal.pageSize.height;
-    const margin = 15;
-
-    const checkPageBreak = (spaceNeeded: number) => {
-        if (y + spaceNeeded > pageHeight - margin) {
-            doc.addPage();
-            y = margin;
-        }
-    }
-
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(paper.institution_name, 105, y, { align: 'center' });
-    y += 7;
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'normal');
-    doc.text(paper.title, 105, y, { align: 'center' });
-    y += 6;
-    doc.text(`${paper.grade} - ${paper.subject}`, 105, y, { align: 'center' });
-    y += 10;
-    
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, 210 - margin, y);
-    y += 7;
-    doc.setFontSize(11);
-    doc.text(`Total Marks: ${paper.total_marks}`, margin, y);
-    doc.text(`Duration: ${paper.duration_minutes} minutes`, 210 - margin, y, { align: 'right' });
-    y += 2;
-    doc.line(margin, y, 210 - margin, y);
-    y += 10;
-    
-    paper.sections.forEach(section => {
-        checkPageBreak(10);
-        doc.setFontSize(13);
-        doc.setFont('helvetica', 'bold');
-        doc.text(section.section_title, margin, y);
-        y += 8;
-
-        section.questions.forEach((q, qIndex) => {
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            
-            const questionText = `${qIndex + 1}. ${q.question_text}`;
-            const marksText = `[${q.marks} Marks]`;
-            const splitQuestion = doc.splitTextToSize(questionText, 180 - margin - doc.getTextWidth(marksText) - 5);
-            checkPageBreak(splitQuestion.length * 5 + 5);
-            
-            doc.text(splitQuestion, margin, y, { align: 'left' });
-            doc.text(marksText, 210 - margin, y, { align: 'right' });
-            y += splitQuestion.length * 5;
-
-            if (q.options) {
-                y += 2;
-                q.options.forEach((option, optIndex) => {
-                    const optionLine = `   ${String.fromCharCode(97 + optIndex)}) ${option}`;
-                    const splitOption = doc.splitTextToSize(optionLine, 180 - margin);
-                    checkPageBreak(splitOption.length * 5 + 2);
-                    doc.text(splitOption, margin, y);
-                    y += splitOption.length * 5;
-                });
-            }
-            if (includeAnswersInExport) {
-                y += 2;
-                doc.setFont('helvetica', 'bold');
-                const answerText = `   Answer: ${q.correct_answer}`;
-                const splitAnswer = doc.splitTextToSize(answerText, 180 - margin);
-                checkPageBreak(splitAnswer.length * 5 + 5);
-                doc.text(splitAnswer, margin, y);
-                y += splitAnswer.length * 5;
-            }
-            y+= 5;
-        });
-    });
-
-    doc.save(`${paper.subject}_${paper.grade}_Paper.pdf`);
+    const writer = new PdfWriter();
+    writer.generate(paper, includeAnswersInExport);
   };
   
   const handleDocxExport = () => {
@@ -214,7 +267,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
 
     const doc = new Document({ sections: [{ children }] });
 
-    Packer.toBlob(doc).then(blob => {
+    Packer.toBlob(doc).then((blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
