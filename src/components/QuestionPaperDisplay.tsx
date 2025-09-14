@@ -329,9 +329,9 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                     <ol className="list-decimal list-inside space-y-6">
                         {section.questions.map((q, qIndex) => (
                             <li key={qIndex} className="break-words">
-                                <div className="flex justify-between items-start">
-                                    <p className="font-semibold text-slate-800 pr-4">{q.question_text}</p>
-                                    <span className="text-sm font-bold text-slate-600 ml-4 whitespace-nowrap">[{q.marks} Marks]</span>
+                                <div className="flex justify-between items-start gap-4">
+                                    <p className="flex-1 font-semibold text-slate-800">{q.question_text}</p>
+                                    <span className="text-sm font-bold text-slate-600 whitespace-nowrap">[{q.marks} Marks]</span>
                                 </div>
 
                                 {q.options && (
