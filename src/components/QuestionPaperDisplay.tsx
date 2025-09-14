@@ -186,10 +186,8 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
 
   const handleToggleAnswers = () => {
-      const newShowState = !showAnswers;
-      setShowAnswers(newShowState);
-      setIncludeAnswersInExport(newShowState);
-  }
+    setShowAnswers(prevShowState => !prevShowState);
+  };
 
   const handleCopy = () => {
     const textToCopy = generatePlainText(paper, includeAnswersInExport);
