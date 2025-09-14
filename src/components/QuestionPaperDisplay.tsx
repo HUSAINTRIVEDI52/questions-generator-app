@@ -117,7 +117,7 @@ class PdfWriter {
 
         const questionMaxWidth = availableWidth - marksWidth - 15; // Increased buffer
 
-        const qNumText = `${qIndex + 1}.`;
+        const qNumText = `${qIndex}.`;
         const qNumWidth = this.doc.getTextWidth(qNumText);
         
         this.doc.setFont('times', 'normal').setFontSize(12);
@@ -260,7 +260,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
 
   useEffect(() => {
     // Check for Web Share API support for files
-    if (navigator.share && typeof navigator.canShare === 'function') {
+    if ('share' in navigator && 'canShare' in navigator && typeof navigator.canShare === 'function') {
         const testFile = new File(["test"], "test.txt", { type: "text/plain" });
         if (navigator.canShare({ files: [testFile] })) {
             setCanShareFiles(true);
