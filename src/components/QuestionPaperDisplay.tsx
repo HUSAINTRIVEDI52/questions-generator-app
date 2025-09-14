@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Question, QuestionPaper } from '../types';
 
 declare var docx: any;
@@ -159,7 +159,7 @@ class PdfWriter {
         this.y += 8; // Space between questions
     }
 
-    generate(paper: QuestionPaper, includeAnswers: boolean) {
+    getBlob(paper: QuestionPaper, includeAnswers: boolean): Blob {
         this.writeHeader(paper);
         paper.sections.forEach(section => {
             this.checkPageBreak(25); // Space for section header
@@ -175,44 +175,12 @@ class PdfWriter {
             });
         });
         this.addPageNumber();
-        this.doc.save(`${paper.subject}_${paper.grade}_Paper.pdf`);
+        return this.doc.output('blob');
     }
 }
 
 
-export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper, isMobile }) => {
-  const [showAnswers, setShowAnswers] = useState(false);
-  const [includeAnswersInExport, setIncludeAnswersInExport] = useState(false);
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
-
-  const handleToggleAnswers = () => {
-    setShowAnswers(prevShowState => !prevShowState);
-  };
-
-  const handleCopy = () => {
-    const textToCopy = generatePlainText(paper, includeAnswersInExport);
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        setCopyStatus('copied');
-        setTimeout(() => setCopyStatus('idle'), 2000);
-    });
-  }
-
-  const handleShare = () => {
-      if ('share' in navigator) {
-          navigator.share({
-              title: 'AI Question Paper Generator',
-              text: `Check out this question paper generator I used!`,
-              url: window.location.href
-          }).catch((error) => console.error('Error sharing:', error));
-      }
-  }
-
-  const handlePdfExport = () => {
-    const writer = new PdfWriter();
-    writer.generate(paper, includeAnswersInExport);
-  };
-  
-  const handleDocxExport = () => {
+const createDocxBlob = (paper: QuestionPaper, includeAnswers: boolean): Promise<Blob> => {
     const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = docx;
 
     const children = [
@@ -253,7 +221,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
             }));
           });
         }
-        if (includeAnswersInExport) {
+        if (includeAnswers) {
           children.push(new Paragraph({
             children: [ new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "008000" }) ],
             spacing: { after: 200 },
@@ -264,51 +232,137 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
     });
 
     const doc = new Document({ sections: [{ children }] });
+    return Packer.toBlob(doc);
+};
 
-    Packer.toBlob(doc).then((blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${paper.subject}_${paper.grade}_Paper.docx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    });
+
+export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper, isMobile }) => {
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [includeAnswersInExport, setIncludeAnswersInExport] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
+  const [canShareFiles, setCanShareFiles] = useState(false);
+
+  useEffect(() => {
+    // Check for Web Share API support for files
+    if (navigator.share && typeof navigator.canShare === 'function') {
+        const testFile = new File(["test"], "test.txt", { type: "text/plain" });
+        if (navigator.canShare({ files: [testFile] })) {
+            setCanShareFiles(true);
+        }
+    }
+  }, []);
+
+  const handleToggleAnswers = () => {
+    setShowAnswers(prevShowState => !prevShowState);
   };
+
+  const handleCopy = () => {
+    const textToCopy = generatePlainText(paper, includeAnswersInExport);
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        setCopyStatus('copied');
+        setTimeout(() => setCopyStatus('idle'), 2000);
+    });
+  }
+
+  const handleFileShare = async (format: 'pdf' | 'docx') => {
+    try {
+        let blob: Blob;
+        let fileName: string;
+        let fileType: string;
+
+        if (format === 'pdf') {
+            const writer = new PdfWriter();
+            blob = writer.getBlob(paper, includeAnswersInExport);
+            fileName = `${paper.subject}_${paper.grade}_Paper.pdf`;
+            fileType = 'application/pdf';
+        } else { // docx
+            blob = await createDocxBlob(paper, includeAnswersInExport);
+            fileName = `${paper.subject}_${paper.grade}_Paper.docx`;
+            fileType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        }
+
+        const fileToShare = new File([blob], fileName, { type: fileType });
+
+        await navigator.share({
+            title: `${paper.subject} Question Paper`,
+            text: `Here is the question paper for ${paper.subject}. Create your own at this website.`,
+            url: window.location.origin,
+            files: [fileToShare],
+        });
+    } catch (error) {
+        if ((error as DOMException).name !== 'AbortError') {
+            console.error('Error sharing file:', error);
+            alert('An error occurred while trying to share the file.');
+        }
+    }
+  };
+
+  const handlePdfExport = () => {
+    const writer = new PdfWriter();
+    const blob = writer.getBlob(paper, includeAnswersInExport);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${paper.subject}_${paper.grade}_Paper.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+  
+  const handleDocxExport = async () => {
+    const blob = await createDocxBlob(paper, includeAnswersInExport);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${paper.subject}_${paper.grade}_Paper.docx`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  const actionButtonStyles = "flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors transform active:scale-95";
+  const primaryButtonStyles = `${actionButtonStyles} bg-blue-600 text-white hover:bg-blue-700`;
+  const secondaryButtonStyles = `${actionButtonStyles} bg-slate-100 text-slate-600 hover:bg-slate-200`;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 animate-fade-in-up">
         <div className="p-4 md:p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 no-print">
-            <div className="flex items-center gap-4 flex-wrap justify-center">
+            <div className="flex items-center gap-2 flex-wrap justify-center">
                 {isMobile && (
-                    <button onClick={onNewPaper} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors transform active:scale-95">
+                    <button onClick={onNewPaper} className={primaryButtonStyles}>
                         <CreateIcon /> New Paper
                     </button>
                 )}
-                <button onClick={handleToggleAnswers} className={`flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors transform active:scale-95 ${showAnswers ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} aria-pressed={showAnswers}>
+                <button onClick={handleToggleAnswers} className={`${secondaryButtonStyles} ${showAnswers ? '!bg-blue-100 !text-blue-700' : ''}`} aria-pressed={showAnswers}>
                     <KeyIcon /> {showAnswers ? 'Hide Answers' : 'Show Answers'}
                 </button>
             </div>
-            <div className="flex items-center gap-2 flex-wrap justify-center bg-slate-100 p-2 rounded-lg">
-                <div className="flex items-center">
-                    <button onClick={handlePdfExport} className="flex items-center gap-2 py-2 pl-4 pr-2 rounded-l-md text-sm font-semibold bg-white text-slate-600 hover:bg-slate-50 transition-colors transform active:scale-95 border border-slate-200"><PdfIcon /> PDF</button>
-                    <button onClick={handleDocxExport} className="flex items-center gap-2 py-2 pl-4 pr-2 rounded-none text-sm font-semibold bg-white text-slate-600 hover:bg-slate-50 transition-colors transform active:scale-95 border-y border-r border-slate-200"><DocxIcon /> DOCX</button>
-                    <div className="flex items-center pl-2 bg-white rounded-r-md border-y border-r border-slate-200 h-full">
-                        <input type="checkbox" id="include-answers" checked={includeAnswersInExport} onChange={(e) => setIncludeAnswersInExport(e.target.checked)} className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
-                        <label htmlFor="include-answers" className="ml-2 text-sm text-slate-600 pr-3 select-none">Answers</label>
-                    </div>
+
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+                {/* File actions */}
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                    <button onClick={handlePdfExport} className={secondaryButtonStyles}><PdfIcon /> Export PDF</button>
+                    <button onClick={handleDocxExport} className={secondaryButtonStyles}><DocxIcon /> Export DOCX</button>
+                    {canShareFiles && (
+                        <>
+                            <button onClick={() => handleFileShare('pdf')} className={secondaryButtonStyles}><ShareIcon /> Share PDF</button>
+                            <button onClick={() => handleFileShare('docx')} className={secondaryButtonStyles}><ShareIcon /> Share DOCX</button>
+                        </>
+                    )}
                 </div>
-            </div>
-             <div className="flex items-center gap-2 flex-wrap justify-center">
-                <button onClick={handleCopy} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors transform active:scale-95">
-                    <CopyIcon /> {copyStatus === 'copied' ? 'Copied!' : 'Copy Content'}
-                </button>
-                 {'share' in navigator && (
-                    <button onClick={handleShare} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors transform active:scale-95">
-                        <ShareIcon /> Share
+
+                {/* Other actions */}
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                    <div className="flex items-center pl-2 bg-slate-100 rounded-md h-full">
+                        <input type="checkbox" id="include-answers" checked={includeAnswersInExport} onChange={(e) => setIncludeAnswersInExport(e.target.checked)} className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
+                        <label htmlFor="include-answers" className="ml-2 text-sm text-slate-600 pr-3 py-2 select-none">Answers in Export/Share</label>
+                    </div>
+                    <button onClick={handleCopy} className={secondaryButtonStyles}>
+                        <CopyIcon /> {copyStatus === 'copied' ? 'Copied!' : 'Copy'}
                     </button>
-                 )}
+                </div>
             </div>
         </div>
       
