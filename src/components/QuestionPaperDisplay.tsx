@@ -200,7 +200,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   }
 
   const handleShare = () => {
-      if (navigator.share) {
+      if ('share' in navigator) {
           navigator.share({
               title: 'AI Question Paper Generator',
               text: `Check out this question paper generator I used!`,
@@ -306,7 +306,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                 <button onClick={handleCopy} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors transform active:scale-95">
                     <CopyIcon /> {copyStatus === 'copied' ? 'Copied!' : 'Copy Content'}
                 </button>
-                 {navigator.share && (
+                 {'share' in navigator && (
                     <button onClick={handleShare} className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors transform active:scale-95">
                         <ShareIcon /> Share
                     </button>
