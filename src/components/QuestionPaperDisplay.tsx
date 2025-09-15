@@ -28,9 +28,24 @@ interface QuestionPaperDisplayProps {
 
 export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper }) => {
   const [showAnswers, setShowAnswers] = useState(false);
+  const [includeAnswersInExport, setIncludeAnswersInExport] = useState(false);
 
   const handlePrint = () => {
+    const paperElement = document.querySelector('.print-area');
+    if (!paperElement) return;
+
+    if (includeAnswersInExport) {
+        paperElement.classList.add('print-with-answers');
+    }
+
     window.print();
+
+    // Use a timeout to ensure the class is removed after the print dialog has closed
+    setTimeout(() => {
+        if (includeAnswersInExport) {
+            paperElement.classList.remove('print-with-answers');
+        }
+    }, 1000);
   };
   
   const handleDocxExport = () => {
@@ -60,12 +75,14 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                     });
                 }
                 
-                questionParts.push(new Paragraph({
-                    children: [
-                        new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "4CAF50" }),
-                    ],
-                    spacing: { after: 200 },
-                }));
+                if (includeAnswersInExport) {
+                    questionParts.push(new Paragraph({
+                        children: [
+                            new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "4CAF50" }),
+                        ],
+                        spacing: { after: 200 },
+                    }));
+                }
 
                 return questionParts;
             });
@@ -121,10 +138,10 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-container">
-        <div className="p-6 border-b border-slate-200 flex justify-between items-center no-print">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-area">
+        <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 no-print">
             <h2 className="text-xl font-bold text-slate-700">Generated Paper</h2>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
                 <button
                     onClick={onNewPaper}
                     className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
@@ -140,12 +157,22 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                     <KeyIcon />
                     {showAnswers ? 'Hide Answers' : 'Show Answers'}
                 </button>
+                 <div className="flex items-center gap-2 py-2 px-3 rounded-md text-sm font-semibold bg-slate-100 text-slate-600">
+                    <input
+                        id="include-answers"
+                        type="checkbox"
+                        checked={includeAnswersInExport}
+                        onChange={(e) => setIncludeAnswersInExport(e.target.checked)}
+                        className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="include-answers" className="cursor-pointer">Include Answers in Export</label>
+                </div>
                 <button
                     onClick={handleDocxExport}
                     className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                 >
                     <DocxIcon />
-                    Export as DOCX
+                    DOCX
                 </button>
                 <button
                     onClick={handlePrint}
@@ -189,13 +216,13 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                                     ))}
                                 </ul>
                                 )}
-                                {showAnswers && (
+                                <div className={`printable-answer ${showAnswers ? '' : 'hidden'}`}>
                                     <div className="mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md">
                                         <p className="text-sm font-semibold text-green-800">
                                             Correct Answer: <span className="font-normal">{q.correct_answer}</span>
                                         </p>
                                     </div>
-                                )}
+                                </div>
                             </li>
                         ))}
                     </ol>
