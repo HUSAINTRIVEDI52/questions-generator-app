@@ -119,7 +119,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
       }],
     });
 
-    Packer.toBlob(doc).then(blob => {
+    Packer.toBlob(doc).then((blob: Blob) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
