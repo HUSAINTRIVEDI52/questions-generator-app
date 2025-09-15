@@ -1,5 +1,4 @@
 import type { QuestionPaper } from '../types';
-import { jsPDF } from 'jspdf';
 import * as docx from 'docx';
 
 const saveFile = (blob: Blob, fileName: string) => {
@@ -84,26 +83,4 @@ export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
 
     const blob = await Packer.toBlob(doc);
     saveFile(blob, `${paper.subject}_${paper.grade}_Question_Paper.docx`);
-};
-
-export const exportToPdf = () => {
-    // A simplified alternative to window.print() for direct PDF generation.
-    // This is less accurate for complex layouts than printing from HTML but is a direct export.
-    const printableElement = document.getElementById('printable-paper');
-    if (printableElement) {
-        const doc = new jsPDF({
-            orientation: 'p',
-            unit: 'mm',
-            format: 'a4'
-        });
-        doc.html(printableElement, {
-            callback: function (doc) {
-                doc.save('question-paper.pdf');
-            },
-            x: 15,
-            y: 15,
-            width: 180, // Target width in mm
-            windowWidth: printableElement.scrollWidth
-        });
-    }
 };
