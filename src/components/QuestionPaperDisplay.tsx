@@ -4,7 +4,7 @@ import type { Question, QuestionPaper } from '../types';
 declare var docx: any;
 declare var jspdf: any;
 
-const FONT_URL = 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans-Regular.ttf';
+const FONT_URL = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosans/NotoSans-Regular.ttf';
 let fontDataCache: string | null = null;
 
 // Helper to convert ArrayBuffer to Base64
