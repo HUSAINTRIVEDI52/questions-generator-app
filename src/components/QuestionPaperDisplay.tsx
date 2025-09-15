@@ -17,19 +17,16 @@ const DocxIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>
 );
 
-// FIX: Added NewPaperIcon for the new button.
 const NewPaperIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
 );
 
-// FIX: Updated props to include onNewPaper and isMobile to resolve type error.
 interface QuestionPaperDisplayProps {
   paper: QuestionPaper;
   onNewPaper: () => void;
-  isMobile: boolean;
 }
 
-export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper, isMobile }) => {
+export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper }) => {
   const [showAnswers, setShowAnswers] = useState(false);
 
   const handlePrint = () => {
@@ -113,7 +110,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-        }).catch(err => {
+        }).catch((err: any) => {
             console.error("Error creating DOCX blob:", err);
             alert("Could not generate DOCX file. An error occurred while packing the document.");
         });
@@ -128,7 +125,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
         <div className="p-6 border-b border-slate-200 flex justify-between items-center no-print">
             <h2 className="text-xl font-bold text-slate-700">Generated Paper</h2>
             <div className="flex items-center gap-2 flex-wrap">
-                {/* FIX: Added a "New Paper" button to utilize the onNewPaper prop. */}
                 <button
                     onClick={onNewPaper}
                     className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"

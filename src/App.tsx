@@ -70,7 +70,7 @@ const App: React.FC = () => {
         </div>
       );
     }
-    if (questionPaper) return <QuestionPaperDisplay key={Date.now()} paper={questionPaper} onNewPaper={handleNewPaper} isMobile={isMobile} />;
+    if (questionPaper) return <QuestionPaperDisplay key={Date.now()} paper={questionPaper} onNewPaper={handleNewPaper} />;
     return null;
   };
 
