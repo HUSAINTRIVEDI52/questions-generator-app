@@ -115,37 +115,3 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
     throw new Error("Failed to generate question paper. The AI model might be overloaded. Please try again in a moment.");
   }
 };
-
-export const reviewQuestionPaper = async (paper: QuestionPaper, userPrompt: string): Promise<string> => {
-    const prompt = `
-    You are an expert academic reviewer and editor. Your task is to analyze the following question paper (in JSON format) and provide feedback based on the user's specific request.
-
-    **Question Paper:**
-    \`\`\`json
-    ${JSON.stringify(paper, null, 2)}
-    \`\`\`
-
-    **User's Review Request:**
-    "${userPrompt}"
-
-    **Instructions:**
-    - Provide a concise, constructive, and helpful review based on the user's request.
-    - Focus on the specific aspects the user asked about (e.g., clarity, accuracy, relevance, difficulty).
-    - If the request is general, provide an overall quality assessment.
-    - Format your response clearly with headings or bullet points for readability. Do not return JSON.
-    `;
-
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-        });
-        return response.text ?? 'The AI did not provide any feedback. You could try rephrasing your request.';
-    } catch (error) {
-        console.error("Error reviewing question paper:", error);
-        if (error instanceof Error && error.message.includes('SAFETY')) {
-            throw new Error("The review was blocked due to safety policies. Please try a different prompt.");
-        }
-        throw new Error("Failed to review the paper. The AI model may be overloaded or an error occurred.");
-    }
-};

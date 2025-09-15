@@ -16,7 +16,7 @@ export const Header: React.FC = () => {
         {/* Right side: Initiative credit */}
         <div className="text-center sm:text-right">
             <p className="text-sm font-medium text-slate-500">An initiative by</p>
-            <p className="text-base font-bold text-blue-700">Husain M Trivedi</p>
+            <p className="text-base font-bold text-blue-700">Mustafasir Son</p>
         </div>
       </div>
     </header>
