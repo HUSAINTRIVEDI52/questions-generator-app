@@ -13,7 +13,7 @@ declare global {
 }
 
 const PrintIcon = () => (
-    <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
 );
 
 const KeyIcon = () => (
@@ -154,10 +154,26 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
         const pdfBlob = await generatePdfBlob();
         const fileName = `${paper.subject.replace(/[\s/]/g, '_')}_${paper.grade.replace(/\s/g, '_')}_Paper.pdf`;
 
-        // Strategy 1: Web Share API (for modern mobile browsers)
+        // Strategy 1: Prioritize custom Flutter WebView Bridge if it exists.
+        if (window.Share && window.Share.postMessage) {
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(pdfBlob);
+                reader.onloadend = () => {
+                    const base64data = (reader.result as string).split(',')[1];
+                    const payload = { base64: base64data, fileName: fileName };
+                    window.Share?.postMessage(JSON.stringify(payload));
+                };
+                return; // Assume success and let Flutter handle it
+            } catch (error) {
+                console.error("Flutter bridge call (window.Share.postMessage) failed, falling back to other methods.", error);
+            }
+        }
+
+        // Strategy 2: Web Share API (for modern mobile browsers without the custom bridge)
         try {
             const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+            if (navigator.share && navigator.canShare?.({ files: [pdfFile] })) {
                 await navigator.share({
                     files: [pdfFile],
                     title: `${paper.subject} Question Paper`,
@@ -166,42 +182,20 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                 return; // Success
             }
         } catch (error) {
-            // Ignore AbortError which happens when the user closes the share dialog
             if (!(error instanceof Error && error.name === 'AbortError')) {
-                console.warn("Web Share API failed, trying next method.", error);
-            }
-        }
-
-        // Convert blob to Base64 for other strategies
-        const base64data = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(pdfBlob);
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = (error) => reject(error);
-        });
-
-        // Strategy 2: Custom Flutter WebView Bridge (`window.Share.postMessage`)
-        if (window.Share && window.Share.postMessage) {
-            try {
-                const payload = {
-                    base64: base64data.split(',')[1], // Send only the base64 part
-                    fileName: fileName
-                };
-                // Send data as a JSON string to the Flutter app
-                window.Share.postMessage(JSON.stringify(payload));
-                return; // Success
-            } catch (error) {
-                console.warn("Flutter bridge call (window.Share.postMessage) failed, falling back to download.", error);
+                console.warn("Web Share API failed, falling back to download.", error);
             }
         }
         
         // Strategy 3: Fallback to standard download link (for desktops and unsupported browsers)
+        const downloadUrl = URL.createObjectURL(pdfBlob);
         const a = document.createElement("a");
-        a.href = base64data;
+        a.href = downloadUrl;
         a.download = fileName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
         showToast("PDF downloaded. You can now share it manually.");
 
     } catch (error) {
