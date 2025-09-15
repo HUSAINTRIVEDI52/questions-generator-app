@@ -66,6 +66,7 @@ const App: React.FC = () => {
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md animate-fade-in-up" role="alert">
           <p className="font-bold">Generation Failed</p>
           <p>{error}</p>
+          <button onClick={handleNewPaper} className="mt-2 bg-red-500 text-white font-bold py-1 px-3 rounded hover:bg-red-600">Try Again</button>
         </div>
       );
     }
@@ -78,7 +79,7 @@ const App: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--color-background)'}}>
       <Header isMobile={isMobile} onGoHome={handleGoHome} />
-      <main className="container mx-auto p-4 md:p-8 flex-grow">
+      <main className="container mx-auto p-2 sm:p-4 md:p-8 flex-grow w-full">
         {isMobile ? (
           <>
             {mobileView === 'home' && <HomePage onStart={() => setMobileView('form')} isDesktop={false} />}
