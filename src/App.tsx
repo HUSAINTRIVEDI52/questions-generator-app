@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { GeneratorForm } from './components/GeneratorForm';
-import { QuestionPaperDisplay } from './components/QuestionPaperDisplay';
+import { GeneratorForm } from './components/form/GeneratorForm';
+import { QuestionPaperDisplay } from './components/display/QuestionPaperDisplay';
 import { Header } from './components/Header';
 import { Loader } from './components/Loader';
 import { generateQuestionPaper } from './services/geminiService';
