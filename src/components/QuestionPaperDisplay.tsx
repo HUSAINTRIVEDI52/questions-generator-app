@@ -1,54 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import type { Question, QuestionPaper } from '../types';
+import { NOTO_SANS_BASE64 } from '../constants';
 
 declare var docx: any;
 declare var jspdf: any;
 
-const FONT_URL = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosans/NotoSans-Regular.ttf';
-let fontDataCache: string | null = null;
-
-// Helper to convert ArrayBuffer to Base64
-const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-};
-
-/**
- * Retrieves the Base64 encoded font data for Noto Sans by fetching it from a CDN.
- * This is crucial for rendering non-Latin characters (like Gujarati) correctly in the PDF.
- * The result is cached to avoid repeated downloads in the same session.
- */
-const getFontData = async (): Promise<string> => {
-    if (fontDataCache) {
-        return fontDataCache;
-    }
-
-    try {
-        const response = await fetch(FONT_URL);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch font: ${response.statusText}`);
-        }
-        const fontBuffer = await response.arrayBuffer();
-        const base64String = arrayBufferToBase64(fontBuffer);
-        fontDataCache = base64String;
-        return base64String;
-    } catch (error) {
-        console.error("Font loading failed:", error);
-        throw new Error("Could not download the required font for PDF export. Please check your internet connection and try again.");
-    }
-};
-
-
 // Icons
-const KeyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>;
-const DocxIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>;
+const KeyIcon = () => <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>;
+const DocxIcon = () => <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>;
 const PdfIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M10 12v6"></path><path d="M10 15h2a2 2 0 1 0 0-4h-2v4Z"></path><path d="M16 12h-1a2 2 0 0 0-2 2v4"></path><path d="M16 18h-2"></path></svg>;
-const CopyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
+const CopyIcon = () => <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
 const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>;
 const CreateIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
 const SpinnerIcon = () => <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
@@ -96,7 +57,7 @@ class PdfWriter {
     lineHeightFactor: number;
     fontName: string = 'UnicodeFont';
 
-    constructor(fontBase64: string) {
+    constructor() {
         this.doc = new jspdf.jsPDF({ unit: 'pt' });
         this.margin = 50;
         this.y = this.margin;
@@ -105,7 +66,7 @@ class PdfWriter {
         this.pageNumber = 1;
         this.lineHeightFactor = 1.4;
 
-        this.doc.addFileToVFS('NotoSans-Regular.ttf', fontBase64);
+        this.doc.addFileToVFS('NotoSans-Regular.ttf', NOTO_SANS_BASE64);
         this.doc.addFont('NotoSans-Regular.ttf', this.fontName, 'normal');
     }
 
@@ -316,78 +277,48 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
     });
   }
 
-  const handleFileShare = async (format: 'pdf' | 'docx') => {
+  const handleFileExport = async (format: 'pdf' | 'docx') => {
     setIsExporting(true);
     try {
-        let blob: Blob;
-        let fileName: string;
-        let fileType: string;
+      let blob: Blob;
+      let fileName: string;
+      let fileType: string;
 
-        if (format === 'pdf') {
-            const fontBase64 = await getFontData();
-            const writer = new PdfWriter(fontBase64);
-            blob = writer.getBlob(paper, includeAnswersInExport);
-            fileName = `${paper.subject}_${paper.grade}_Paper.pdf`;
-            fileType = 'application/pdf';
-        } else {
-            blob = await createDocxBlob(paper, includeAnswersInExport);
-            fileName = `${paper.subject}_${paper.grade}_Paper.docx`;
-            fileType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-        }
-
-        const fileToShare = new File([blob], fileName, { type: fileType });
-
-        await navigator.share({
+      if (format === 'pdf') {
+        const writer = new PdfWriter();
+        blob = writer.getBlob(paper, includeAnswersInExport);
+        fileName = `${paper.subject}_${paper.grade}_Paper.pdf`;
+        fileType = 'application/pdf';
+      } else {
+        blob = await createDocxBlob(paper, includeAnswersInExport);
+        fileName = `${paper.subject}_${paper.grade}_Paper.docx`;
+        fileType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      }
+      
+      // Use the Web Share API if available (for mobile sharing)
+      if (canShareFiles && 'share' in navigator) {
+         const fileToShare = new File([blob], fileName, { type: fileType });
+         await navigator.share({
             title: `${paper.subject} Question Paper`,
-            text: `Here is the question paper for ${paper.subject}. Create your own at this website.`,
-            url: window.location.origin,
+            text: `Here is the question paper for ${paper.subject}.`,
             files: [fileToShare],
         });
+      } else {
+        // Fallback to direct download for desktop
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
     } catch (error) {
-        if ((error as DOMException).name !== 'AbortError') {
-            console.error('Error sharing file:', error);
-            alert(`An error occurred while trying to share the file: ${(error as Error).message}`);
+        if ((error as DOMException).name !== 'AbortError') { // Ignore user canceling share sheet
+            console.error('Error exporting file:', error);
+            alert(`An error occurred while trying to export the file: ${(error as Error).message}`);
         }
-    } finally {
-        setIsExporting(false);
-    }
-  };
-
-  const handlePdfExport = async () => {
-    setIsExporting(true);
-    try {
-        const fontBase64 = await getFontData();
-        const writer = new PdfWriter(fontBase64);
-        const blob = writer.getBlob(paper, includeAnswersInExport);
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${paper.subject}_${paper.grade}_Paper.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    } catch (error) {
-        alert((error as Error).message);
-    } finally {
-        setIsExporting(false);
-    }
-  };
-  
-  const handleDocxExport = async () => {
-    setIsExporting(true);
-    try {
-        const blob = await createDocxBlob(paper, includeAnswersInExport);
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${paper.subject}_${paper.grade}_Paper.docx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    } catch (error) {
-        alert(`Failed to export DOCX: ${(error as Error).message}`);
     } finally {
         setIsExporting(false);
     }
@@ -413,28 +344,23 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
 
             <div className="flex items-center gap-4 flex-wrap justify-center">
                 <div className="flex items-center gap-2 flex-wrap justify-center">
-                    <button onClick={handlePdfExport} disabled={isExporting} className={secondaryButtonStyles}>
+                    <button onClick={() => handleFileExport('pdf')} disabled={isExporting} className={secondaryButtonStyles}>
                         {isExporting ? <SpinnerIcon /> : <PdfIcon />} {isExporting ? 'Preparing...' : 'Export PDF'}
                     </button>
-                    <button onClick={handleDocxExport} disabled={isExporting} className={secondaryButtonStyles}>
+                    <button onClick={() => handleFileExport('docx')} disabled={isExporting} className={secondaryButtonStyles}>
                         {isExporting ? <SpinnerIcon /> : <DocxIcon />}{isExporting ? 'Preparing...' : 'Export DOCX'}
                     </button>
                     {canShareFiles && (
-                        <>
-                            <button onClick={() => handleFileShare('pdf')} disabled={isExporting} className={secondaryButtonStyles}>
-                                {isExporting ? <SpinnerIcon /> : <ShareIcon />}{isExporting ? 'Preparing...' : 'Share PDF'}
-                            </button>
-                            <button onClick={() => handleFileShare('docx')} disabled={isExporting} className={secondaryButtonStyles}>
-                                {isExporting ? <SpinnerIcon /> : <ShareIcon />}{isExporting ? 'Preparing...' : 'Share DOCX'}
-                            </button>
-                        </>
+                         <button onClick={() => handleFileExport('pdf')} disabled={isExporting} className={secondaryButtonStyles}>
+                            {isExporting ? <SpinnerIcon /> : <ShareIcon />} {isExporting ? 'Preparing...' : 'Share'}
+                        </button>
                     )}
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap justify-center">
                     <div className="flex items-center pl-2 bg-slate-100 rounded-md h-full">
                         <input type="checkbox" id="include-answers" checked={includeAnswersInExport} onChange={(e) => setIncludeAnswersInExport(e.target.checked)} className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
-                        <label htmlFor="include-answers" className="ml-2 text-sm text-slate-600 pr-3 py-2 select-none">Answers in Export/Share</label>
+                        <label htmlFor="include-answers" className="ml-2 text-sm text-slate-600 pr-3 py-2 select-none">Answers in Export</label>
                     </div>
                     <button onClick={handleCopy} className={secondaryButtonStyles}>
                         <CopyIcon /> {copyStatus === 'copied' ? 'Copied!' : 'Copy'}
