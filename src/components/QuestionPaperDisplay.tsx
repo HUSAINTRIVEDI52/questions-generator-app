@@ -1,18 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import type { Question, QuestionPaper } from '../types';
-import { NOTO_SANS_BASE64 } from '../constants';
 
 declare var docx: any;
 declare var jspdf: any;
 
 // Icons
-const KeyIcon = () => <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>;
-const DocxIcon = () => <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>;
+const KeyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>;
+const DocxIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0v5a2.5 2.5 0 0 1-5 0V15a2.5 2.5 0 0 0-5 0v5a2.5 2.5 0 0 0 5 0v-2.5"/></svg>;
 const PdfIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M10 12v6"></path><path d="M10 15h2a2 2 0 1 0 0-4h-2v4Z"></path><path d="M16 12h-1a2 2 0 0 0-2 2v4"></path><path d="M16 18h-2"></path></svg>;
-const CopyIcon = () => <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
+const CopyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
 const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>;
 const CreateIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
 const SpinnerIcon = () => <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
+
+let cachedFontBase64: string | null = null;
+
+const getFontAsBase64 = async (): Promise<string> => {
+    if (cachedFontBase64) {
+        return cachedFontBase64;
+    }
+    try {
+        const fontUrl = 'https://cdn.jsdelivr.net/npm/notosans-regular-webfont@1.0.0/NotoSans-Regular.ttf';
+        const response = await fetch(fontUrl);
+        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+
+        const blob = await response.blob();
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+            reader.onloadend = () => {
+                const base64data = (reader.result as string)?.split(',')[1];
+                if (base64data) {
+                    cachedFontBase64 = base64data;
+                    resolve(base64data);
+                } else {
+                    reject(new Error("Failed to read font file from CDN."));
+                }
+            };
+            reader.onerror = () => reject(new Error("FileReader error while processing font."));
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error("Font download or processing failed:", error);
+        throw new Error("Could not download the required font for PDF export. Please check your internet connection and try again.");
+    }
+};
 
 
 interface QuestionPaperDisplayProps {
@@ -57,7 +88,7 @@ class PdfWriter {
     lineHeightFactor: number;
     fontName: string = 'UnicodeFont';
 
-    constructor() {
+    constructor(fontBase64: string) {
         this.doc = new jspdf.jsPDF({ unit: 'pt' });
         this.margin = 50;
         this.y = this.margin;
@@ -66,7 +97,7 @@ class PdfWriter {
         this.pageNumber = 1;
         this.lineHeightFactor = 1.4;
 
-        this.doc.addFileToVFS('NotoSans-Regular.ttf', NOTO_SANS_BASE64);
+        this.doc.addFileToVFS('NotoSans-Regular.ttf', fontBase64);
         this.doc.addFont('NotoSans-Regular.ttf', this.fontName, 'normal');
     }
 
@@ -285,7 +316,8 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
       let fileType: string;
 
       if (format === 'pdf') {
-        const writer = new PdfWriter();
+        const fontBase64 = await getFontAsBase64();
+        const writer = new PdfWriter(fontBase64);
         blob = writer.getBlob(paper, includeAnswersInExport);
         fileName = `${paper.subject}_${paper.grade}_Paper.pdf`;
         fileType = 'application/pdf';
@@ -295,7 +327,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
         fileType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       }
       
-      // Use the Web Share API if available (for mobile sharing)
       if (canShareFiles && 'share' in navigator) {
          const fileToShare = new File([blob], fileName, { type: fileType });
          await navigator.share({
@@ -304,7 +335,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
             files: [fileToShare],
         });
       } else {
-        // Fallback to direct download for desktop
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -315,7 +345,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
         document.body.removeChild(a);
       }
     } catch (error) {
-        if ((error as DOMException).name !== 'AbortError') { // Ignore user canceling share sheet
+        if ((error as DOMException).name !== 'AbortError') {
             console.error('Error exporting file:', error);
             alert(`An error occurred while trying to export the file: ${(error as Error).message}`);
         }
