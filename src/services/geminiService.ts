@@ -140,7 +140,7 @@ export const reviewQuestionPaper = async (paper: QuestionPaper, userPrompt: stri
             model: "gemini-2.5-flash",
             contents: prompt,
         });
-        return response.text;
+        return response.text ?? 'The AI did not provide any feedback. You could try rephrasing your request.';
     } catch (error) {
         console.error("Error reviewing question paper:", error);
         if (error instanceof Error && error.message.includes('SAFETY')) {
