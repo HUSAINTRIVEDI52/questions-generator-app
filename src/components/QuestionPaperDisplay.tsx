@@ -29,6 +29,14 @@ interface QuestionPaperDisplayProps {
 export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ paper, onNewPaper }) => {
   const [showAnswers, setShowAnswers] = useState(false);
   const [includeAnswersInExport, setIncludeAnswersInExport] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => {
+        setToastMessage(null);
+    }, 5000);
+  };
 
   const handlePrint = () => {
     const paperElement = document.querySelector('.print-area');
@@ -153,106 +161,118 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-            alert("Web Share is not supported in your browser. The PDF has been downloaded for you to share manually.");
+            showToast("Web Share not supported. The PDF has been downloaded for you to share manually.");
         }
     } catch (error) {
         console.error("Error generating or sharing PDF:", error);
-        alert("Could not generate PDF for sharing. An unexpected error occurred.");
+        showToast("Could not generate PDF for sharing. An unexpected error occurred.");
     }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-area">
-        <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 no-print">
-            <h2 className="text-xl font-bold text-slate-700">Generated Paper</h2>
-            <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
-                <button
-                    onClick={onNewPaper}
-                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                >
-                    <NewPaperIcon />
-                    New Paper
-                </button>
-                <button
-                    onClick={() => setShowAnswers(!showAnswers)}
-                    className={`flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors ${showAnswers ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                    aria-pressed={showAnswers}
+    <>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-area">
+            <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 no-print">
+                <h2 className="text-xl font-bold text-slate-700">Generated Paper</h2>
+                <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
+                    <button
+                        onClick={onNewPaper}
+                        className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                     >
-                    <KeyIcon />
-                    {showAnswers ? 'Hide Answers' : 'Show Answers'}
-                </button>
-                 <div className="flex items-center gap-2 py-2 px-3 rounded-md text-sm font-semibold bg-slate-100 text-slate-600">
-                    <input
-                        id="include-answers"
-                        type="checkbox"
-                        checked={includeAnswersInExport}
-                        onChange={(e) => setIncludeAnswersInExport(e.target.checked)}
-                        className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="include-answers" className="cursor-pointer">Include Answers in Export</label>
+                        <NewPaperIcon />
+                        New Paper
+                    </button>
+                    <button
+                        onClick={() => setShowAnswers(!showAnswers)}
+                        className={`flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold transition-colors ${showAnswers ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                        aria-pressed={showAnswers}
+                        >
+                        <KeyIcon />
+                        {showAnswers ? 'Hide Answers' : 'Show Answers'}
+                    </button>
+                     <div className="flex items-center gap-2 py-2 px-3 rounded-md text-sm font-semibold bg-slate-100 text-slate-600">
+                        <input
+                            id="include-answers"
+                            type="checkbox"
+                            checked={includeAnswersInExport}
+                            onChange={(e) => setIncludeAnswersInExport(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                        />
+                        <label htmlFor="include-answers" className="cursor-pointer">Include Answers in Export</label>
+                    </div>
+                    <button
+                        onClick={handleShare}
+                        className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                    >
+                        <WhatsAppIcon />
+                        Share
+                    </button>
+                    <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    >
+                        <PrintIcon />
+                        Print / PDF
+                    </button>
                 </div>
-                <button
-                    onClick={handleShare}
-                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
-                >
-                    <WhatsAppIcon />
-                    Share
-                </button>
-                <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >
-                    <PrintIcon />
-                    Print / PDF
-                </button>
             </div>
-        </div>
-      
-        <div className="p-6 md:p-10" id="printable-paper">
-            <header className="text-center mb-8">
-                <h1 className="text-3xl font-bold">{paper.institution_name}</h1>
-                <h2 className="text-xl font-semibold text-slate-700 mt-1">{paper.title}</h2>
-                <h3 className="text-lg font-medium text-slate-600">{paper.grade} - {paper.subject}</h3>
-                <div className="flex justify-between items-center mt-4 text-sm max-w-lg mx-auto border-t border-b py-2">
-                    <span><strong>Total Marks:</strong> {paper.total_marks}</span>
-                    <span><strong>Duration:</strong> {paper.duration_minutes} minutes</span>
-                </div>
-            </header>
+          
+            <div className="p-6 md:p-10" id="printable-paper">
+                <header className="text-center mb-8">
+                    <h1 className="text-3xl font-bold">{paper.institution_name}</h1>
+                    <h2 className="text-xl font-semibold text-slate-700 mt-1">{paper.title}</h2>
+                    <h3 className="text-lg font-medium text-slate-600">{paper.grade} - {paper.subject}</h3>
+                    <div className="flex justify-between items-center mt-4 text-sm max-w-lg mx-auto border-t border-b py-2">
+                        <span><strong>Total Marks:</strong> {paper.total_marks}</span>
+                        <span><strong>Duration:</strong> {paper.duration_minutes} minutes</span>
+                    </div>
+                </header>
 
-            {paper.sections.map((section, sectionIndex) => (
-                <section key={sectionIndex} className="mb-8">
-                    <h3 className="text-lg font-bold border-b-2 border-slate-400 pb-2 mb-4">{section.section_title}</h3>
-                    <ol className="list-decimal list-inside space-y-6">
-                        {section.questions.map((q, qIndex) => (
-                            <li key={qIndex} className="break-words">
-                                <div className="flex justify-between items-start">
-                                    <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
-                                    <span className="text-sm font-semibold ml-4 whitespace-nowrap">[{q.marks} Marks]</span>
-                                </div>
-
-                                {q.options && (
-                                <ul className="list-none pl-6 mt-2 space-y-1">
-                                    {q.options.map((option, optIndex) => (
-                                        <li key={optIndex} className={`text-slate-700 flex items-start ${showAnswers && option === q.correct_answer ? 'font-bold text-green-700' : ''}`}>
-                                            <span className="mr-2">{String.fromCharCode(97 + optIndex)})</span>
-                                            <span>{option}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                )}
-                                <div className={`printable-answer ${showAnswers ? '' : 'hidden'}`}>
-                                    <div className="mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md">
-                                        <p className="text-sm font-semibold text-green-800">
-                                            Correct Answer: <span className="font-normal">{q.correct_answer}</span>
-                                        </p>
+                {paper.sections.map((section, sectionIndex) => (
+                    <section key={sectionIndex} className="mb-8">
+                        <h3 className="text-lg font-bold border-b-2 border-slate-400 pb-2 mb-4">{section.section_title}</h3>
+                        <ol className="list-decimal list-inside space-y-6">
+                            {section.questions.map((q, qIndex) => (
+                                <li key={qIndex} className="break-words">
+                                    <div className="flex justify-between items-start">
+                                        <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
+                                        <span className="text-sm font-semibold ml-4 whitespace-nowrap">[{q.marks} Marks]</span>
                                     </div>
-                                </div>
-                            </li>
-                        ))}
-                    </ol>
-                </section>
-            ))}
-      </div>
-    </div>
+
+                                    {q.options && (
+                                    <ul className="list-none pl-6 mt-2 space-y-1">
+                                        {q.options.map((option, optIndex) => (
+                                            <li key={optIndex} className={`text-slate-700 flex items-start ${showAnswers && option === q.correct_answer ? 'font-bold text-green-700' : ''}`}>
+                                                <span className="mr-2">{String.fromCharCode(97 + optIndex)})</span>
+                                                <span>{option}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    )}
+                                    <div className={`printable-answer ${showAnswers ? '' : 'hidden'}`}>
+                                        <div className="mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md">
+                                            <p className="text-sm font-semibold text-green-800">
+                                                Correct Answer: <span className="font-normal">{q.correct_answer}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ol>
+                    </section>
+                ))}
+          </div>
+        </div>
+        {/* Toast Notification */}
+        {toastMessage && (
+            <div
+              className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white py-2 px-6 rounded-full shadow-lg transition-opacity duration-300 animate-fade-in-up z-50 no-print"
+              role="status"
+              aria-live="polite"
+            >
+                <p>{toastMessage}</p>
+            </div>
+        )}
+    </>
   );
 };
