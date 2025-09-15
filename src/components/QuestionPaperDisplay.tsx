@@ -59,7 +59,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                         children: [
                             new TextRun({ text: `${qIndex + 1}. `, bold: true }),
                             new TextRun(q.question_text),
-                            new TextRun({ children: [`\t[${q.marks} Marks]`], bold: true, italics: true }),
+                            new TextRun({ text: `\t[${q.marks} Marks]`, bold: true, italics: true }),
                         ],
                         spacing: { after: 100 },
                         tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
@@ -107,7 +107,7 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                     new Paragraph({
                         children: [
                             new TextRun(`Total Marks: ${paper.total_marks}`),
-                            new TextRun({ children: [`\tDuration: ${paper.duration_minutes} minutes`] }),
+                            new TextRun({ text: `\tDuration: ${paper.duration_minutes} minutes` }),
                         ],
                         border: { top: { size: 4, value: "single" }, bottom: { size: 4, value: "single" } },
                         spacing: { before: 200, after: 400 },
