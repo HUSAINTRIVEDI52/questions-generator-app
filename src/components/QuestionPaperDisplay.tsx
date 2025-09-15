@@ -1,25 +1,23 @@
 import React, { useState } from 'react';
 import type { QuestionPaper } from '../types';
-
-// This tells TypeScript that the 'jspdf' object is available globally,
-// loaded from the script tag in index.html.
-declare var jspdf: any;
+import { jsPDF } from 'jspdf';
 
 // Define the Flutter WebView bridge on the window object for TypeScript
 declare global {
   interface Window {
-    flutter_inappwebview?: {
-      callHandler: (handlerName: string, ...args: any[]) => Promise<any>;
+    // For webview_flutter's JavascriptChannel
+    Share?: {
+      postMessage: (message: string) => void;
     };
   }
 }
 
 const PrintIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+    <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
 );
 
 const KeyIcon = () => (
-    <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18.24-5.48-5.48-1.5-1.5-2.25-2.25-1.5-1.5-5.48-5.48a.5.5 0 0 0-.71 0l-1.5 1.5a.5.5 0 0 0 0 .71l5.48 5.48 1.5 1.5 2.25 2.25 1.5 1.5 5.48 5.48a.5.5 0 0 0 .71 0l1.5-1.5a.5.5 0 0 0 0-.71z" /><path d="m2 22 5.5-5.5" /></svg>
 );
 
 const ShareIcon = () => (
@@ -66,7 +64,6 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
   };
 
   const generatePdfBlob = async (): Promise<Blob> => {
-    const { jsPDF } = jspdf;
     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
     let yPos = 15;
@@ -169,12 +166,13 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
                 return; // Success
             }
         } catch (error) {
+            // Ignore AbortError which happens when the user closes the share dialog
             if (!(error instanceof Error && error.name === 'AbortError')) {
                 console.warn("Web Share API failed, trying next method.", error);
             }
         }
 
-        // Convert blob to Base64 for the next strategies
+        // Convert blob to Base64 for other strategies
         const base64data = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(pdfBlob);
@@ -182,21 +180,22 @@ export const QuestionPaperDisplay: React.FC<QuestionPaperDisplayProps> = ({ pape
             reader.onerror = (error) => reject(error);
         });
 
-        // Strategy 2: Flutter WebView Bridge (for the embedded app)
-        if (window.flutter_inappwebview) {
+        // Strategy 2: Custom Flutter WebView Bridge (`window.Share.postMessage`)
+        if (window.Share && window.Share.postMessage) {
             try {
-                // The handler 'sharePdfFromBase64' will receive the base64 string and the filename.
-                await window.flutter_inappwebview.callHandler('sharePdfFromBase64', {
-                    base64: base64data.split(',')[1], // Send only the base64 part, not the data URI prefix
+                const payload = {
+                    base64: base64data.split(',')[1], // Send only the base64 part
                     fileName: fileName
-                });
+                };
+                // Send data as a JSON string to the Flutter app
+                window.Share.postMessage(JSON.stringify(payload));
                 return; // Success
             } catch (error) {
-                console.warn("Flutter bridge call failed, falling back to download.", error);
+                console.warn("Flutter bridge call (window.Share.postMessage) failed, falling back to download.", error);
             }
         }
         
-        // Strategy 3: Fallback to standard download link (for desktops and other browsers)
+        // Strategy 3: Fallback to standard download link (for desktops and unsupported browsers)
         const a = document.createElement("a");
         a.href = base64data;
         a.download = fileName;
