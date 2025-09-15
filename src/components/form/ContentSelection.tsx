@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { FormState, MarksDistribution } from '../../types';
+import type { FormState } from '../../types';
 import type { useFormState } from '../../hooks/useFormState';
 
 type UseFormStateReturn = ReturnType<typeof useFormState>;
