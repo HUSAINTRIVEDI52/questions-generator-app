@@ -1,6 +1,5 @@
 import React from 'react';
 import type { useFormState } from '../../hooks/useFormState';
-import { Accordion } from '../common/Accordion';
 import { QuestionStructure } from './QuestionStructure';
 import type { ChapterQuestionConfig } from '../../types';
 

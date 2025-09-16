@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import type { FormState, ChapterQuestionConfig, MarksDistribution } from '../types';
+import type { FormState, ChapterQuestionConfig } from '../types';
 import { GSEB_CURRICULUM } from '../constants';
 
 const grades = Object.keys(GSEB_CURRICULUM).sort((a, b) => parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1]));

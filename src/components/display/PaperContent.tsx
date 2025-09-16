@@ -26,7 +26,7 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
                 <section key={sectionIndex} className="mb-8">
                     <h3 className="text-lg font-bold border-b-2 border-slate-400 pb-2 mb-4">{section.section_title}</h3>
                     <ol className="list-decimal list-inside space-y-6">
-                        {section.questions.map((q, qIndex) => (
+                        {section.questions.map((q) => (
                             <li key={q.id} className="break-words">
                                 <div className="flex justify-between items-start">
                                     <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
