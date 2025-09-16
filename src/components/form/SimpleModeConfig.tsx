@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import type { useFormState } from '../../hooks/useFormState';
-import { TrueFalseIcon, FileTextIcon } from '../common/Icons';
 
 type UseFormStateReturn = ReturnType<typeof useFormState>;
 
