@@ -1,4 +1,5 @@
 export interface Question {
+  id: string;
   question_text: string;
   options?: string[]; // For MCQ
   match_a?: string[]; // For Match the Following - Column A
@@ -33,14 +34,19 @@ export interface MarksDistribution {
   type: QuestionType;
 }
 
+export interface ChapterQuestionConfig {
+  chapter: string;
+  enabled: boolean;
+  distribution: MarksDistribution[];
+}
+
 export interface FormState {
     institutionName: string;
     title: string;
     grade: string;
     medium: string;
     subject: string;
-    chapters: string[];
+    chapterConfigs: ChapterQuestionConfig[];
     difficulty: 'Easy' | 'Medium' | 'Hard';
-    marksDistribution: MarksDistribution[];
     totalMarks: number;
 }

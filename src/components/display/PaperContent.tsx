@@ -1,12 +1,15 @@
 import React from 'react';
 import type { QuestionPaper } from '../../types';
+import { RegenerateIcon, SpinnerIcon } from '../common/Icons';
 
 interface PaperContentProps {
     paper: QuestionPaper;
     showAnswers: boolean;
+    onRegenerateQuestion: (questionId: string, sectionIndex: number) => void;
+    regeneratingQuestionId: string | null;
 }
 
-export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers }) => {
+export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, onRegenerateQuestion, regeneratingQuestionId }) => {
     return (
         <div className="p-6 md:p-10" id="printable-paper">
             <header className="text-center mb-8">
@@ -24,10 +27,22 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers }
                     <h3 className="text-lg font-bold border-b-2 border-slate-400 pb-2 mb-4">{section.section_title}</h3>
                     <ol className="list-decimal list-inside space-y-6">
                         {section.questions.map((q, qIndex) => (
-                            <li key={qIndex} className="break-words">
+                            <li key={q.id} className="break-words">
                                 <div className="flex justify-between items-start">
                                     <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
-                                    <span className="text-sm font-semibold ml-4 whitespace-nowrap">[{q.marks} Marks]</span>
+                                    <div className="flex items-center ml-4 flex-shrink-0">
+                                        <span className="text-sm font-semibold whitespace-nowrap">[{q.marks} Marks]</span>
+                                        {!showAnswers && (
+                                            <button
+                                                onClick={() => onRegenerateQuestion(q.id, sectionIndex)}
+                                                disabled={regeneratingQuestionId !== null}
+                                                className="ml-2 p-1 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                                                aria-label="Regenerate question"
+                                            >
+                                                {regeneratingQuestionId === q.id ? <SpinnerIcon /> : <RegenerateIcon />}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {q.options && (

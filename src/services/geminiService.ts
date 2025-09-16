@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import type { FormState, QuestionPaper } from '../types';
-import { createGenerationPrompt } from "../utils/promptFactory";
+import type { FormState, QuestionPaper, Question } from '../types';
+import { createGenerationPrompt, createRegenerationPrompt } from "../utils/promptFactory";
 
 if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable not set");
@@ -8,49 +8,49 @@ if (!process.env.API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-const responseSchema = {
+const baseQuestionProperties = {
+  question_text: { type: Type.STRING },
+  options: { 
+      type: Type.ARRAY,
+      description: "Array of 4 option strings for MCQs. Omit for other question types.",
+      items: { type: Type.STRING } 
+  },
+  match_a: {
+      type: Type.ARRAY,
+      description: "For 'Match the Following' questions, this is Column A. Omit for other types.",
+      items: { type: Type.STRING }
+  },
+  match_b: {
+      type: Type.ARRAY,
+      description: "For 'Match the Following' questions, this is Column B. Omit for other types.",
+      items: { type: Type.STRING }
+  },
+  correct_answer: { type: Type.STRING, description: "The correct answer. For MCQs, it should match one of the options exactly. For 'Match the Following', use format '1-c, 2-a, ...'." },
+  marks: { type: Type.INTEGER }
+};
+
+const paperSchema = {
   type: Type.OBJECT,
   properties: {
-    institution_name: { type: Type.STRING, description: "The name of the institution, e.g., 'GSEB Academy'."},
-    title: { type: Type.STRING, description: "A suitable title for the question paper, e.g., 'Annual Examination'."},
-    grade: { type: Type.STRING, description: "The grade or class for which the paper is intended, e.g., 'Class 10'."},
-    medium: { type: Type.STRING, description: "The medium of instruction, e.g., 'English Medium'."},
-    subject: { type: Type.STRING, description: "The subject of the question paper."},
-    difficulty: { type: Type.STRING, description: "The difficulty level of the paper, e.g., 'Medium'."},
-    total_marks: { type: Type.INTEGER, description: "The total marks for the paper."},
-    duration_minutes: { type: Type.INTEGER, description: "The recommended duration in minutes, e.g., 180 for 3 hours."},
+    institution_name: { type: Type.STRING },
+    title: { type: Type.STRING },
+    grade: { type: Type.STRING },
+    medium: { type: Type.STRING },
+    subject: { type: Type.STRING },
+    difficulty: { type: Type.STRING },
+    total_marks: { type: Type.INTEGER },
+    duration_minutes: { type: Type.INTEGER },
     sections: {
       type: Type.ARRAY,
-      description: "An array of question sections (e.g., MCQs, Short Answers, Long Answers).",
       items: {
         type: Type.OBJECT,
         properties: {
-          section_title: { type: Type.STRING, description: "Title of the section, e.g., 'Section A: Multiple Choice Questions'."},
+          section_title: { type: Type.STRING },
           questions: {
             type: Type.ARRAY,
-            description: "An array of questions within this section.",
             items: {
               type: Type.OBJECT,
-              properties: {
-                question_text: { type: Type.STRING },
-                options: { 
-                    type: Type.ARRAY,
-                    description: "Array of 4 option strings for MCQs. Omit for other question types.",
-                    items: { type: Type.STRING } 
-                },
-                match_a: {
-                    type: Type.ARRAY,
-                    description: "For 'Match the Following' questions, this is Column A. Omit for other types.",
-                    items: { type: Type.STRING }
-                },
-                match_b: {
-                    type: Type.ARRAY,
-                    description: "For 'Match the Following' questions, this is Column B. Omit for other types.",
-                    items: { type: Type.STRING }
-                },
-                correct_answer: { type: Type.STRING, description: "The correct answer. For MCQs, it should match one of the options exactly. For 'Match the Following', use format '1-c, 2-a, ...'." },
-                marks: { type: Type.INTEGER }
-              },
+              properties: baseQuestionProperties,
               required: ["question_text", "correct_answer", "marks"]
             }
           }
@@ -60,6 +60,12 @@ const responseSchema = {
     }
   },
   required: ["institution_name", "title", "grade", "medium", "subject", "difficulty", "total_marks", "duration_minutes", "sections"]
+};
+
+const singleQuestionSchema = {
+  type: Type.OBJECT,
+  properties: baseQuestionProperties,
+  required: ["question_text", "correct_answer", "marks"]
 };
 
 
@@ -72,7 +78,7 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            responseSchema: responseSchema,
+            responseSchema: paperSchema,
             temperature: 0.7,
         }
     });
@@ -82,6 +88,14 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
        throw new Error("The model returned an empty response. It might be overloaded. Please try again in a moment.");
     }
     const parsedPaper: QuestionPaper = JSON.parse(jsonText);
+    
+    // Add unique IDs to each question for state management (e.g., regeneration)
+    parsedPaper.sections.forEach(section => {
+      section.questions.forEach(question => {
+        question.id = crypto.randomUUID();
+      });
+    });
+
     return parsedPaper;
 
   } catch (error) {
@@ -93,5 +107,43 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
         throw new Error("Failed to parse the question paper from the model. The response was not valid JSON.");
     }
     throw new Error("Failed to generate question paper. The AI model might be overloaded. Please try again in a moment.");
+  }
+};
+
+export const regenerateQuestion = async (
+  questionToReplace: Question,
+  paperContext: Pick<QuestionPaper, 'grade' | 'medium' | 'subject' | 'difficulty'>,
+  chapters: string[]
+): Promise<Omit<Question, 'id'>> => {
+  const prompt = createRegenerationPrompt(questionToReplace, paperContext, chapters);
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: singleQuestionSchema,
+        temperature: 0.85, // Higher temp for more creative/different regeneration
+      }
+    });
+
+    const jsonText = (response.text ?? '').trim();
+    if (!jsonText) {
+      throw new Error("The model returned an empty response for regeneration.");
+    }
+    
+    const newQuestionData: Omit<Question, 'id'> = JSON.parse(jsonText);
+    
+    // Ensure the marks of the new question match the original
+    newQuestionData.marks = questionToReplace.marks;
+
+    return newQuestionData;
+  } catch (error) {
+     console.error("Error regenerating question:", error);
+     if (error instanceof Error && error.message.includes('SAFETY')) {
+        throw new Error("The regeneration was blocked due to safety policies. Please try a different prompt.");
+    }
+    throw new Error("Failed to regenerate the question. The AI model might be unavailable.");
   }
 };

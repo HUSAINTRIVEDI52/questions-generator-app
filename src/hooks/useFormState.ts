@@ -1,15 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import type { FormState, MarksDistribution } from '../types';
+import type { FormState, ChapterQuestionConfig, MarksDistribution } from '../types';
 import { GSEB_CURRICULUM } from '../constants';
 
 const grades = Object.keys(GSEB_CURRICULUM).sort((a, b) => parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1]));
-
-const initialDistribution: MarksDistribution[] = [
-    { id: crypto.randomUUID(), marks: 1, count: 10, type: 'MCQ' },
-    { id: crypto.randomUUID(), marks: 2, count: 5, type: 'Short Answer' },
-    { id: crypto.randomUUID(), marks: 3, count: 5, type: 'Short Answer' },
-    { id: crypto.randomUUID(), marks: 5, count: 3, type: 'Long Answer' },
-];
 
 export const useFormState = () => {
   const [institutionName, setInstitutionName] = useState('GSEB Academy');
@@ -17,19 +10,22 @@ export const useFormState = () => {
   const [grade, setGrade] = useState(grades[0]);
   const [medium, setMedium] = useState('');
   const [subject, setSubject] = useState('');
-  const [chapters, setChapters] = useState<string[]>([]);
+  const [chapterConfigs, setChapterConfigs] = useState<ChapterQuestionConfig[]>([]);
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
-  const [marksDistribution, setMarksDistribution] = useState<MarksDistribution[]>(initialDistribution);
-
+  
   const availableMediums = useMemo(() => Object.keys(GSEB_CURRICULUM[grade] || {}), [grade]);
   const availableSubjects = useMemo(() => Object.keys(GSEB_CURRICULUM[grade]?.[medium] || {}), [grade, medium]);
   const availableChapters = useMemo(() => GSEB_CURRICULUM[grade]?.[medium]?.[subject] || [], [grade, medium, subject]);
   
   const totalMarks = useMemo(() => {
-    return marksDistribution.reduce((total, row) => total + (row.marks * row.count), 0);
-  }, [marksDistribution]);
+    return chapterConfigs.reduce((total, config) => {
+      if (!config.enabled) return total;
+      const chapterTotal = config.distribution.reduce((subTotal, row) => subTotal + (row.marks * row.count), 0);
+      return total + chapterTotal;
+    }, 0);
+  }, [chapterConfigs]);
 
-  const isChapterSelectionDisabled = chapters.length === 0 || !grade || !medium || !subject;
+  const areAnyChaptersEnabled = useMemo(() => chapterConfigs.some(c => c.enabled), [chapterConfigs]);
 
   useEffect(() => {
     setMedium(availableMediums[0] || '');
@@ -40,19 +36,24 @@ export const useFormState = () => {
   }, [medium, availableSubjects]);
 
   useEffect(() => {
-    setChapters([]);
-  }, [grade, medium, subject]);
+    const newConfigs = availableChapters.map(chapter => ({
+      chapter,
+      enabled: false,
+      distribution: [{ id: crypto.randomUUID(), marks: 1, count: 0, type: 'MCQ' as const }]
+    }));
+    setChapterConfigs(newConfigs);
+  }, [grade, medium, subject, availableChapters]);
 
-  const formState: Omit<FormState, 'totalMarks'> = {
-    institutionName, title, grade, medium, subject, chapters, difficulty, marksDistribution
+  const formState: Omit<FormState, 'totalMarks' | 'chapters'> = {
+    institutionName, title, grade, medium, subject, chapterConfigs, difficulty
   };
   
   const formHandlers = {
-    setInstitutionName, setTitle, setGrade, setMedium, setSubject, setChapters, setDifficulty, setMarksDistribution
+    setInstitutionName, setTitle, setGrade, setMedium, setSubject, setChapterConfigs, setDifficulty
   };
 
   const derivedState = {
-    grades, availableMediums, availableSubjects, availableChapters, totalMarks, isChapterSelectionDisabled
+    grades, availableMediums, availableSubjects, totalMarks, areAnyChaptersEnabled
   };
 
   return {
