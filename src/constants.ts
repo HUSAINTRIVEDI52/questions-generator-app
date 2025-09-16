@@ -1,3 +1,6 @@
+// Define and export the QuestionType enum
+export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'One Word Answer' | 'Short Answer' | 'Long Answer' | 'Match the Following' | 'Graph Question';
+
 // NOTE: Curriculum data has been comprehensively updated to reflect the latest GSEB/NCERT syllabus for all subjects and grades.
 export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, string[]>>> = {
   "Class 10": {
@@ -218,7 +221,7 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
       ]
     },
      "Gujarati Medium": {
-      "વિજ્ઞાન (Science)": ["1. આહારના ઘટકો", "2. વસ્તુઓનાં જૂથ બનાવવાં", "3. પદાર્થોનું અલગીકરણ", "4. વનસ્પતિની જાણકારી મેળવીએ", "5. શરીરનું હલનચલન", "6. સજીવો અને તેમની આસપાસ", "7. ગતિ અને અંતરનું માપન", "8. પ્રકાશ, પડછાયા અને પરાવર્તન", "9. વિદ્યુત તથા પરિપથ", "10. ચુંબક સાથે ગમ્મત", "11. પાણી", "12. આપણી આસપાસની હવા"],
+      "વિજ્ઞાન (Science)": ["1. આહારના ઘટકો", "2. વસ્તુઓનાં જૂથ બનાવવાં", "3. પદાર્થોનું અલગીકરણ", "4. વનસ્પતિની જાણકારી મેળવીએ", "5. શરીરનું હલનચલન", "6. સજીવો અને તેમની આસપાસ", "7. ગતિ અને અંતરનું માપન", "8. પ્રકાશ, પડછાયਾ અને પરાવર્તન", "9. વિદ્યુત તથા પરિપથ", "10. ચુંબક સાથે ગમ્મત", "11. પાણી", "12. આપણી આસપાસની હવા"],
       "ગણિત (Mathematics)": ["1. સંખ્યા પરિચય", "2. પૂર્ણ સંખ્યાઓ", "3. સંખ્યા સાથે રમત", "4. ભૂમિતિના પાયાના ખ્યાલો", "5. પાયાના આકારોની સમજૂતી", "6. પૂર્ણાંક સંખ્યાઓ", "7. અપૂર્ણાંક સંખ્યાઓ", "8. દશાંશ સંખ્યાઓ", "9. માહિતીનું નિયમન", "10. માપન", "11. બીજગણિત", "12. ગુણોત્તર અને પ્રમાણ", "13. સંમિતિ"],
       "સામાજિક વિજ્ઞાન (Social Science)": [
         // ઇતિહાસ

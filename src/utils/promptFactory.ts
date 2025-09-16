@@ -1,6 +1,40 @@
 import type { FormState, Question, QuestionPaper } from '../types';
 
-export const createGenerationPrompt = (formData: FormState): string => {
+const createSimpleGenerationPrompt = (formData: FormState): string => {
+  const { institutionName, title, grade, medium, subject, chapters, difficulty, totalMarks, mcqCount, shortAnswerCount, longAnswerCount } = formData;
+  return `
+    You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
+    Your task is to create a complete and well-structured question paper based on the following specifications.
+    The questions must be relevant to the latest and most current GSEB curriculum for the specified grade, medium, subject, and chapters.
+
+    **Paper Details:**
+    - **Institution Name:** ${institutionName}
+    - **Paper Title:** ${title}
+    - **Grade:** ${grade}
+    - **Medium:** ${medium}
+    - **Subject:** ${subject}
+    - **Chapters to cover:** ${chapters.join(', ')}
+    - **Difficulty Level:** ${difficulty}
+    - **Total Marks:** ${totalMarks}
+
+    **Required Question Breakdown:**
+    - Multiple Choice Questions (MCQs): ${mcqCount}
+    - Short Answer Questions (2-3 sentences): ${shortAnswerCount}
+    - Long Answer Questions (1-2 paragraphs): ${longAnswerCount}
+
+    **Core Instructions:**
+    1.  **Generate Exact Counts:** Create the exact number of questions requested for each type. Group them into distinct sections (e.g., 'Section A: MCQs').
+    2.  **Distribute Marks:** Distribute the ${totalMarks} marks logically across all generated questions. The sum of marks for all questions MUST equal the **Total Marks**.
+    3.  **Content Source:** The questions should be drawn from the list of chapters provided.
+    4.  **Question Type Formatting:**
+        - **MCQs:** Provide exactly 4 distinct options.
+        - **Short/Long Answers:** Provide a model correct answer.
+    5.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
+  `;
+};
+
+
+const createAdvancedGenerationPrompt = (formData: FormState): string => {
   const { institutionName, title, grade, medium, subject, chapterConfigs, difficulty, totalMarks } = formData;
 
   const chapterDistributionText = chapterConfigs
@@ -45,6 +79,14 @@ export const createGenerationPrompt = (formData: FormState): string => {
     5.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
     `;
 };
+
+export const createGenerationPrompt = (formData: FormState): string => {
+    if (formData.generationMode === 'simple') {
+        return createSimpleGenerationPrompt(formData);
+    }
+    return createAdvancedGenerationPrompt(formData);
+};
+
 
 const getQuestionStructurePrompt = (question: Question): string => {
     if (question.options) return 'It must be a Multiple Choice Question with exactly 4 options.';

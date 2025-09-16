@@ -5,28 +5,47 @@ import { GSEB_CURRICULUM } from '../constants';
 const grades = Object.keys(GSEB_CURRICULUM).sort((a, b) => parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1]));
 
 export const useFormState = () => {
+  // Common State
   const [institutionName, setInstitutionName] = useState('GSEB Academy');
   const [title, setTitle] = useState('Annual Examination');
   const [grade, setGrade] = useState(grades[0]);
   const [medium, setMedium] = useState('');
   const [subject, setSubject] = useState('');
-  const [chapterConfigs, setChapterConfigs] = useState<ChapterQuestionConfig[]>([]);
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
-  
+  const [generationMode, setGenerationMode] = useState<'simple' | 'advanced'>('advanced');
+
+  // State for Simple Mode
+  const [chapters, setChapters] = useState<string[]>([]);
+  const [totalMarksSimple, setTotalMarksSimple] = useState(50);
+  const [mcqCount, setMcqCount] = useState(5);
+  const [shortAnswerCount, setShortAnswerCount] = useState(5);
+  const [longAnswerCount, setLongAnswerCount] = useState(3);
+
+  // State for Advanced Mode
+  const [chapterConfigs, setChapterConfigs] = useState<ChapterQuestionConfig[]>([]);
+
+  // Derived Values
   const availableMediums = useMemo(() => Object.keys(GSEB_CURRICULUM[grade] || {}), [grade]);
   const availableSubjects = useMemo(() => Object.keys(GSEB_CURRICULUM[grade]?.[medium] || {}), [grade, medium]);
   const availableChapters = useMemo(() => GSEB_CURRICULUM[grade]?.[medium]?.[subject] || [], [grade, medium, subject]);
-  
-  const totalMarks = useMemo(() => {
+
+  const totalMarksAdvanced = useMemo(() => {
     return chapterConfigs.reduce((total, config) => {
       if (!config.enabled) return total;
       const chapterTotal = config.distribution.reduce((subTotal, row) => subTotal + (row.marks * row.count), 0);
       return total + chapterTotal;
     }, 0);
   }, [chapterConfigs]);
+  
+  const totalMarks = generationMode === 'simple' ? totalMarksSimple : totalMarksAdvanced;
+  
+  const areAnyChaptersEnabled = useMemo(() => {
+      if (generationMode === 'simple') return chapters.length > 0;
+      return chapterConfigs.some(c => c.enabled);
+  }, [generationMode, chapters, chapterConfigs]);
 
-  const areAnyChaptersEnabled = useMemo(() => chapterConfigs.some(c => c.enabled), [chapterConfigs]);
 
+  // Effects to handle cascading dropdowns and state resets
   useEffect(() => {
     setMedium(availableMediums[0] || '');
   }, [grade, availableMediums]);
@@ -36,24 +55,31 @@ export const useFormState = () => {
   }, [medium, availableSubjects]);
 
   useEffect(() => {
+    // Reset selections and configs when subject changes
+    setChapters([]);
     const newConfigs = availableChapters.map(chapter => ({
       chapter,
       enabled: false,
       distribution: [{ id: crypto.randomUUID(), marks: 1, count: 0, type: 'MCQ' as const }]
     }));
     setChapterConfigs(newConfigs);
-  }, [grade, medium, subject, availableChapters]);
+  }, [subject, availableChapters]); // Dependency on `subject` is key here
 
-  const formState: Omit<FormState, 'totalMarks' | 'chapters'> = {
-    institutionName, title, grade, medium, subject, chapterConfigs, difficulty
+  const formState: FormState = {
+    institutionName, title, grade, medium, subject, difficulty, generationMode,
+    totalMarks,
+    chapters, mcqCount, shortAnswerCount, longAnswerCount,
+    chapterConfigs,
   };
   
   const formHandlers = {
-    setInstitutionName, setTitle, setGrade, setMedium, setSubject, setChapterConfigs, setDifficulty
+    setInstitutionName, setTitle, setGrade, setMedium, setSubject, setDifficulty, setGenerationMode,
+    setChapters, setTotalMarksSimple, setMcqCount, setShortAnswerCount, setLongAnswerCount,
+    setChapterConfigs,
   };
 
   const derivedState = {
-    grades, availableMediums, availableSubjects, totalMarks, areAnyChaptersEnabled
+    grades, availableMediums, availableSubjects, availableChapters, areAnyChaptersEnabled, totalMarks
   };
 
   return {

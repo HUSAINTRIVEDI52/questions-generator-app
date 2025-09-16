@@ -1,3 +1,7 @@
+import { QuestionType } from './constants';
+// FIX: Export the `QuestionType` to make it available for other modules.
+export type { QuestionType };
+
 export interface Question {
   id: string;
   question_text: string;
@@ -25,8 +29,6 @@ export interface QuestionPaper {
   sections: QuestionSection[];
 }
 
-export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'One Word Answer' | 'Short Answer' | 'Long Answer' | 'Match the Following' | 'Graph Question';
-
 export interface MarksDistribution {
   id: string;
   marks: number;
@@ -41,12 +43,24 @@ export interface ChapterQuestionConfig {
 }
 
 export interface FormState {
+    // Common fields
     institutionName: string;
     title: string;
     grade: string;
     medium: string;
     subject: string;
-    chapterConfigs: ChapterQuestionConfig[];
     difficulty: 'Easy' | 'Medium' | 'Hard';
     totalMarks: number;
+
+    // Mode specific fields
+    generationMode: 'simple' | 'advanced';
+    
+    // For Simple Mode
+    chapters: string[];
+    mcqCount: number;
+    shortAnswerCount: number;
+    longAnswerCount: number;
+
+    // For Advanced Mode
+    chapterConfigs: ChapterQuestionConfig[];
 }

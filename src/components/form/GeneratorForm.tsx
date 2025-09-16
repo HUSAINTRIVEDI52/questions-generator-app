@@ -5,6 +5,7 @@ import { Accordion } from '../common/Accordion';
 import { PaperDetails } from './PaperDetails';
 import { ContentSelection } from './ContentSelection';
 import { WandIcon } from '../common/Icons';
+import { SimpleModeConfig } from './SimpleModeConfig';
 
 interface GeneratorFormProps {
   onGenerate: (formData: FormState) => void;
@@ -18,17 +19,27 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!areAnyChaptersEnabled) {
-      alert("Please select and configure at least one chapter.");
+      alert("Please select at least one chapter.");
       return;
     }
     if (totalMarks <= 0) {
-      alert("Total marks must be greater than 0. Please add some questions to the selected chapters.");
+      alert("Total marks must be greater than 0.");
       return;
     }
-    onGenerate({ ...formState, totalMarks });
+    onGenerate(formState);
   };
+  
+  const ModeButton: React.FC<{ mode: 'simple' | 'advanced'; children: React.ReactNode }> = ({ mode, children }) => (
+    <button
+      type="button"
+      onClick={() => formHandlers.setGenerationMode(mode)}
+      className={`w-1/2 py-2 text-sm font-semibold transition-colors ${formState.generationMode === mode ? 'bg-blue-600 text-white shadow' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+    >
+      {children}
+    </button>
+  );
 
-  const isSubmitDisabled = isLoading || !areAnyChaptersEnabled || totalMarks === 0;
+  const isSubmitDisabled = isLoading || !areAnyChaptersEnabled || totalMarks <= 0;
 
   return (
     <form onSubmit={handleSubmit} className="p-1 sm:p-6 rounded-xl space-y-6" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)'}}>
@@ -40,26 +51,44 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       <div className="space-y-4">
         <Accordion title="1. Paper Details" defaultOpen>
           <PaperDetails
-            institutionName={formState.institutionName}
-            title={formState.title}
-            onInstitutionNameChange={formHandlers.setInstitutionName}
-            onTitleChange={formHandlers.setTitle}
-          />
-        </Accordion>
-
-        <Accordion title="2. Chapter & Question Configuration" defaultOpen>
-          <ContentSelection 
             formState={formState}
             formHandlers={formHandlers}
             derivedState={derivedState}
           />
+        </Accordion>
+
+        <Accordion title="2. Generation Mode" defaultOpen>
+            <div className="flex rounded-md overflow-hidden border border-slate-300">
+                <ModeButton mode="simple">Simple</ModeButton>
+                <ModeButton mode="advanced">Advanced</ModeButton>
+            </div>
+            <p className="text-xs text-slate-500 mt-2 p-2 bg-slate-50 rounded-md">
+                <strong>Simple:</strong> Set total question counts for selected chapters. <br/>
+                <strong>Advanced:</strong> Define precise question counts for each chapter individually.
+            </p>
+        </Accordion>
+
+        <Accordion title="3. Content & Structure" defaultOpen>
+          {formState.generationMode === 'simple' ? (
+              <SimpleModeConfig 
+                formState={formState}
+                formHandlers={formHandlers}
+                derivedState={derivedState}
+              />
+          ) : (
+             <ContentSelection 
+                formState={formState}
+                formHandlers={formHandlers}
+                derivedState={derivedState}
+            />
+          )}
         </Accordion>
       </div>
 
       <button type="submit" disabled={isSubmitDisabled} className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center text-base shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transform active:scale-95">
         {isLoading ? (
           <>
-             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
              </svg>

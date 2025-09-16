@@ -8,6 +8,7 @@ import { generateQuestionPaper, regenerateQuestion } from './services/geminiServ
 import type { FormState, Question, QuestionPaper } from './types';
 import { Analytics } from '@vercel/analytics/react';
 import { HomePage } from './components/HomePage';
+import { Footer } from './components/Footer';
 
 const App: React.FC = () => {
   const [currentFormState, setCurrentFormState] = useState<FormState | null>(null);
@@ -64,9 +65,14 @@ const App: React.FC = () => {
         difficulty: questionPaper.difficulty,
       };
       
-      const enabledChapters = currentFormState.chapterConfigs
+      let enabledChapters: string[] = [];
+      if (currentFormState.generationMode === 'simple') {
+        enabledChapters = currentFormState.chapters;
+      } else {
+        enabledChapters = currentFormState.chapterConfigs
           .filter(c => c.enabled)
           .map(c => c.chapter);
+      }
 
       if(enabledChapters.length === 0) {
           throw new Error("Cannot regenerate question without chapter context.");
@@ -156,10 +162,7 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
-      <footer className="w-full text-center p-4 mt-8 no-print" style={{ color: 'var(--color-text-muted)' }}>
-        <p className="text-sm font-medium">An initiative by <span className="font-bold text-blue-700">Husain M Trivedi</span></p>
-        <p className="text-sm">Contact: <a href="tel:7698379853" className="font-semibold hover:underline">7698379853</a></p>
-      </footer>
+      <Footer />
       <Analytics />
     </div>
   );
