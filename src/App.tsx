@@ -41,8 +41,14 @@ const App: React.FC = () => {
       const paper = await generateQuestionPaper(formData);
       setQuestionPaper(paper);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
-      console.error(err);
+      // FIX: Wrapped error handling logic in braces for correct catch block syntax. This resolves errors on lines 44, 45, 46, and 49.
+      if (err instanceof Error) {
+        setError(err.message);
+        console.error(err);
+      } else {
+        setError('An unknown error occurred.');
+        console.error(err);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -138,10 +144,11 @@ const App: React.FC = () => {
   };
 
   const showResults = isLoading || error || questionPaper;
+  const showHeaderTitle = !isMobile || mobileView === 'home';
 
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--color-background)'}}>
-      <Header isMobile={isMobile} onGoHome={handleGoHome} />
+      <Header isMobile={isMobile} onGoHome={handleGoHome} showTitle={showHeaderTitle} />
       <main className="container mx-auto p-2 sm:p-4 md:p-8 flex-grow w-full">
         {isMobile ? (
           <>

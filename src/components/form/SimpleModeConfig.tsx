@@ -14,8 +14,16 @@ const labelStyles = "block text-sm font-semibold text-slate-600 mb-1";
 const inputStyles = "w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
 
 export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, formHandlers, derivedState }) => {
-    const { chapters, totalMarks, mcqCount, shortAnswerCount, longAnswerCount } = formState;
-    const { setChapters, setTotalMarksSimple, setMcqCount, setShortAnswerCount, setLongAnswerCount } = formHandlers;
+    const { 
+        chapters, subject, totalMarks, mcqCount, shortAnswerCount, longAnswerCount, 
+        trueFalseCount, fillInTheBlanksCount, oneWordAnswerCount, 
+        matchTheFollowingCount, graphQuestionCount
+    } = formState;
+    const { 
+        setChapters, setTotalMarksSimple, setMcqCount, setShortAnswerCount, setLongAnswerCount,
+        setTrueFalseCount, setFillInTheBlanksCount, setOneWordAnswerCount,
+        setMatchTheFollowingCount, setGraphQuestionCount
+    } = formHandlers;
     const { availableChapters } = derivedState;
 
     const [selectAll, setSelectAll] = useState(false);
@@ -37,6 +45,8 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
      React.useEffect(() => {
         setSelectAll(chapters.length === availableChapters.length && availableChapters.length > 0);
     }, [chapters, availableChapters]);
+
+    const showGraphQuestion = subject && subject.toLowerCase().includes('social science');
 
     return (
         <div className="space-y-4">
@@ -69,27 +79,19 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
             <div>
                 <p className={labelStyles}>Number of Questions</p>
                 <div className="space-y-2">
-                    <div className="grid grid-cols-12 items-center gap-2">
-                        <label htmlFor="mcqCount" className="text-sm col-span-2 flex items-center"><TrueFalseIcon /></label>
-                        <label htmlFor="mcqCount" className="text-sm col-span-7 font-medium">MCQs</label>
-                        <div className="col-span-3">
-                            <input type="number" id="mcqCount" value={mcqCount} onChange={e => setMcqCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-12 items-center gap-2">
-                         <label htmlFor="shortAnswerCount" className="text-sm col-span-2 flex items-center"><FileTextIcon /></label>
-                        <label htmlFor="shortAnswerCount" className="text-sm col-span-7 font-medium">Short Answers</label>
-                        <div className="col-span-3">
-                            <input type="number" id="shortAnswerCount" value={shortAnswerCount} onChange={e => setShortAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-12 items-center gap-2">
-                         <label htmlFor="longAnswerCount" className="text-sm col-span-2 flex items-center"><FileTextIcon /></label>
-                        <label htmlFor="longAnswerCount" className="text-sm col-span-7 font-medium">Long Answers</label>
-                        <div className="col-span-3">
-                            <input type="number" id="longAnswerCount" value={longAnswerCount} onChange={e => setLongAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} />
-                        </div>
-                    </div>
+                    {/* Basic Types */}
+                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="mcqCount" className="text-sm col-span-9 font-medium">MCQs</label><div className="col-span-3"><input type="number" id="mcqCount" value={mcqCount} onChange={e => setMcqCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
+                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="trueFalseCount" className="text-sm col-span-9 font-medium">True/False</label><div className="col-span-3"><input type="number" id="trueFalseCount" value={trueFalseCount} onChange={e => setTrueFalseCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
+                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="fillInTheBlanksCount" className="text-sm col-span-9 font-medium">Fill in the Blanks</label><div className="col-span-3"><input type="number" id="fillInTheBlanksCount" value={fillInTheBlanksCount} onChange={e => setFillInTheBlanksCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
+                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="oneWordAnswerCount" className="text-sm col-span-9 font-medium">One Word Answer</label><div className="col-span-3"><input type="number" id="oneWordAnswerCount" value={oneWordAnswerCount} onChange={e => setOneWordAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
+                    
+                    {/* Answer Types */}
+                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="shortAnswerCount" className="text-sm col-span-9 font-medium">Short Answers</label><div className="col-span-3"><input type="number" id="shortAnswerCount" value={shortAnswerCount} onChange={e => setShortAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
+                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="longAnswerCount" className="text-sm col-span-9 font-medium">Long Answers</label><div className="col-span-3"><input type="number" id="longAnswerCount" value={longAnswerCount} onChange={e => setLongAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
+
+                    {/* Complex Types */}
+                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="matchTheFollowingCount" className="text-sm col-span-9 font-medium">Match the Following</label><div className="col-span-3"><input type="number" id="matchTheFollowingCount" value={matchTheFollowingCount} onChange={e => setMatchTheFollowingCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
+                    {showGraphQuestion && <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="graphQuestionCount" className="text-sm col-span-9 font-medium">Graph Questions</label><div className="col-span-3"><input type="number" id="graphQuestionCount" value={graphQuestionCount} onChange={e => setGraphQuestionCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>}
                 </div>
             </div>
         </div>

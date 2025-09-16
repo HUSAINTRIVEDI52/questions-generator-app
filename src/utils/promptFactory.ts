@@ -1,7 +1,27 @@
 import type { FormState, Question, QuestionPaper } from '../types';
 
 const createSimpleGenerationPrompt = (formData: FormState): string => {
-  const { institutionName, title, grade, medium, subject, chapters, difficulty, totalMarks, mcqCount, shortAnswerCount, longAnswerCount } = formData;
+  const { 
+    institutionName, title, grade, medium, subject, chapters, difficulty, totalMarks, 
+    mcqCount, shortAnswerCount, longAnswerCount, trueFalseCount, fillInTheBlanksCount, 
+    oneWordAnswerCount, matchTheFollowingCount, graphQuestionCount 
+  } = formData;
+
+  const questionBreakdown = [
+    { name: 'Multiple Choice Questions (MCQs)', count: mcqCount },
+    { name: 'True/False Questions', count: trueFalseCount },
+    { name: 'Fill in the Blanks Questions', count: fillInTheBlanksCount },
+    { name: 'One Word Answer Questions', count: oneWordAnswerCount },
+    { name: 'Short Answer Questions (2-3 sentences)', count: shortAnswerCount },
+    { name: 'Long Answer Questions (1-2 paragraphs)', count: longAnswerCount },
+    { name: 'Match the Following Questions', count: matchTheFollowingCount },
+    { name: 'Graph-based Questions (Social Science only)', count: graphQuestionCount }
+  ]
+  .filter(q => q.count > 0)
+  .map(q => `- ${q.name}: ${q.count}`)
+  .join('\n');
+
+
   return `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
     Your task is to create a complete and well-structured question paper based on the following specifications.
@@ -18,9 +38,7 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     - **Total Marks:** ${totalMarks}
 
     **Required Question Breakdown:**
-    - Multiple Choice Questions (MCQs): ${mcqCount}
-    - Short Answer Questions (2-3 sentences): ${shortAnswerCount}
-    - Long Answer Questions (1-2 paragraphs): ${longAnswerCount}
+    ${questionBreakdown}
 
     **Core Instructions:**
     1.  **Generate Exact Counts:** Create the exact number of questions requested for each type. Group them into distinct sections (e.g., 'Section A: MCQs').
@@ -28,6 +46,11 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     3.  **Content Source:** The questions should be drawn from the list of chapters provided.
     4.  **Question Type Formatting:**
         - **MCQs:** Provide exactly 4 distinct options.
+        - **True/False:** The answer must be 'True' or 'False'.
+        - **Fill in the Blanks:** Provide the missing word(s) as the answer.
+        - **One Word Answer:** Provide a concise one or two-word answer.
+        - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
+        - **Graph Questions (Social Science):** Describe a data set or scenario in 'question_text' and ask an analytical question. You do not need to generate a visual graph.
         - **Short/Long Answers:** Provide a model correct answer.
     5.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
   `;

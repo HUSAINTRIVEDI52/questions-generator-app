@@ -12,6 +12,7 @@ export const useFormState = () => {
   const [medium, setMedium] = useState('');
   const [subject, setSubject] = useState('');
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
+  // FIX: Broadened the type of generationMode to include both 'simple' and 'advanced'. This resolves errors on lines 45 and 48, and a related error in GeneratorForm.tsx.
   const [generationMode, setGenerationMode] = useState<'simple' | 'advanced'>('advanced');
 
   // State for Simple Mode
@@ -20,6 +21,11 @@ export const useFormState = () => {
   const [mcqCount, setMcqCount] = useState(5);
   const [shortAnswerCount, setShortAnswerCount] = useState(5);
   const [longAnswerCount, setLongAnswerCount] = useState(3);
+  const [trueFalseCount, setTrueFalseCount] = useState(0);
+  const [fillInTheBlanksCount, setFillInTheBlanksCount] = useState(0);
+  const [oneWordAnswerCount, setOneWordAnswerCount] = useState(0);
+  const [matchTheFollowingCount, setMatchTheFollowingCount] = useState(0);
+  const [graphQuestionCount, setGraphQuestionCount] = useState(0);
 
   // State for Advanced Mode
   const [chapterConfigs, setChapterConfigs] = useState<ChapterQuestionConfig[]>([]);
@@ -69,12 +75,16 @@ export const useFormState = () => {
     institutionName, title, grade, medium, subject, difficulty, generationMode,
     totalMarks,
     chapters, mcqCount, shortAnswerCount, longAnswerCount,
+    trueFalseCount, fillInTheBlanksCount, oneWordAnswerCount,
+    matchTheFollowingCount, graphQuestionCount,
     chapterConfigs,
   };
   
   const formHandlers = {
     setInstitutionName, setTitle, setGrade, setMedium, setSubject, setDifficulty, setGenerationMode,
     setChapters, setTotalMarksSimple, setMcqCount, setShortAnswerCount, setLongAnswerCount,
+    setTrueFalseCount, setFillInTheBlanksCount, setOneWordAnswerCount,
+    setMatchTheFollowingCount, setGraphQuestionCount,
     setChapterConfigs,
   };
 
