@@ -58,6 +58,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
             marksDistribution={formState.marksDistribution}
             onDistributionChange={formHandlers.setMarksDistribution}
             totalMarks={totalMarks}
+            subject={formState.subject}
           />
         </Accordion>
       </div>

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { QuestionPaper } from '../../types';
 import { exportToDocx } from '../../services/exportService';
-import { KeyIcon, DocxIcon, PrintIcon, CreateIcon } from '../common/Icons';
+import { KeyIcon, DocxIcon, PrintIcon, CreateIcon, CopyIcon } from '../common/Icons';
 
 interface PaperActionsProps {
     paper: QuestionPaper;
@@ -11,6 +11,7 @@ interface PaperActionsProps {
 }
 
 export const PaperActions: React.FC<PaperActionsProps> = ({ paper, onNewPaper, showAnswers, onToggleAnswers }) => {
+    const [copyText, setCopyText] = useState('Copy');
 
     const handlePrint = () => {
         const printable = document.querySelector('.print-area');
@@ -26,6 +27,49 @@ export const PaperActions: React.FC<PaperActionsProps> = ({ paper, onNewPaper, s
         // Clean up the class after printing
         if (showAnswers) {
             printable.classList.remove('print-with-answers');
+        }
+    };
+
+    const generatePaperText = (paperToCopy: QuestionPaper): string => {
+        let text = '';
+        text += `${paperToCopy.institution_name}\n`;
+        text += `${paperToCopy.title}\n`;
+        text += `${paperToCopy.grade} - ${paperToCopy.subject}\n\n`;
+        text += `Total Marks: ${paperToCopy.total_marks}\t`;
+        text += `Duration: ${paperToCopy.duration_minutes} minutes\n`;
+        text += '--------------------------------------------------\n\n';
+
+        paperToCopy.sections.forEach(section => {
+            text += `${section.section_title}\n\n`;
+            section.questions.forEach((q, qIndex) => {
+                text += `${qIndex + 1}. ${q.question_text} [${q.marks} Marks]\n`;
+                if (q.options) {
+                    q.options.forEach((option, optIndex) => {
+                        text += `   ${String.fromCharCode(97 + optIndex)}) ${option}\n`;
+                    });
+                }
+                if (q.match_a && q.match_b) {
+                    text += '  Column A\n';
+                    q.match_a.forEach((item, idx) => text += `    ${idx + 1}. ${item}\n`);
+                    text += '  Column B\n';
+                    q.match_b.forEach((item, idx) => text += `    ${String.fromCharCode(97 + idx)}. ${item}\n`);
+                }
+                text += '\n';
+            });
+        });
+        return text;
+    };
+
+    const handleCopy = async () => {
+        const paperText = generatePaperText(paper);
+        try {
+            await navigator.clipboard.writeText(paperText);
+            setCopyText('Copied!');
+            setTimeout(() => setCopyText('Copy'), 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            setCopyText('Failed!');
+            setTimeout(() => setCopyText('Copy'), 2000);
         }
     };
 
@@ -47,6 +91,13 @@ export const PaperActions: React.FC<PaperActionsProps> = ({ paper, onNewPaper, s
                 >
                     <KeyIcon />
                     {showAnswers ? 'Hide Answers' : 'Show Answers'}
+                </button>
+                 <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-2 py-2 px-4 rounded-md text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                >
+                    <CopyIcon />
+                    {copyText}
                 </button>
                 <button
                     onClick={() => exportToDocx(paper)}

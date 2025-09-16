@@ -38,7 +38,17 @@ const responseSchema = {
                     description: "Array of 4 option strings for MCQs. Omit for other question types.",
                     items: { type: Type.STRING } 
                 },
-                correct_answer: { type: Type.STRING, description: "The correct answer. For MCQs, it should match one of the options exactly." },
+                match_a: {
+                    type: Type.ARRAY,
+                    description: "For 'Match the Following' questions, this is Column A. Omit for other types.",
+                    items: { type: Type.STRING }
+                },
+                match_b: {
+                    type: Type.ARRAY,
+                    description: "For 'Match the Following' questions, this is Column B. Omit for other types.",
+                    items: { type: Type.STRING }
+                },
+                correct_answer: { type: Type.STRING, description: "The correct answer. For MCQs, it should match one of the options exactly. For 'Match the Following', use format '1-c, 2-a, ...'." },
                 marks: { type: Type.INTEGER }
               },
               required: ["question_text", "correct_answer", "marks"]

@@ -1,6 +1,8 @@
 export interface Question {
   question_text: string;
-  options?: string[];
+  options?: string[]; // For MCQ
+  match_a?: string[]; // For Match the Following - Column A
+  match_b?: string[]; // For Match the Following - Column B
   correct_answer: string;
   marks: number;
 }
@@ -22,7 +24,7 @@ export interface QuestionPaper {
   sections: QuestionSection[];
 }
 
-export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'Short Answer' | 'Long Answer';
+export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'One Word Answer' | 'Short Answer' | 'Long Answer' | 'Match the Following' | 'Graph Question';
 
 export interface MarksDistribution {
   id: string;

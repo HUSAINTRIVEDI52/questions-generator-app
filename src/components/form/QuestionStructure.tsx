@@ -2,16 +2,25 @@ import React from 'react';
 import type { MarksDistribution, QuestionType } from '../../types';
 import { PlusIcon, MinusIcon } from '../common/Icons';
 
-const questionTypes: QuestionType[] = ['MCQ', 'True/False', 'Fill in the Blanks', 'Short Answer', 'Long Answer'];
 const inputStyles = "w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
 
 interface QuestionStructureProps {
     marksDistribution: MarksDistribution[];
     onDistributionChange: React.Dispatch<React.SetStateAction<MarksDistribution[]>>;
     totalMarks: number;
+    subject: string;
 }
 
-export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistribution, onDistributionChange, totalMarks }) => {
+export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistribution, onDistributionChange, totalMarks, subject }) => {
+
+    const availableQuestionTypes = React.useMemo(() => {
+        const baseTypes: QuestionType[] = ['MCQ', 'True/False', 'Fill in the Blanks', 'One Word Answer', 'Short Answer', 'Long Answer', 'Match the Following'];
+        if (subject && subject.toLowerCase().includes('social science')) {
+            return [...baseTypes, 'Graph Question'];
+        }
+        return baseTypes;
+    }, [subject]);
+
 
     const handleDistributionChange = (id: string, field: keyof Omit<MarksDistribution, 'id'>, value: string | number) => {
         onDistributionChange(prev => prev.map(row => row.id === id ? { ...row, [field]: value } : row));
@@ -45,7 +54,7 @@ export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistr
                         <div className="col-span-10 sm:col-span-5">
                             <label className="text-xs font-medium text-slate-500">Type</label>
                             <select value={row.type} onChange={e => handleDistributionChange(row.id, 'type', e.target.value)} className={inputStyles}>
-                                {questionTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                                {availableQuestionTypes.map(type => <option key={type} value={type}>{type}</option>)}
                             </select>
                         </div>
                          <div className="col-span-2 sm:col-span-1 flex items-end justify-center">

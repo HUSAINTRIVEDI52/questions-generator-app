@@ -13,40 +13,67 @@ const saveFile = (blob: Blob, fileName: string) => {
 };
 
 export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
-    const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+    const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableCell, TableRow, WidthType } = docx;
 
     const sections = paper.sections.flatMap(section => {
         const questions = section.questions.map((q, qIndex) => {
-            const questionParts = [
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: `${qIndex + 1}. `, bold: true }),
-                        new TextRun(q.question_text),
-                        new TextRun({ text: ` [${q.marks} Marks]`, bold: true, italics: true }),
-                    ],
-                    spacing: { after: 100 },
-                })
-            ];
+            const questionChildren = [];
 
+            // Question Text and Marks
+            questionChildren.push(new Paragraph({
+                children: [
+                    new TextRun({ text: `${qIndex + 1}. `, bold: true }),
+                    new TextRun(q.question_text),
+                    new TextRun({ text: ` [${q.marks} Marks]`, bold: true, italics: true }),
+                ],
+                spacing: { after: 100 },
+            }));
+
+            // MCQ Options
             if (q.options) {
                 q.options.forEach((option, optIndex) => {
-                    questionParts.push(new Paragraph({
+                    questionChildren.push(new Paragraph({
                         children: [new TextRun(`\t${String.fromCharCode(97 + optIndex)}) ${option}`)],
                         spacing: { after: 50 },
                     }));
                 });
             }
             
-            // Add a paragraph for the answer, even if empty, to maintain spacing.
-            // In a real scenario, you might conditionally add this based on an 'includeAnswers' flag.
-            questionParts.push(new Paragraph({
+            // Match the Following Table
+            if (q.match_a && q.match_b) {
+                const tableRows = q.match_a.map((itemA, index) => {
+                    const itemB = q.match_b?.[index] || '';
+                    return new TableRow({
+                        children: [
+                            new TableCell({ children: [new Paragraph({ text: `${index + 1}. ${itemA}` })], width: { size: 50, type: WidthType.PERCENTAGE } }),
+                            new TableCell({ children: [new Paragraph({ text: `${String.fromCharCode(97 + index)}. ${itemB}` })], width: { size: 50, type: WidthType.PERCENTAGE } }),
+                        ],
+                    });
+                });
+
+                const table = new Table({
+                    rows: [
+                        new TableRow({
+                            children: [
+                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Column A", bold: true })]})] }),
+                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Column B", bold: true })]})] }),
+                            ],
+                        }),
+                        ...tableRows
+                    ],
+                });
+                questionChildren.push(table);
+            }
+
+            // Answer
+            questionChildren.push(new Paragraph({
                  children: [
                      new TextRun({ text: `Answer: ${q.correct_answer}`, bold: true, color: "4CAF50" }),
                  ],
-                 spacing: { after: 200 },
+                 spacing: { before: 100, after: 200 },
             }));
 
-            return questionParts;
+            return questionChildren;
         });
 
         return [

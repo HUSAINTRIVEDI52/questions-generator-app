@@ -40,6 +40,22 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers }
                                         ))}
                                     </ul>
                                 )}
+                                {q.match_a && q.match_b && (
+                                    <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 pl-6">
+                                        <div>
+                                            <h4 className="font-semibold mb-2 border-b">Column A</h4>
+                                            <ol className="list-decimal list-inside space-y-1">
+                                                {q.match_a.map((item, idx) => <li key={idx} className="pl-2">{item}</li>)}
+                                            </ol>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold mb-2 border-b">Column B</h4>
+                                            <ol className="list-[lower-alpha] list-inside space-y-1">
+                                                {q.match_b.map((item, idx) => <li key={idx} className="pl-2">{item}</li>)}
+                                            </ol>
+                                        </div>
+                                    </div>
+                                )}
                                 {showAnswers && (
                                     <div className="mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md printable-answer">
                                         <p className="text-sm font-semibold text-green-800">
