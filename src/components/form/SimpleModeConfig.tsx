@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { useFormState } from '../../hooks/useFormState';
 
 type UseFormStateReturn = ReturnType<typeof useFormState>;
@@ -10,42 +10,40 @@ interface SimpleModeConfigProps {
 }
 
 const labelStyles = "block text-sm font-semibold text-slate-600 mb-1";
-const inputStyles = "w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
+const countInputStyles = "w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
+
+const QuestionCounter: React.FC<{ label: string; value: number; onChange: (value: number) => void }> = ({ label, value, onChange }) => (
+    <div className="grid grid-cols-3 items-center gap-2">
+        <label htmlFor={`${label}-count`} className="text-sm col-span-2">{label}</label>
+        <input
+            type="number"
+            id={`${label}-count`}
+            value={value}
+            onChange={e => onChange(Number(e.target.value))}
+            min="0"
+            className={countInputStyles}
+        />
+    </div>
+);
+
 
 export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, formHandlers, derivedState }) => {
-    const { 
-        chapters, subject, totalMarks, mcqCount, shortAnswerCount, longAnswerCount, 
-        trueFalseCount, fillInTheBlanksCount, oneWordAnswerCount, 
-        matchTheFollowingCount, graphQuestionCount
-    } = formState;
-    const { 
-        setChapters, setTotalMarksSimple, setMcqCount, setShortAnswerCount, setLongAnswerCount,
-        setTrueFalseCount, setFillInTheBlanksCount, setOneWordAnswerCount,
-        setMatchTheFollowingCount, setGraphQuestionCount
-    } = formHandlers;
+    const { chapters, totalMarks, mcqCount, shortAnswerCount, longAnswerCount, trueFalseCount, fillInTheBlanksCount, oneWordAnswerCount, matchTheFollowingCount, graphQuestionCount } = formState;
+    const { setChapters, setTotalMarks, setMcqCount, setShortAnswerCount, setLongAnswerCount, setTrueFalseCount, setFillInTheBlanksCount, setOneWordAnswerCount, setMatchTheFollowingCount, setGraphQuestionCount } = formHandlers;
     const { availableChapters } = derivedState;
 
-    const [selectAll, setSelectAll] = useState(false);
+    const selectAll = chapters.length === availableChapters.length && availableChapters.length > 0;
 
     const handleChapterToggle = (chapter: string) => {
         const newSelection = chapters.includes(chapter)
             ? chapters.filter(c => c !== chapter)
             : [...chapters, chapter];
         setChapters(newSelection);
-        setSelectAll(newSelection.length === availableChapters.length && availableChapters.length > 0);
     };
 
     const handleSelectAll = () => {
-        const newSelectAll = !selectAll;
-        setSelectAll(newSelectAll);
-        setChapters(newSelectAll ? [...availableChapters] : []);
+        setChapters(selectAll ? [] : [...availableChapters]);
     };
-    
-     React.useEffect(() => {
-        setSelectAll(chapters.length === availableChapters.length && availableChapters.length > 0);
-    }, [chapters, availableChapters]);
-
-    const showGraphQuestion = subject && subject.toLowerCase().includes('social science');
 
     return (
         <div className="space-y-4">
@@ -71,28 +69,33 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
             {/* Total Marks */}
             <div>
                 <label htmlFor="totalMarks" className={labelStyles}>Total Marks</label>
-                <input type="number" id="totalMarks" value={totalMarks} onChange={e => setTotalMarksSimple(Number(e.target.value))} min="10" className={inputStyles} />
+                <input
+                    type="number"
+                    id="totalMarks"
+                    value={totalMarks}
+                    onChange={e => setTotalMarks(Number(e.target.value))}
+                    min="1"
+                    className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                />
             </div>
 
             {/* Question Counts */}
             <div>
                 <p className={labelStyles}>Number of Questions</p>
-                <div className="space-y-2">
-                    {/* Basic Types */}
-                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="mcqCount" className="text-sm col-span-9 font-medium">MCQs</label><div className="col-span-3"><input type="number" id="mcqCount" value={mcqCount} onChange={e => setMcqCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
-                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="trueFalseCount" className="text-sm col-span-9 font-medium">True/False</label><div className="col-span-3"><input type="number" id="trueFalseCount" value={trueFalseCount} onChange={e => setTrueFalseCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
-                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="fillInTheBlanksCount" className="text-sm col-span-9 font-medium">Fill in the Blanks</label><div className="col-span-3"><input type="number" id="fillInTheBlanksCount" value={fillInTheBlanksCount} onChange={e => setFillInTheBlanksCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
-                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="oneWordAnswerCount" className="text-sm col-span-9 font-medium">One Word Answer</label><div className="col-span-3"><input type="number" id="oneWordAnswerCount" value={oneWordAnswerCount} onChange={e => setOneWordAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
-                    
-                    {/* Answer Types */}
-                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="shortAnswerCount" className="text-sm col-span-9 font-medium">Short Answers</label><div className="col-span-3"><input type="number" id="shortAnswerCount" value={shortAnswerCount} onChange={e => setShortAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
-                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="longAnswerCount" className="text-sm col-span-9 font-medium">Long Answers</label><div className="col-span-3"><input type="number" id="longAnswerCount" value={longAnswerCount} onChange={e => setLongAnswerCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
-
-                    {/* Complex Types */}
-                    <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="matchTheFollowingCount" className="text-sm col-span-9 font-medium">Match the Following</label><div className="col-span-3"><input type="number" id="matchTheFollowingCount" value={matchTheFollowingCount} onChange={e => setMatchTheFollowingCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>
-                    {showGraphQuestion && <div className="grid grid-cols-12 items-center gap-2"><label htmlFor="graphQuestionCount" className="text-sm col-span-9 font-medium">Graph Questions</label><div className="col-span-3"><input type="number" id="graphQuestionCount" value={graphQuestionCount} onChange={e => setGraphQuestionCount(Number(e.target.value))} min="0" className={`${inputStyles} text-center`} /></div></div>}
+                <div className="space-y-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <QuestionCounter label="MCQs" value={mcqCount} onChange={setMcqCount} />
+                    <QuestionCounter label="Short Answers" value={shortAnswerCount} onChange={setShortAnswerCount} />
+                    <QuestionCounter label="Long Answers" value={longAnswerCount} onChange={setLongAnswerCount} />
+                    <QuestionCounter label="True/False" value={trueFalseCount} onChange={setTrueFalseCount} />
+                    <QuestionCounter label="Fill in the Blanks" value={fillInTheBlanksCount} onChange={setFillInTheBlanksCount} />
+                    <QuestionCounter label="One Word Answer" value={oneWordAnswerCount} onChange={setOneWordAnswerCount} />
+                    <QuestionCounter label="Match the Following" value={matchTheFollowingCount} onChange={setMatchTheFollowingCount} />
+                    {formState.subject.toLowerCase().includes('social science') && (
+                         <QuestionCounter label="Graph-based" value={graphQuestionCount} onChange={setGraphQuestionCount} />
+                    )}
                 </div>
             </div>
+
         </div>
     );
 };
