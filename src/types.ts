@@ -1,4 +1,6 @@
-// FIX: Re-export QuestionType so it can be imported from this module.
+import type { QuestionType } from './constants';
+
+// Re-export QuestionType so it can be imported from this module by other components.
 export type { QuestionType } from './constants';
 
 export interface Question {
