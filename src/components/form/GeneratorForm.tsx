@@ -14,19 +14,62 @@ interface GeneratorFormProps {
 
 export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) => {
   const { formState, formHandlers, derivedState } = useFormState();
-  const { totalMarks, areAnyChaptersEnabled } = derivedState;
+  const { areAnyChaptersEnabled } = derivedState;
 
   const submissionError = useMemo(() => {
     if (!areAnyChaptersEnabled) return "Please select at least one chapter.";
-    if (totalMarks <= 0) return "Please add at least one question to the paper.";
+
+    let totalQuestions = 0;
+
+    if (formState.generationMode === 'simple') {
+        const { mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, graphQuestionCount, graphQuestionMarks } = formState;
+        
+        const questionTypes = [
+            { count: mcqCount, marks: mcqMarks, name: "MCQs" },
+            { count: shortAnswerCount, marks: shortAnswerMarks, name: "Short Answers" },
+            { count: longAnswerCount, marks: longAnswerMarks, name: "Long Answers" },
+            { count: trueFalseCount, marks: trueFalseMarks, name: "True/False" },
+            { count: fillInTheBlanksCount, marks: fillInTheBlanksMarks, name: "Fill in the Blanks" },
+            { count: oneWordAnswerCount, marks: oneWordAnswerMarks, name: "One Word Answers" },
+            { count: matchTheFollowingCount, marks: matchTheFollowingMarks, name: "Match the Following" },
+            { count: graphQuestionCount, marks: graphQuestionMarks, name: "Graph-based" },
+        ];
+
+        for (const type of questionTypes) {
+            if (type.count > 0) {
+                totalQuestions += type.count;
+                if (type.marks <= 0) {
+                    return `${type.name} must have marks greater than 0.`;
+                }
+            }
+        }
+    } else { // advanced mode
+        for (const config of formState.chapterConfigs) {
+            if (config.enabled) {
+                for (const dist of config.distribution) {
+                    if (dist.count > 0) {
+                        totalQuestions += dist.count;
+                        if (dist.marks <= 0) {
+                            return `Questions in "${config.chapter}" must have marks greater than 0.`;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (totalQuestions === 0) {
+        return "Please add at least one question to the paper.";
+    }
+    
     return null;
-  }, [areAnyChaptersEnabled, totalMarks]);
+  }, [formState, areAnyChaptersEnabled]);
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading || submissionError) {
-      return; // Prevent submission if disabled
+      return;
     }
     onGenerate(formState);
   };
@@ -47,7 +90,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
     <form onSubmit={handleSubmit} className="p-1 sm:p-6 rounded-xl space-y-6" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)'}}>
       <div className="flex justify-between items-center border-b border-slate-200 pb-3">
         <h2 className="text-xl font-bold text-slate-800">Paper Configuration</h2>
-        <p className="text-sm font-bold text-slate-700 bg-slate-200 px-3 py-1 rounded-full">Total Marks: {totalMarks}</p>
+        <p className="text-sm font-bold text-slate-700 bg-slate-200 px-3 py-1 rounded-full">Total Marks: {derivedState.totalMarks}</p>
       </div>
       
       <div className="space-y-4">

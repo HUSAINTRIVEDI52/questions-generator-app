@@ -38,7 +38,7 @@ const QuestionConfigRow: React.FC<{
                 id={`${label}-marks`}
                 value={marks}
                 onChange={e => onMarksChange(Number(e.target.value))}
-                min="1"
+                min="0"
                 className={inputStyles}
                 aria-label={`${label} marks`}
             />

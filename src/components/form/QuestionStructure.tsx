@@ -39,7 +39,7 @@ export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistr
                 <div key={row.id} className="grid grid-cols-12 gap-2">
                     <div className="col-span-3">
                         <label className="text-xs font-medium text-slate-500 sr-only">Marks</label>
-                        <input type="number" placeholder="Marks" value={row.marks} onChange={e => handleDistributionChange(row.id, 'marks', Number(e.target.value))} min="1" className={`${inputStyles} text-center`} />
+                        <input type="number" placeholder="Marks" value={row.marks} onChange={e => handleDistributionChange(row.id, 'marks', Number(e.target.value))} min="0" className={`${inputStyles} text-center`} />
                     </div>
                     <div className="col-span-3">
                         <label className="text-xs font-medium text-slate-500 sr-only">Count</label>
@@ -47,7 +47,7 @@ export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistr
                     </div>
                     <div className="col-span-5">
                         <label className="text-xs font-medium text-slate-500 sr-only">Type</label>
-                        <select value={row.type} onChange={e => handleDistributionChange(row.id, 'type', e.target.value)} className={inputStyles}>
+                        <select value={row.type} onChange={e => handleDistributionChange(row.id, 'type', e.target.value as QuestionType)} className={inputStyles}>
                             {availableQuestionTypes.map(type => <option key={type} value={type}>{type}</option>)}
                         </select>
                     </div>
