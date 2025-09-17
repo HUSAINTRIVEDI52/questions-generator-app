@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { FormState, ChapterQuestionConfig } from '../types';
-import { GSEB_CURRICULUM } from '../constants';
+import { GSEB_CURRICULUM, SIMPLE_MODE_MARKS_SCHEME } from '../constants';
 
 const grades = Object.keys(GSEB_CURRICULUM).sort((a, b) => parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1]));
 
@@ -15,9 +15,6 @@ const initialCounts = {
     graphQuestionCount: 0,
 };
 
-const initialSimpleMarks = (initialCounts.mcqCount * 1) + (initialCounts.shortAnswerCount * 2) + (initialCounts.longAnswerCount * 5);
-
-
 const initialFormState: FormState = {
     institutionName: 'GSEB Academy',
     title: 'Periodic Test - 1',
@@ -25,7 +22,7 @@ const initialFormState: FormState = {
     medium: '',
     subject: '',
     difficulty: 'Medium',
-    totalMarks: initialSimpleMarks,
+    totalMarks: 0, // Let the useEffect calculate the initial correct value
     generationMode: 'simple',
     chapters: [],
     ...initialCounts,
@@ -61,25 +58,11 @@ export const useFormState = () => {
     // Effect to dynamically update total marks for simple mode
     useEffect(() => {
         if (formState.generationMode === 'simple') {
-            const marksScheme = {
-                mcqCount: 1,
-                trueFalseCount: 1,
-                fillInTheBlanksCount: 1,
-                oneWordAnswerCount: 1,
-                shortAnswerCount: 2,
-                longAnswerCount: 5,
-                matchTheFollowingCount: 4,
-                graphQuestionCount: 5,
-            };
-            const newTotalMarks = 
-                (formState.mcqCount * marksScheme.mcqCount) +
-                (formState.trueFalseCount * marksScheme.trueFalseCount) +
-                (formState.fillInTheBlanksCount * marksScheme.fillInTheBlanksCount) +
-                (formState.oneWordAnswerCount * marksScheme.oneWordAnswerCount) +
-                (formState.shortAnswerCount * marksScheme.shortAnswerCount) +
-                (formState.longAnswerCount * marksScheme.longAnswerCount) +
-                (formState.matchTheFollowingCount * marksScheme.matchTheFollowingCount) +
-                (formState.graphQuestionCount * marksScheme.graphQuestionCount);
+            const newTotalMarks = Object.keys(SIMPLE_MODE_MARKS_SCHEME).reduce((total, key) => {
+                const count = formState[key as keyof typeof initialCounts] as number || 0;
+                const marks = SIMPLE_MODE_MARKS_SCHEME[key];
+                return total + (count * marks);
+            }, 0);
             
             setFormState(prev => ({ ...prev, totalMarks: newTotalMarks }));
         }

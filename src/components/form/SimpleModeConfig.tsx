@@ -1,5 +1,6 @@
 import React from 'react';
 import type { useFormState } from '../../hooks/useFormState';
+import { SIMPLE_MODE_MARKS_SCHEME } from '../../constants';
 
 type UseFormStateReturn = ReturnType<typeof useFormState>;
 
@@ -12,17 +13,22 @@ interface SimpleModeConfigProps {
 const labelStyles = "block text-sm font-semibold text-slate-600 mb-1";
 const countInputStyles = "w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
 
-const QuestionCounter: React.FC<{ label: string; value: number; onChange: (value: number) => void }> = ({ label, value, onChange }) => (
-    <div className="grid grid-cols-3 items-center gap-2">
-        <label htmlFor={`${label}-count`} className="text-sm col-span-2">{label}</label>
-        <input
-            type="number"
-            id={`${label}-count`}
-            value={value}
-            onChange={e => onChange(Number(e.target.value))}
-            min="0"
-            className={countInputStyles}
-        />
+const QuestionCounter: React.FC<{ label: string; value: number; onChange: (value: number) => void; marks: number }> = ({ label, value, onChange, marks }) => (
+    <div className="grid grid-cols-5 items-center gap-2">
+        <label htmlFor={`${label}-count`} className="text-sm col-span-3">
+            {label}
+            <span className="text-xs text-slate-500 ml-1">({marks} {marks === 1 ? 'Mark' : 'Marks'})</span>
+        </label>
+        <div className="col-span-2">
+            <input
+                type="number"
+                id={`${label}-count`}
+                value={value}
+                onChange={e => onChange(Number(e.target.value))}
+                min="0"
+                className={countInputStyles}
+            />
+        </div>
     </div>
 );
 
@@ -70,15 +76,15 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
             <div>
                 <p className={labelStyles}>Number of Questions</p>
                 <div className="space-y-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <QuestionCounter label="MCQs" value={mcqCount} onChange={setMcqCount} />
-                    <QuestionCounter label="Short Answers" value={shortAnswerCount} onChange={setShortAnswerCount} />
-                    <QuestionCounter label="Long Answers" value={longAnswerCount} onChange={setLongAnswerCount} />
-                    <QuestionCounter label="True/False" value={trueFalseCount} onChange={setTrueFalseCount} />
-                    <QuestionCounter label="Fill in the Blanks" value={fillInTheBlanksCount} onChange={setFillInTheBlanksCount} />
-                    <QuestionCounter label="One Word Answer" value={oneWordAnswerCount} onChange={setOneWordAnswerCount} />
-                    <QuestionCounter label="Match the Following" value={matchTheFollowingCount} onChange={setMatchTheFollowingCount} />
+                    <QuestionCounter label="MCQs" value={mcqCount} onChange={setMcqCount} marks={SIMPLE_MODE_MARKS_SCHEME.mcqCount} />
+                    <QuestionCounter label="Short Answers" value={shortAnswerCount} onChange={setShortAnswerCount} marks={SIMPLE_MODE_MARKS_SCHEME.shortAnswerCount} />
+                    <QuestionCounter label="Long Answers" value={longAnswerCount} onChange={setLongAnswerCount} marks={SIMPLE_MODE_MARKS_SCHEME.longAnswerCount} />
+                    <QuestionCounter label="True/False" value={trueFalseCount} onChange={setTrueFalseCount} marks={SIMPLE_MODE_MARKS_SCHEME.trueFalseCount} />
+                    <QuestionCounter label="Fill in the Blanks" value={fillInTheBlanksCount} onChange={setFillInTheBlanksCount} marks={SIMPLE_MODE_MARKS_SCHEME.fillInTheBlanksCount} />
+                    <QuestionCounter label="One Word Answer" value={oneWordAnswerCount} onChange={setOneWordAnswerCount} marks={SIMPLE_MODE_MARKS_SCHEME.oneWordAnswerCount} />
+                    <QuestionCounter label="Match the Following" value={matchTheFollowingCount} onChange={setMatchTheFollowingCount} marks={SIMPLE_MODE_MARKS_SCHEME.matchTheFollowingCount} />
                     {formState.subject.toLowerCase().includes('social science') && (
-                         <QuestionCounter label="Graph-based" value={graphQuestionCount} onChange={setGraphQuestionCount} />
+                         <QuestionCounter label="Graph-based" value={graphQuestionCount} onChange={setGraphQuestionCount} marks={SIMPLE_MODE_MARKS_SCHEME.graphQuestionCount} />
                     )}
                 </div>
             </div>

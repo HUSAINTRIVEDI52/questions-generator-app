@@ -1,6 +1,19 @@
 // Define and export the QuestionType enum
 export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'One Word Answer' | 'Short Answer' | 'Long Answer' | 'Match the Following' | 'Graph Question';
 
+// Define and export the marks scheme for Simple Mode
+export const SIMPLE_MODE_MARKS_SCHEME: Record<string, number> = {
+  mcqCount: 1,
+  trueFalseCount: 1,
+  fillInTheBlanksCount: 1,
+  oneWordAnswerCount: 1,
+  shortAnswerCount: 2,
+  longAnswerCount: 5,
+  matchTheFollowingCount: 4,
+  graphQuestionCount: 5,
+};
+
+
 // NOTE: Curriculum data has been comprehensively updated to reflect the latest GSEB/NCERT syllabus for all subjects and grades.
 export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, string[]>>> = {
   "Class 10": {
