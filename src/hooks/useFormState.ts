@@ -15,6 +15,17 @@ const initialCounts = {
     graphQuestionCount: 0,
 };
 
+const initialMarks = {
+    mcqMarks: SIMPLE_MODE_MARKS_SCHEME.mcqCount,
+    shortAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.shortAnswerCount,
+    longAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.longAnswerCount,
+    trueFalseMarks: SIMPLE_MODE_MARKS_SCHEME.trueFalseCount,
+    fillInTheBlanksMarks: SIMPLE_MODE_MARKS_SCHEME.fillInTheBlanksCount,
+    oneWordAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.oneWordAnswerCount,
+    matchTheFollowingMarks: SIMPLE_MODE_MARKS_SCHEME.matchTheFollowingCount,
+    graphQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.graphQuestionCount,
+};
+
 const initialFormState: FormState = {
     institutionName: 'GSEB Academy',
     title: 'Periodic Test - 1',
@@ -26,6 +37,7 @@ const initialFormState: FormState = {
     generationMode: 'simple',
     chapters: [],
     ...initialCounts,
+    ...initialMarks,
     chapterConfigs: [],
 };
 
@@ -58,18 +70,35 @@ export const useFormState = () => {
     // Effect to dynamically update total marks for simple mode
     useEffect(() => {
         if (formState.generationMode === 'simple') {
-            const newTotalMarks = Object.keys(SIMPLE_MODE_MARKS_SCHEME).reduce((total, key) => {
-                const count = formState[key as keyof typeof initialCounts] as number || 0;
-                const marks = SIMPLE_MODE_MARKS_SCHEME[key];
-                return total + (count * marks);
-            }, 0);
+            const {
+                mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks,
+                trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks,
+                oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks,
+                graphQuestionCount, graphQuestionMarks,
+            } = formState;
+
+            const newTotalMarks = 
+                (mcqCount * mcqMarks) +
+                (shortAnswerCount * shortAnswerMarks) +
+                (longAnswerCount * longAnswerMarks) +
+                (trueFalseCount * trueFalseMarks) +
+                (fillInTheBlanksCount * fillInTheBlanksMarks) +
+                (oneWordAnswerCount * oneWordAnswerMarks) +
+                (matchTheFollowingCount * matchTheFollowingMarks) +
+                (graphQuestionCount * graphQuestionMarks);
             
             setFormState(prev => ({ ...prev, totalMarks: newTotalMarks }));
         }
     }, [
-        formState.generationMode, formState.mcqCount, formState.trueFalseCount, 
-        formState.fillInTheBlanksCount, formState.oneWordAnswerCount, formState.shortAnswerCount,
-        formState.longAnswerCount, formState.matchTheFollowingCount, formState.graphQuestionCount
+        formState.generationMode,
+        formState.mcqCount, formState.mcqMarks,
+        formState.shortAnswerCount, formState.shortAnswerMarks,
+        formState.longAnswerCount, formState.longAnswerMarks,
+        formState.trueFalseCount, formState.trueFalseMarks,
+        formState.fillInTheBlanksCount, formState.fillInTheBlanksMarks,
+        formState.oneWordAnswerCount, formState.oneWordAnswerMarks,
+        formState.matchTheFollowingCount, formState.matchTheFollowingMarks,
+        formState.graphQuestionCount, formState.graphQuestionMarks,
     ]);
 
     // Effect to dynamically update total marks for advanced mode
@@ -112,6 +141,14 @@ export const useFormState = () => {
         setOneWordAnswerCount: createHandler('oneWordAnswerCount'),
         setMatchTheFollowingCount: createHandler('matchTheFollowingCount'),
         setGraphQuestionCount: createHandler('graphQuestionCount'),
+        setMcqMarks: createHandler('mcqMarks'),
+        setShortAnswerMarks: createHandler('shortAnswerMarks'),
+        setLongAnswerMarks: createHandler('longAnswerMarks'),
+        setTrueFalseMarks: createHandler('trueFalseMarks'),
+        setFillInTheBlanksMarks: createHandler('fillInTheBlanksMarks'),
+        setOneWordAnswerMarks: createHandler('oneWordAnswerMarks'),
+        setMatchTheFollowingMarks: createHandler('matchTheFollowingMarks'),
+        setGraphQuestionMarks: createHandler('graphQuestionMarks'),
         setChapterConfigs,
     }), [createHandler, setChapterConfigs]);
 

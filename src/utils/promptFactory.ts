@@ -3,22 +3,24 @@ import type { FormState, Question, QuestionPaper } from '../types';
 const createSimpleGenerationPrompt = (formData: FormState): string => {
   const { 
     institutionName, title, grade, medium, subject, chapters, difficulty, totalMarks, 
-    mcqCount, shortAnswerCount, longAnswerCount, trueFalseCount, fillInTheBlanksCount, 
-    oneWordAnswerCount, matchTheFollowingCount, graphQuestionCount 
+    mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, 
+    trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, 
+    oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, 
+    graphQuestionCount, graphQuestionMarks 
   } = formData;
 
   const questionBreakdown = [
-    { name: 'Multiple Choice Questions (MCQs)', count: mcqCount },
-    { name: 'True/False Questions', count: trueFalseCount },
-    { name: 'Fill in the Blanks Questions', count: fillInTheBlanksCount },
-    { name: 'One Word Answer Questions', count: oneWordAnswerCount },
-    { name: 'Short Answer Questions (2-3 sentences)', count: shortAnswerCount },
-    { name: 'Long Answer Questions (1-2 paragraphs)', count: longAnswerCount },
-    { name: 'Match the Following Questions', count: matchTheFollowingCount },
-    { name: 'Graph-based Questions (Social Science only)', count: graphQuestionCount }
+    { name: 'Multiple Choice Questions (MCQs)', count: mcqCount, marks: mcqMarks },
+    { name: 'True/False Questions', count: trueFalseCount, marks: trueFalseMarks },
+    { name: 'Fill in the Blanks Questions', count: fillInTheBlanksCount, marks: fillInTheBlanksMarks },
+    { name: 'One Word Answer Questions', count: oneWordAnswerCount, marks: oneWordAnswerMarks },
+    { name: 'Short Answer Questions (2-3 sentences)', count: shortAnswerCount, marks: shortAnswerMarks },
+    { name: 'Long Answer Questions (1-2 paragraphs)', count: longAnswerCount, marks: longAnswerMarks },
+    { name: 'Match the Following Questions', count: matchTheFollowingCount, marks: matchTheFollowingMarks },
+    { name: 'Graph-based Questions (Social Science only)', count: graphQuestionCount, marks: graphQuestionMarks }
   ]
   .filter(q => q.count > 0)
-  .map(q => `- ${q.name}: ${q.count}`)
+  .map(q => `- ${q.name}: ${q.count} questions, each worth ${q.marks} marks.`)
   .join('\n');
 
 
@@ -41,8 +43,8 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     ${questionBreakdown}
 
     **Core Instructions:**
-    1.  **Generate Exact Counts:** Create the exact number of questions requested for each type. Group them into distinct sections (e.g., 'Section A: MCQs').
-    2.  **Distribute Marks:** Distribute the ${totalMarks} marks logically across all generated questions. The sum of marks for all questions MUST equal the **Total Marks**.
+    1.  **Generate Exact Counts & Marks:** Create the exact number of questions requested for each type with the specified marks for each question. Group them into distinct sections (e.g., 'Section A: MCQs').
+    2.  **Strict Total Marks Adherence:** The sum of marks for all generated questions MUST equal the **Total Marks**.
     3.  **Content Source:** The questions should be drawn from the list of chapters provided.
     4.  **Question Type Formatting:**
         - **MCQs:** Provide exactly 4 distinct options.

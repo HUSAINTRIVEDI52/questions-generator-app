@@ -1,5 +1,5 @@
-// FIX: Export the `QuestionType` to make it available for other modules.
-export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'One Word Answer' | 'Short Answer' | 'Long Answer' | 'Match the Following' | 'Graph Question';
+// FIX: Re-export QuestionType so it can be imported from this module.
+export type { QuestionType } from './constants';
 
 export interface Question {
   id: string;
@@ -54,7 +54,7 @@ export interface FormState {
     // Mode specific fields
     generationMode: 'simple' | 'advanced';
     
-    // For Simple Mode
+    // For Simple Mode - Counts
     chapters: string[];
     mcqCount: number;
     shortAnswerCount: number;
@@ -64,6 +64,16 @@ export interface FormState {
     oneWordAnswerCount: number;
     matchTheFollowingCount: number;
     graphQuestionCount: number;
+
+    // For Simple Mode - Marks per question
+    mcqMarks: number;
+    shortAnswerMarks: number;
+    longAnswerMarks: number;
+    trueFalseMarks: number;
+    fillInTheBlanksMarks: number;
+    oneWordAnswerMarks: number;
+    matchTheFollowingMarks: number;
+    graphQuestionMarks: number;
 
     // For Advanced Mode
     chapterConfigs: ChapterQuestionConfig[];
