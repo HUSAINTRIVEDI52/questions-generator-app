@@ -157,7 +157,7 @@ const App: React.FC = () => {
     return (
         <div className="bg-slate-50 min-h-screen text-slate-700 flex flex-col" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-main)' }}>
             <Header isMobile={true} onGoHome={() => setView('home')} showTitle={view !== 'form'} />
-            <main className="flex-grow p-2 sm:p-4">
+            <main className={`flex-grow p-2 sm:p-4 ${view === 'form' ? 'flex items-center' : ''}`}>
                 {view === 'home' && <HomePage onStart={() => setView('form')} isDesktop={isDesktop} />}
                 {view === 'form' && <GeneratorForm onGenerate={handleGenerate} isLoading={isLoading} />}
                 {view === 'display' && (

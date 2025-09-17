@@ -28,8 +28,8 @@ const QuestionCounter: React.FC<{ label: string; value: number; onChange: (value
 
 
 export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, formHandlers, derivedState }) => {
-    const { chapters, totalMarks, mcqCount, shortAnswerCount, longAnswerCount, trueFalseCount, fillInTheBlanksCount, oneWordAnswerCount, matchTheFollowingCount, graphQuestionCount } = formState;
-    const { setChapters, setTotalMarks, setMcqCount, setShortAnswerCount, setLongAnswerCount, setTrueFalseCount, setFillInTheBlanksCount, setOneWordAnswerCount, setMatchTheFollowingCount, setGraphQuestionCount } = formHandlers;
+    const { chapters, mcqCount, shortAnswerCount, longAnswerCount, trueFalseCount, fillInTheBlanksCount, oneWordAnswerCount, matchTheFollowingCount, graphQuestionCount } = formState;
+    const { setChapters, setMcqCount, setShortAnswerCount, setLongAnswerCount, setTrueFalseCount, setFillInTheBlanksCount, setOneWordAnswerCount, setMatchTheFollowingCount, setGraphQuestionCount } = formHandlers;
     const { availableChapters } = derivedState;
 
     const selectAll = chapters.length === availableChapters.length && availableChapters.length > 0;
@@ -64,19 +64,6 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
                         )) : <p className="text-sm text-slate-400 text-center py-4">Please select a subject to see chapters.</p>}
                     </div>
                 </div>
-            </div>
-
-            {/* Total Marks */}
-            <div>
-                <label htmlFor="totalMarks" className={labelStyles}>Total Marks</label>
-                <input
-                    type="number"
-                    id="totalMarks"
-                    value={totalMarks}
-                    onChange={e => setTotalMarks(Number(e.target.value))}
-                    min="1"
-                    className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                />
             </div>
 
             {/* Question Counts */}
