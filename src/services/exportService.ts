@@ -19,12 +19,11 @@ export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
         const questions = section.questions.map((q, qIndex) => {
             const questionChildren = [];
 
-            // Question Text and Marks
+            // Question Text
             questionChildren.push(new Paragraph({
                 children: [
                     new TextRun({ text: `${qIndex + 1}. `, bold: true }),
                     new TextRun(q.question_text),
-                    new TextRun({ text: ` [${q.marks} Marks]`, bold: true, italics: true }),
                 ],
                 spacing: { after: 100 },
             }));

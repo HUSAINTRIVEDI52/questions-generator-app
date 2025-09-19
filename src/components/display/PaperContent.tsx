@@ -30,19 +30,18 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
                             <li key={q.id} className="break-words">
                                 <div className="flex justify-between items-start">
                                     <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
-                                    <div className="flex items-center ml-4 flex-shrink-0">
-                                        <span className="text-sm font-semibold whitespace-nowrap">[{q.marks} Marks]</span>
-                                        {!showAnswers && (
+                                    {!showAnswers && (
+                                        <div className="ml-4 flex-shrink-0">
                                             <button
                                                 onClick={() => onRegenerateQuestion(q.id, sectionIndex)}
                                                 disabled={regeneratingQuestionId !== null}
-                                                className="ml-2 p-1 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                                                className="p-1 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                                                 aria-label="Regenerate question"
                                             >
                                                 {regeneratingQuestionId === q.id ? <SpinnerIcon /> : <RegenerateIcon />}
                                             </button>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {q.options && (
