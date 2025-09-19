@@ -27,8 +27,8 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
 
   return `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
+    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the **latest updated GSEB/NCERT curriculum** for the specified grade and subject. Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official curriculum is mandatory.
     Your task is to create a complete and well-structured question paper based on the following specifications.
-    The questions must be relevant to the latest and most current GSEB curriculum for the specified grade, medium, subject, and chapters.
 
     **Paper Details:**
     - **Institution Name:** ${institutionName}
@@ -54,7 +54,7 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
         - **Graph Questions (Social Science):** Describe a data set or scenario in 'question_text' and ask an analytical question. You do not need to generate a visual graph.
-        - **Diagram Questions (Mathematics):** You MUST generate a valid SVG string for the 'diagram_svg' property. The SVG should be clear, well-formatted, and accurately represent the geometric problem. The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme. Include labels, angles, and side lengths as specified in the question.
+        - **Diagram Questions (Mathematics):** For topics like Geometry, Mensuration, or Data Handling (e.g., pie charts), you MUST generate a valid SVG string for the 'diagram_svg' property. The SVG must be clear, well-formatted, and accurately represent the problem. For pie charts, ensure all sectors are clearly labeled. **Crucially, ensure that all text labels (like angle measures, side lengths, or percentages) are placed clearly and do not overlap with lines, arcs, or other labels.** The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme.
         - **Short/Long Answers:** Provide a model correct answer.
     5.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
   `;
@@ -77,6 +77,7 @@ const createAdvancedGenerationPrompt = (formData: FormState): string => {
 
   return `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
+    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the **latest updated GSEB/NCERT curriculum** for the specified grade and subject. Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official curriculum is mandatory.
     Your task is to create a complete and well-structured question paper based on the following chapter-specific instructions.
 
     **Paper Details:**
@@ -102,7 +103,7 @@ const createAdvancedGenerationPrompt = (formData: FormState): string => {
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
         - **Graph Questions (Social Science):** Describe a data set or scenario in 'question_text' and ask an analytical question. You do not need to generate a visual graph.
-        - **Diagram Questions (Mathematics):** You MUST generate a valid SVG string for the 'diagram_svg' property. The SVG should be clear, well-formatted, and accurately represent the geometric problem. The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme. Include labels, angles, and side lengths as specified in the question.
+        - **Diagram Questions (Mathematics):** For topics like Geometry, Mensuration, or Data Handling (e.g., pie charts), you MUST generate a valid SVG string for the 'diagram_svg' property. The SVG must be clear, well-formatted, and accurately represent the problem. For pie charts, ensure all sectors are clearly labeled. **Crucially, ensure that all text labels (like angle measures, side lengths, or percentages) are placed clearly and do not overlap with lines, arcs, or other labels.** The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme.
         - **Short/Long Answers:** Provide a model correct answer.
     5.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
     `;
@@ -143,6 +144,7 @@ export const createRegenerationPrompt = (
     - Medium: ${paperContext.medium}
     - Subject: ${paperContext.subject}
     - Content Source: The new question can be from ANY of the following chapters: ${chapters.join(', ')}
+    - Curriculum: The question must be strictly based on the latest updated GSEB/NCERT curriculum.
     - Difficulty Level: ${paperContext.difficulty}
     - Marks: ${questionToReplace.marks}
     - Structure: ${getQuestionStructurePrompt(questionToReplace)}
@@ -150,6 +152,7 @@ export const createRegenerationPrompt = (
     **Instructions:**
     1.  Generate ONE new question that meets all the above specifications.
     2.  Critically, the new question's topic or focus must be different from the original question text provided. Do not just rephrase the old question.
-    3.  The response must be a single, valid JSON object that adheres to the provided schema for a single question. Do not include any extra text or markdown.
+    3.  If it is a diagram-based question, ensure labels do not overlap with diagram lines.
+    4.  The response must be a single, valid JSON object that adheres to the provided schema for a single question. Do not include any extra text or markdown.
     `;
 };
