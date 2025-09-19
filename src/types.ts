@@ -5,6 +5,7 @@ export type { QuestionType } from './constants';
 
 export interface Question {
   id: string;
+  chapter: string; // The source chapter of the question
   question_text: string;
   diagram_svg?: string; // An SVG string for geometric diagrams
   options?: string[]; // For MCQ

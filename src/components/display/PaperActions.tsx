@@ -41,7 +41,7 @@ export const PaperActions: React.FC<PaperActionsProps> = ({ paper, onNewPaper, s
         paperToCopy.sections.forEach(section => {
             text += `${section.section_title}\n\n`;
             section.questions.forEach((q, qIndex) => {
-                text += `${qIndex + 1}. ${q.question_text} [${q.marks} Marks]\n`;
+                text += `${qIndex + 1}. ${q.question_text}\n`;
                 if (q.diagram_svg) {
                     text += '   [Diagram for question]\n';
                 }

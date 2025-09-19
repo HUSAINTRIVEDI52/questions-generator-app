@@ -67,10 +67,24 @@ const App: React.FC = () => {
             return;
         }
 
-        const chaptersForRegen = formStateForRegen.generationMode === 'simple'
-            ? formStateForRegen.chapters
-            : formStateForRegen.chapterConfigs.filter(c => c.enabled).map(c => c.chapter);
+        // Determine the chapter for regeneration.
+        // The new question should come from the same chapter as the original.
+        let chaptersForRegen: string[];
+        if (questionToReplace.chapter) {
+            chaptersForRegen = [questionToReplace.chapter];
+        } else {
+            // Fallback for older data that might not have the chapter property.
+            console.warn(`Question ID ${questionId} does not have a chapter. Falling back to all selected chapters for regeneration.`);
+            chaptersForRegen = formStateForRegen.generationMode === 'simple'
+                ? formStateForRegen.chapters
+                : formStateForRegen.chapterConfigs.filter(c => c.enabled).map(c => c.chapter);
+        }
 
+        if (chaptersForRegen.length === 0) {
+             setRegenerationError("Could not determine the chapter for regeneration.");
+             setRegeneratingQuestionId(null);
+             return;
+        }
 
         try {
             const newQuestionData = await regenerateQuestion(

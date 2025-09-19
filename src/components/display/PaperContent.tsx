@@ -62,10 +62,10 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
                                 )}
 
                                 {q.options && (
-                                    <ul className="list-none pl-6 mt-2 space-y-1">
+                                    <ul className="list-none pl-6 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                                         {q.options.map((option, optIndex) => (
                                             <li key={optIndex} className={`text-slate-700 flex items-start ${showAnswers && option === q.correct_answer ? 'font-bold text-green-700' : ''}`}>
-                                                <span className="mr-2">{String.fromCharCode(97 + optIndex)})</span>
+                                                <span className="mr-2 font-semibold">{String.fromCharCode(97 + optIndex)})</span>
                                                 <span>{option}</span>
                                             </li>
                                         ))}

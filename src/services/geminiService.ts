@@ -9,6 +9,10 @@ if (!process.env.API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const baseQuestionProperties = {
+  chapter: { 
+    type: Type.STRING,
+    description: "The name of the chapter this question is sourced from. This MUST match one of the chapters provided in the prompt's context."
+  },
   question_text: { type: Type.STRING },
   diagram_svg: { 
     type: Type.STRING,
@@ -55,7 +59,7 @@ const paperSchema = {
             items: {
               type: Type.OBJECT,
               properties: baseQuestionProperties,
-              required: ["question_text", "correct_answer", "marks"]
+              required: ["chapter", "question_text", "correct_answer", "marks"]
             }
           }
         },
@@ -69,7 +73,7 @@ const paperSchema = {
 const singleQuestionSchema = {
   type: Type.OBJECT,
   properties: baseQuestionProperties,
-  required: ["question_text", "correct_answer", "marks"]
+  required: ["chapter", "question_text", "correct_answer", "marks"]
 };
 
 
