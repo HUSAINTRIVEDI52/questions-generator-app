@@ -36,8 +36,7 @@ export const PaperActions: React.FC<PaperActionsProps> = ({ paper, onNewPaper, s
         text += `${paperToCopy.title}\n`;
         text += `${paperToCopy.grade} - ${paperToCopy.subject}\n\n`;
         text += `Total Marks: ${paperToCopy.total_marks}\t`;
-        text += `Duration: ${paperToCopy.duration_minutes} minutes\n`;
-        text += '--------------------------------------------------\n\n';
+        text += `Duration: ${paperToCopy.duration_minutes} minutes\n\n`;
 
         paperToCopy.sections.forEach(section => {
             text += `${section.section_title}\n\n`;
