@@ -26,47 +26,6 @@
   }
 }
 
-/* CUSTOM STYLES TO PREVENT BORDERS FROM BEING COPIED ON MOBILE */
-.paper-header-info {
-  position: relative;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.paper-header-info::before,
-.paper-header-info::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: #e5e7eb; /* slate-200 */
-}
-
-.paper-header-info::before {
-  top: 0;
-}
-
-.paper-header-info::after {
-  bottom: 0;
-}
-
-.paper-section-title {
-  position: relative;
-  padding-bottom: 0.5rem; /* pb-2 */
-}
-
-.paper-section-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px; /* border-b-2 */
-  background-color: #94a3b8; /* border-slate-400 */
-}
-
-
 /* PRINT STYLES */
 @media print {
   @page {

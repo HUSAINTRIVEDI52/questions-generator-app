@@ -16,15 +16,22 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
                 <h1 className="text-3xl font-bold">{paper.institution_name}</h1>
                 <h2 className="text-xl font-semibold text-slate-700 mt-1">{paper.title}</h2>
                 <h3 className="text-lg font-medium text-slate-600">{paper.grade} - {paper.subject}</h3>
-                <div className="flex justify-between items-center mt-4 text-sm max-w-lg mx-auto paper-header-info">
-                    <span><strong>Total Marks:</strong> {paper.total_marks}</span>
-                    <span><strong>Duration:</strong> {paper.duration_minutes} minutes</span>
+                <div className="mt-4 text-sm max-w-lg mx-auto">
+                    <div className="h-px bg-slate-200" aria-hidden="true"></div>
+                    <div className="flex justify-between items-center py-2">
+                        <span><strong>Total Marks:</strong> {paper.total_marks}</span>
+                        <span><strong>Duration:</strong> {paper.duration_minutes} minutes</span>
+                    </div>
+                    <div className="h-px bg-slate-200" aria-hidden="true"></div>
                 </div>
             </header>
 
             {paper.sections.map((section, sectionIndex) => (
                 <section key={sectionIndex} className="mb-8">
-                    <h3 className="text-lg font-bold paper-section-title mb-4">{section.section_title}</h3>
+                    <div className="mb-4">
+                        <h3 className="text-lg font-bold pb-2">{section.section_title}</h3>
+                        <div className="h-[2px] bg-slate-400" aria-hidden="true"></div>
+                    </div>
                     <ol className="list-decimal list-inside space-y-6">
                         {section.questions.map((q) => (
                             <li key={q.id} className="break-words">
