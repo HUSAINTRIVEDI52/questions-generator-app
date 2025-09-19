@@ -106,6 +106,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       oneWordAnswerCount: 0,
       matchTheFollowingCount: 0,
       graphQuestionCount: 0,
+      diagramQuestionCount: 0,
       mcqMarks: SIMPLE_MODE_MARKS_SCHEME.mcqCount,
       shortAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.shortAnswerCount,
       longAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.longAnswerCount,
@@ -114,6 +115,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       oneWordAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.oneWordAnswerCount,
       matchTheFollowingMarks: SIMPLE_MODE_MARKS_SCHEME.matchTheFollowingCount,
       graphQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.graphQuestionCount,
+      diagramQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.diagramQuestionCount,
       chapterConfigs: [],
     });
   };

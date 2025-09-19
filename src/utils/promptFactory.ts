@@ -6,7 +6,7 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, 
     trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, 
     oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, 
-    graphQuestionCount, graphQuestionMarks 
+    graphQuestionCount, graphQuestionMarks, diagramQuestionCount, diagramQuestionMarks
   } = formData;
 
   const questionBreakdown = [
@@ -17,7 +17,8 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     { name: 'Short Answer Questions (2-3 sentences)', count: shortAnswerCount, marks: shortAnswerMarks },
     { name: 'Long Answer Questions (1-2 paragraphs)', count: longAnswerCount, marks: longAnswerMarks },
     { name: 'Match the Following Questions', count: matchTheFollowingCount, marks: matchTheFollowingMarks },
-    { name: 'Graph-based Questions (Social Science only)', count: graphQuestionCount, marks: graphQuestionMarks }
+    { name: 'Graph-based Questions (Social Science only)', count: graphQuestionCount, marks: graphQuestionMarks },
+    { name: 'Diagram-based Questions (Mathematics only)', count: diagramQuestionCount, marks: diagramQuestionMarks }
   ]
   .filter(q => q.count > 0)
   .map(q => `- ${q.name}: ${q.count} questions, each worth ${q.marks} marks.`)
@@ -53,6 +54,7 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
         - **Graph Questions (Social Science):** Describe a data set or scenario in 'question_text' and ask an analytical question. You do not need to generate a visual graph.
+        - **Diagram Questions (Mathematics):** You MUST generate a valid SVG string for the 'diagram_svg' property. The SVG should be clear, well-formatted, and accurately represent the geometric problem. The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme. Include labels, angles, and side lengths as specified in the question.
         - **Short/Long Answers:** Provide a model correct answer.
     5.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
   `;
@@ -100,6 +102,7 @@ const createAdvancedGenerationPrompt = (formData: FormState): string => {
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
         - **Graph Questions (Social Science):** Describe a data set or scenario in 'question_text' and ask an analytical question. You do not need to generate a visual graph.
+        - **Diagram Questions (Mathematics):** You MUST generate a valid SVG string for the 'diagram_svg' property. The SVG should be clear, well-formatted, and accurately represent the geometric problem. The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme. Include labels, angles, and side lengths as specified in the question.
         - **Short/Long Answers:** Provide a model correct answer.
     5.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
     `;
@@ -114,6 +117,7 @@ export const createGenerationPrompt = (formData: FormState): string => {
 
 
 const getQuestionStructurePrompt = (question: Question): string => {
+    if (question.diagram_svg) return 'It must be a "Diagram-based Question" requiring a geometric figure.';
     if (question.options) return 'It must be a Multiple Choice Question with exactly 4 options.';
     if (question.match_a) return 'It must be a "Match the Following" question with two corresponding lists.';
     if (question.marks <= 1) return 'It must be a "One Word Answer", "True/False", or "Fill in the Blanks" type question.';

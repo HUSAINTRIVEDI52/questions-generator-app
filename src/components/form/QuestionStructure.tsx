@@ -8,17 +8,21 @@ interface QuestionStructureProps {
     marksDistribution: MarksDistribution[];
     onDistributionChange: (newDistribution: MarksDistribution[]) => void;
     subject: string;
+    grade: string;
 }
 
-export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistribution, onDistributionChange, subject }) => {
+export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistribution, onDistributionChange, subject, grade }) => {
 
     const availableQuestionTypes = React.useMemo(() => {
         const baseTypes: QuestionType[] = ['MCQ', 'True/False', 'Fill in the Blanks', 'One Word Answer', 'Short Answer', 'Long Answer', 'Match the Following'];
         if (subject && subject.toLowerCase().includes('social science')) {
-            return [...baseTypes, 'Graph Question'];
+            baseTypes.push('Graph Question');
+        }
+        if (subject && subject.toLowerCase().includes('math') && (grade === 'Class 8' || grade === 'Class 9')) {
+            baseTypes.push('Diagram Question');
         }
         return baseTypes;
-    }, [subject]);
+    }, [subject, grade]);
 
 
     const handleDistributionChange = (id: string, field: keyof Omit<MarksDistribution, 'id'>, value: string | number) => {

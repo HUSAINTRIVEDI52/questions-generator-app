@@ -6,6 +6,7 @@ export type { QuestionType } from './constants';
 export interface Question {
   id: string;
   question_text: string;
+  diagram_svg?: string; // An SVG string for geometric diagrams
   options?: string[]; // For MCQ
   match_a?: string[]; // For Match the Following - Column A
   match_b?: string[]; // For Match the Following - Column B
@@ -66,6 +67,7 @@ export interface FormState {
     oneWordAnswerCount: number;
     matchTheFollowingCount: number;
     graphQuestionCount: number;
+    diagramQuestionCount: number;
 
     // For Simple Mode - Marks per question
     mcqMarks: number;
@@ -76,6 +78,7 @@ export interface FormState {
     oneWordAnswerMarks: number;
     matchTheFollowingMarks: number;
     graphQuestionMarks: number;
+    diagramQuestionMarks: number;
 
     // For Advanced Mode
     chapterConfigs: ChapterQuestionConfig[];

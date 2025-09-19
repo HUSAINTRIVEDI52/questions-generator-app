@@ -44,6 +44,16 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
                                     )}
                                 </div>
 
+                                {q.diagram_svg && (
+                                    <div className="my-4 max-w-xs mx-auto p-2 border border-slate-200 rounded-md bg-slate-50/50 flex justify-center items-center text-slate-800">
+                                        <div
+                                            style={{ width: '100%', height: 'auto' }}
+                                            dangerouslySetInnerHTML={{ __html: q.diagram_svg }}
+                                            aria-label="Geometric diagram for the question"
+                                        />
+                                    </div>
+                                )}
+
                                 {q.options && (
                                     <ul className="list-none pl-6 mt-2 space-y-1">
                                         {q.options.map((option, optIndex) => (

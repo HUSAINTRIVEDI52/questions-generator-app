@@ -42,6 +42,9 @@ export const PaperActions: React.FC<PaperActionsProps> = ({ paper, onNewPaper, s
             text += `${section.section_title}\n\n`;
             section.questions.forEach((q, qIndex) => {
                 text += `${qIndex + 1}. ${q.question_text} [${q.marks} Marks]\n`;
+                if (q.diagram_svg) {
+                    text += '   [Diagram for question]\n';
+                }
                 if (q.options) {
                     q.options.forEach((option, optIndex) => {
                         text += `   ${String.fromCharCode(97 + optIndex)}) ${option}\n`;

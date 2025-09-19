@@ -13,6 +13,7 @@ const initialCounts = {
     oneWordAnswerCount: 0,
     matchTheFollowingCount: 0,
     graphQuestionCount: 0,
+    diagramQuestionCount: 0,
 };
 
 const initialMarks = {
@@ -24,6 +25,7 @@ const initialMarks = {
     oneWordAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.oneWordAnswerCount,
     matchTheFollowingMarks: SIMPLE_MODE_MARKS_SCHEME.matchTheFollowingCount,
     graphQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.graphQuestionCount,
+    diagramQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.diagramQuestionCount,
 };
 
 const initialFormState: FormState = {
@@ -74,7 +76,7 @@ export const useFormState = () => {
                 mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks,
                 trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks,
                 oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks,
-                graphQuestionCount, graphQuestionMarks,
+                graphQuestionCount, graphQuestionMarks, diagramQuestionCount, diagramQuestionMarks,
             } = formState;
 
             const newTotalMarks = 
@@ -85,7 +87,8 @@ export const useFormState = () => {
                 (fillInTheBlanksCount * fillInTheBlanksMarks) +
                 (oneWordAnswerCount * oneWordAnswerMarks) +
                 (matchTheFollowingCount * matchTheFollowingMarks) +
-                (graphQuestionCount * graphQuestionMarks);
+                (graphQuestionCount * graphQuestionMarks) +
+                (diagramQuestionCount * diagramQuestionMarks);
             
             setFormState(prev => ({ ...prev, totalMarks: newTotalMarks }));
         }
@@ -99,6 +102,7 @@ export const useFormState = () => {
         formState.oneWordAnswerCount, formState.oneWordAnswerMarks,
         formState.matchTheFollowingCount, formState.matchTheFollowingMarks,
         formState.graphQuestionCount, formState.graphQuestionMarks,
+        formState.diagramQuestionCount, formState.diagramQuestionMarks,
     ]);
 
     // Effect to dynamically update total marks for advanced mode
@@ -141,6 +145,7 @@ export const useFormState = () => {
         setOneWordAnswerCount: createHandler('oneWordAnswerCount'),
         setMatchTheFollowingCount: createHandler('matchTheFollowingCount'),
         setGraphQuestionCount: createHandler('graphQuestionCount'),
+        setDiagramQuestionCount: createHandler('diagramQuestionCount'),
         setMcqMarks: createHandler('mcqMarks'),
         setShortAnswerMarks: createHandler('shortAnswerMarks'),
         setLongAnswerMarks: createHandler('longAnswerMarks'),
@@ -149,6 +154,7 @@ export const useFormState = () => {
         setOneWordAnswerMarks: createHandler('oneWordAnswerMarks'),
         setMatchTheFollowingMarks: createHandler('matchTheFollowingMarks'),
         setGraphQuestionMarks: createHandler('graphQuestionMarks'),
+        setDiagramQuestionMarks: createHandler('diagramQuestionMarks'),
         setChapterConfigs,
     }), [createHandler, setChapterConfigs]);
 

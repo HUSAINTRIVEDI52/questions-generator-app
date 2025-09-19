@@ -14,7 +14,7 @@ interface ContentSelectionProps {
 const labelStyles = "block text-sm font-semibold text-slate-600 mb-1";
 
 export const ContentSelection: React.FC<ContentSelectionProps> = ({ formState, formHandlers }) => {
-    const { subject, chapterConfigs } = formState;
+    const { subject, grade, chapterConfigs } = formState;
     const { setChapterConfigs } = formHandlers;
 
     const handleChapterToggle = (chapterName: string, enabled: boolean) => {
@@ -67,6 +67,7 @@ export const ContentSelection: React.FC<ContentSelectionProps> = ({ formState, f
                                         marksDistribution={config.distribution}
                                         onDistributionChange={(newDist) => handleChapterDistributionChange(config.chapter, newDist)}
                                         subject={subject}
+                                        grade={grade}
                                     />
                                 </div>
                             )}

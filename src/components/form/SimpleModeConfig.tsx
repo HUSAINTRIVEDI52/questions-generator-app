@@ -105,6 +105,9 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
                     {formState.subject.toLowerCase().includes('social science') && (
                          <QuestionConfigRow label="Graph-based" count={formState.graphQuestionCount} onCountChange={formHandlers.setGraphQuestionCount} marks={formState.graphQuestionMarks} onMarksChange={formHandlers.setGraphQuestionMarks} />
                     )}
+                    {formState.subject.toLowerCase().includes('math') && (formState.grade === 'Class 8' || formState.grade === 'Class 9') && (
+                        <QuestionConfigRow label="Diagram-based" count={formState.diagramQuestionCount} onCountChange={formHandlers.setDiagramQuestionCount} marks={formState.diagramQuestionMarks} onMarksChange={formHandlers.setDiagramQuestionMarks} />
+                    )}
                 </div>
             </div>
 

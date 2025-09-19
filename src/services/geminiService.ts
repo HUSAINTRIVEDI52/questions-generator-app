@@ -10,6 +10,10 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const baseQuestionProperties = {
   question_text: { type: Type.STRING },
+  diagram_svg: { 
+    type: Type.STRING,
+    description: "For Diagram-based questions in Mathematics, this MUST contain a valid, self-contained SVG string representing the geometric diagram. The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should have a transparent background and use 'currentColor' for strokes and fills to adapt to theming. Omit this property for all other question types." 
+  },
   options: { 
       type: Type.ARRAY,
       description: "Array of 4 option strings for MCQs. Omit for other question types.",
