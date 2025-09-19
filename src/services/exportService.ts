@@ -108,7 +108,7 @@ export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
             if (q.diagram_svg) {
                 try {
                     const { buffer, width, height } = await svgToPngBlob(q.diagram_svg);
-                    // FIX: Added 'type: "png"' to the ImageRun options to satisfy IImageOptions interface from the 'docx' library. The svgToPngBlob function converts the SVG to a PNG buffer.
+                    // FIX: The 'type' property for ImageRun must be a valid image format. Since the buffer contains PNG data, "png" is the correct value. For docx v9+, this property may not be required when using a buffer, but providing it ensures compatibility.
                     const image = new ImageRun({
                         type: "png",
                         data: buffer,
