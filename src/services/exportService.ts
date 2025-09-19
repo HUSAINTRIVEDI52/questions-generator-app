@@ -108,7 +108,8 @@ export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
             if (q.diagram_svg) {
                 try {
                     const { buffer, width, height } = await svgToPngBlob(q.diagram_svg);
-                    // FIX: Add the `type: "buffer"` property to the ImageRun options. This is required by recent versions of the `docx` library to correctly discriminate the image data type.
+                    // FIX: The `docx` library (v8+) requires a `type` property for the ImageRun constructor.
+                    // For an ArrayBuffer of image data, the type must be "buffer".
                     const image = new ImageRun({
                         type: "buffer",
                         data: buffer,

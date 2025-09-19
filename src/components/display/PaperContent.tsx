@@ -16,7 +16,7 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
                 <h1 className="text-3xl font-bold">{paper.institution_name}</h1>
                 <h2 className="text-xl font-semibold text-slate-700 mt-1">{paper.title}</h2>
                 <h3 className="text-lg font-medium text-slate-600">{paper.grade} - {paper.subject}</h3>
-                <div className="flex justify-between items-center mt-4 text-sm max-w-lg mx-auto border-t border-b py-2">
+                <div className="flex justify-between items-center mt-4 text-sm max-w-lg mx-auto paper-header-info">
                     <span><strong>Total Marks:</strong> {paper.total_marks}</span>
                     <span><strong>Duration:</strong> {paper.duration_minutes} minutes</span>
                 </div>
@@ -24,7 +24,7 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
 
             {paper.sections.map((section, sectionIndex) => (
                 <section key={sectionIndex} className="mb-8">
-                    <h3 className="text-lg font-bold border-b-2 border-slate-400 pb-2 mb-4">{section.section_title}</h3>
+                    <h3 className="text-lg font-bold paper-section-title mb-4">{section.section_title}</h3>
                     <ol className="list-decimal list-inside space-y-6">
                         {section.questions.map((q) => (
                             <li key={q.id} className="break-words">
