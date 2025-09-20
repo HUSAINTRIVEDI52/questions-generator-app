@@ -13,10 +13,12 @@ interface QuestionStructureProps {
 
 export const QuestionStructure: React.FC<QuestionStructureProps> = ({ marksDistribution, onDistributionChange, subject, grade }) => {
 
+    // UPDATE: Replaced 'Graph Question' with 'Map Question' and 'Point-wise Question' for Social Science.
     const availableQuestionTypes = React.useMemo(() => {
         const baseTypes: QuestionType[] = ['MCQ', 'True/False', 'Fill in the Blanks', 'One Word Answer', 'Short Answer', 'Long Answer', 'Match the Following'];
         if (subject && subject.toLowerCase().includes('social science')) {
-            baseTypes.push('Graph Question');
+            baseTypes.push('Map Question');
+            baseTypes.push('Point-wise Question');
         }
         if (subject && subject.toLowerCase().includes('math') && (grade === 'Class 8' || grade === 'Class 9')) {
             baseTypes.push('Diagram Question');

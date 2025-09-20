@@ -4,6 +4,7 @@ import { GSEB_CURRICULUM, SIMPLE_MODE_MARKS_SCHEME } from '../constants';
 
 const grades = Object.keys(GSEB_CURRICULUM).sort((a, b) => parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1]));
 
+// UPDATE: Replaced graphQuestionCount with mapQuestionCount and added pointwiseQuestionCount.
 const initialCounts = {
     mcqCount: 5,
     shortAnswerCount: 5,
@@ -12,10 +13,12 @@ const initialCounts = {
     fillInTheBlanksCount: 0,
     oneWordAnswerCount: 0,
     matchTheFollowingCount: 0,
-    graphQuestionCount: 0,
+    mapQuestionCount: 0,
+    pointwiseQuestionCount: 0,
     diagramQuestionCount: 0,
 };
 
+// UPDATE: Replaced graphQuestionMarks with mapQuestionMarks and added pointwiseQuestionMarks.
 const initialMarks = {
     mcqMarks: SIMPLE_MODE_MARKS_SCHEME.mcqCount,
     shortAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.shortAnswerCount,
@@ -24,7 +27,8 @@ const initialMarks = {
     fillInTheBlanksMarks: SIMPLE_MODE_MARKS_SCHEME.fillInTheBlanksCount,
     oneWordAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.oneWordAnswerCount,
     matchTheFollowingMarks: SIMPLE_MODE_MARKS_SCHEME.matchTheFollowingCount,
-    graphQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.graphQuestionCount,
+    mapQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.mapQuestionCount,
+    pointwiseQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.pointwiseQuestionCount,
     diagramQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.diagramQuestionCount,
 };
 
@@ -70,13 +74,15 @@ export const useFormState = () => {
     }, [availableChapters]);
 
     // Effect to dynamically update total marks for simple mode
+    // UPDATE: Replaced graph question logic with map and pointwise question logic.
     useEffect(() => {
         if (formState.generationMode === 'simple') {
             const {
                 mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks,
                 trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks,
                 oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks,
-                graphQuestionCount, graphQuestionMarks, diagramQuestionCount, diagramQuestionMarks,
+                mapQuestionCount, mapQuestionMarks, pointwiseQuestionCount, pointwiseQuestionMarks,
+                diagramQuestionCount, diagramQuestionMarks,
             } = formState;
 
             const newTotalMarks = 
@@ -87,7 +93,8 @@ export const useFormState = () => {
                 (fillInTheBlanksCount * fillInTheBlanksMarks) +
                 (oneWordAnswerCount * oneWordAnswerMarks) +
                 (matchTheFollowingCount * matchTheFollowingMarks) +
-                (graphQuestionCount * graphQuestionMarks) +
+                (mapQuestionCount * mapQuestionMarks) +
+                (pointwiseQuestionCount * pointwiseQuestionMarks) +
                 (diagramQuestionCount * diagramQuestionMarks);
             
             setFormState(prev => ({ ...prev, totalMarks: newTotalMarks }));
@@ -101,7 +108,8 @@ export const useFormState = () => {
         formState.fillInTheBlanksCount, formState.fillInTheBlanksMarks,
         formState.oneWordAnswerCount, formState.oneWordAnswerMarks,
         formState.matchTheFollowingCount, formState.matchTheFollowingMarks,
-        formState.graphQuestionCount, formState.graphQuestionMarks,
+        formState.mapQuestionCount, formState.mapQuestionMarks,
+        formState.pointwiseQuestionCount, formState.pointwiseQuestionMarks,
         formState.diagramQuestionCount, formState.diagramQuestionMarks,
     ]);
 
@@ -128,6 +136,7 @@ export const useFormState = () => {
         }));
     }, []);
 
+    // UPDATE: Added handlers for new question types.
     const formHandlers = useMemo(() => ({
         setInstitutionName: createHandler('institutionName'),
         setTitle: createHandler('title'),
@@ -144,7 +153,8 @@ export const useFormState = () => {
         setFillInTheBlanksCount: createHandler('fillInTheBlanksCount'),
         setOneWordAnswerCount: createHandler('oneWordAnswerCount'),
         setMatchTheFollowingCount: createHandler('matchTheFollowingCount'),
-        setGraphQuestionCount: createHandler('graphQuestionCount'),
+        setMapQuestionCount: createHandler('mapQuestionCount'),
+        setPointwiseQuestionCount: createHandler('pointwiseQuestionCount'),
         setDiagramQuestionCount: createHandler('diagramQuestionCount'),
         setMcqMarks: createHandler('mcqMarks'),
         setShortAnswerMarks: createHandler('shortAnswerMarks'),
@@ -153,7 +163,8 @@ export const useFormState = () => {
         setFillInTheBlanksMarks: createHandler('fillInTheBlanksMarks'),
         setOneWordAnswerMarks: createHandler('oneWordAnswerMarks'),
         setMatchTheFollowingMarks: createHandler('matchTheFollowingMarks'),
-        setGraphQuestionMarks: createHandler('graphQuestionMarks'),
+        setMapQuestionMarks: createHandler('mapQuestionMarks'),
+        setPointwiseQuestionMarks: createHandler('pointwiseQuestionMarks'),
         setDiagramQuestionMarks: createHandler('diagramQuestionMarks'),
         setChapterConfigs,
     }), [createHandler, setChapterConfigs]);

@@ -16,13 +16,14 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
   const { formState, formHandlers, derivedState } = useFormState();
   const { areAnyChaptersEnabled } = derivedState;
 
+  // UPDATE: Updated to include map and pointwise questions in the validation logic.
   const submissionError = useMemo(() => {
     if (!areAnyChaptersEnabled) return "Please select at least one chapter.";
 
     let totalQuestions = 0;
 
     if (formState.generationMode === 'simple') {
-        const { mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, graphQuestionCount, graphQuestionMarks } = formState;
+        const { mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, mapQuestionCount, mapQuestionMarks, pointwiseQuestionCount, pointwiseQuestionMarks } = formState;
         
         const questionTypes = [
             { count: mcqCount, marks: mcqMarks, name: "MCQs" },
@@ -32,7 +33,8 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
             { count: fillInTheBlanksCount, marks: fillInTheBlanksMarks, name: "Fill in the Blanks" },
             { count: oneWordAnswerCount, marks: oneWordAnswerMarks, name: "One Word Answers" },
             { count: matchTheFollowingCount, marks: matchTheFollowingMarks, name: "Match the Following" },
-            { count: graphQuestionCount, marks: graphQuestionMarks, name: "Graph-based" },
+            { count: mapQuestionCount, marks: mapQuestionMarks, name: "Map-based" },
+            { count: pointwiseQuestionCount, marks: pointwiseQuestionMarks, name: "Point-wise" },
         ];
 
         for (const type of questionTypes) {

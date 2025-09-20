@@ -67,7 +67,8 @@ export interface FormState {
     fillInTheBlanksCount: number;
     oneWordAnswerCount: number;
     matchTheFollowingCount: number;
-    graphQuestionCount: number;
+    mapQuestionCount: number;
+    pointwiseQuestionCount: number;
     diagramQuestionCount: number;
 
     // For Simple Mode - Marks per question
@@ -78,7 +79,8 @@ export interface FormState {
     fillInTheBlanksMarks: number;
     oneWordAnswerMarks: number;
     matchTheFollowingMarks: number;
-    graphQuestionMarks: number;
+    mapQuestionMarks: number;
+    pointwiseQuestionMarks: number;
     diagramQuestionMarks: number;
 
     // For Advanced Mode

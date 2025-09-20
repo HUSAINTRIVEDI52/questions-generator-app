@@ -105,7 +105,9 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       fillInTheBlanksCount: 0,
       oneWordAnswerCount: 0,
       matchTheFollowingCount: 0,
-      graphQuestionCount: 0,
+      // FIX: Replace 'graphQuestionCount' with 'mapQuestionCount' and add 'pointwiseQuestionCount' to align with the FormState type.
+      mapQuestionCount: 0,
+      pointwiseQuestionCount: 0,
       diagramQuestionCount: 0,
       mcqMarks: SIMPLE_MODE_MARKS_SCHEME.mcqCount,
       shortAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.shortAnswerCount,
@@ -114,7 +116,9 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       fillInTheBlanksMarks: SIMPLE_MODE_MARKS_SCHEME.fillInTheBlanksCount,
       oneWordAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.oneWordAnswerCount,
       matchTheFollowingMarks: SIMPLE_MODE_MARKS_SCHEME.matchTheFollowingCount,
-      graphQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.graphQuestionCount,
+      // FIX: Replace 'graphQuestionMarks' with 'mapQuestionMarks' and add 'pointwiseQuestionMarks' to align with the FormState type and constants.
+      mapQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.mapQuestionCount,
+      pointwiseQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.pointwiseQuestionCount,
       diagramQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.diagramQuestionCount,
       chapterConfigs: [],
     });

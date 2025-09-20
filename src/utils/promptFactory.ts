@@ -6,9 +6,11 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, 
     trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, 
     oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, 
-    graphQuestionCount, graphQuestionMarks, diagramQuestionCount, diagramQuestionMarks
+    mapQuestionCount, mapQuestionMarks, pointwiseQuestionCount, pointwiseQuestionMarks,
+    diagramQuestionCount, diagramQuestionMarks
   } = formData;
 
+  // UPDATE: Replaced graph with map and pointwise questions.
   const questionBreakdown = [
     { name: 'Multiple Choice Questions (MCQs)', count: mcqCount, marks: mcqMarks },
     { name: 'True/False Questions', count: trueFalseCount, marks: trueFalseMarks },
@@ -17,7 +19,8 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     { name: 'Short Answer Questions (2-3 sentences)', count: shortAnswerCount, marks: shortAnswerMarks },
     { name: 'Long Answer Questions (1-2 paragraphs)', count: longAnswerCount, marks: longAnswerMarks },
     { name: 'Match the Following Questions', count: matchTheFollowingCount, marks: matchTheFollowingMarks },
-    { name: 'Graph-based Questions (Social Science only)', count: graphQuestionCount, marks: graphQuestionMarks },
+    { name: 'Map-based Questions (Social Science only)', count: mapQuestionCount, marks: mapQuestionMarks },
+    { name: 'Point-wise Questions (Social Science only)', count: pointwiseQuestionCount, marks: pointwiseQuestionMarks },
     { name: 'Diagram-based Questions (Mathematics only)', count: diagramQuestionCount, marks: diagramQuestionMarks }
   ]
   .filter(q => q.count > 0)
@@ -44,22 +47,24 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     ${questionBreakdown}
 
     **Core Instructions:**
-    1.  **Section Titles with Marks:** The \`section_title\` MUST be descriptive and include the total marks for that section. If all questions in a section have the same marks, also specify the marks per question. Examples: 'Section A: Multiple Choice Questions (Total Marks: 10 | 1 Mark Each)' or 'Section B: Short Answer Questions (Total Marks: 15)'.
-    2.  **Generate Exact Counts & Marks:** Create the exact number of questions requested for each type with the specified marks. Group them into distinct sections.
-    3.  **Strict Total Marks Adherence:** The sum of marks for all questions MUST equal the **Total Marks**.
-    4.  **Content Source:** Questions should be drawn from the list of chapters provided.
-    5.  **Source Chapter Attribution:** For EACH question generated, you MUST include the 'chapter' property in the JSON, specifying which of the source chapters it was derived from. The chapter name must be an exact match from the input.
-    6.  **Question Type Formatting:**
+    1.  **Question Depth and Complexity:** The complexity of the question and the expected length/detail of the answer MUST be proportional to the marks allocated. A 5-mark question should require a more detailed and comprehensive answer than a 3-mark question. For 'Point-wise' questions, the number of points expected in the answer should align with the marks (e.g., a 3-mark question might ask for 3 points).
+    2.  **Section Titles with Marks:** The \`section_title\` MUST be descriptive and include the total marks for that section. If all questions in a section have the same marks, also specify the marks per question. Examples: 'Section A: Multiple Choice Questions (Total Marks: 10 | 1 Mark Each)' or 'Section B: Short Answer Questions (Total Marks: 15)'.
+    3.  **Generate Exact Counts & Marks:** Create the exact number of questions requested for each type with the specified marks. Group them into distinct sections.
+    4.  **Strict Total Marks Adherence:** The sum of marks for all questions MUST equal the **Total Marks**.
+    5.  **Content Source:** Questions should be drawn from the list of chapters provided.
+    6.  **Source Chapter Attribution:** For EACH question generated, you MUST include the 'chapter' property in the JSON, specifying which of the source chapters it was derived from. The chapter name must be an exact match from the input.
+    7.  **Question Type Formatting:**
         - **MCQs:** Provide exactly 4 distinct options.
         - **True/False:** The answer must be 'True' or 'False'.
         - **Fill in the Blanks:** Provide the missing word(s) as the answer.
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
         - **Statistics Questions (Mathematics):** When generating questions for the 'Statistics' chapter, if the question asks to calculate mean, median, or mode, you MUST present the data in a clear text-based table within the \`question_text\`.
-        - **Graph Questions (Social Science):** Describe a data set or scenario in 'question_text' and ask an analytical question. You do not need to generate a visual graph.
+        - **Map-based Questions (Social Science only):** Provide a descriptive scenario and ask the student to identify, locate, or mark specific geographical features, historical places, or routes. You do not need to generate a visual map. The question should be answerable with text.
+        - **Point-wise Questions (Social Science only):** Frame a question where the answer is expected as a series of distinct points. The model answer should also be structured in points.
         - **Diagram Questions (Mathematics):** For topics like Geometry, Mensuration, or Data Handling (e.g., pie charts), you MUST generate a valid SVG string for the 'diagram_svg' property. The SVG must be clear, well-formatted, and accurately represent the problem. For pie charts, ensure all sectors are clearly labeled. **Crucially, ensure that all text labels (like angle measures, side lengths, or percentages) are placed clearly and do not overlap with lines, arcs, or other labels.** The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme.
-        - **Short/Long Answers:** Provide a model correct answer.
-    7.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
+        - **Short/Long Answers:** Provide a model correct answer that reflects the depth required by the allocated marks.
+    8.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
   `;
 };
 
@@ -96,22 +101,24 @@ const createAdvancedGenerationPrompt = (formData: FormState): string => {
     ${chapterDistributionText}
 
     **Core Instructions:**
-    1.  **Section Titles with Marks:** The \`section_title\` MUST be descriptive and include the total marks for that section. If all questions in a section have the same marks, also specify the marks per question. Examples: 'Section A: Multiple Choice Questions (Total Marks: 10 | 1 Mark Each)' or 'Section B: Short Answer Questions (Total Marks: 15)'.
-    2.  **Strict Chapter Adherence:** For each chapter listed above, you MUST generate the specified number and type of questions using content ONLY from that specific chapter. Do not mix content from different chapters.
-    3.  **Source Chapter Attribution:** For EACH question generated, you MUST include the 'chapter' property in the JSON, specifying which of the source chapters it was derived from. The chapter name must be an exact match from the input.
-    4.  **Accurate Marks:** The marks for each question must be exactly as specified. The sum of marks for all questions must equal the **Total Marks**.
-    5.  **Logical Sectioning:** Group the generated questions into logical sections (e.g., 'Section A: MCQs'). You can group questions of the same type from different chapters into the same section.
-    6.  **Question Type Formatting:**
+    1.  **Question Depth and Complexity:** The complexity of the question and the expected length/detail of the answer MUST be proportional to the marks allocated. A 5-mark question should require a more detailed and comprehensive answer than a 3-mark question. For 'Point-wise' questions, the number of points expected in the answer should align with the marks (e.g., a 3-mark question might ask for 3 points).
+    2.  **Section Titles with Marks:** The \`section_title\` MUST be descriptive and include the total marks for that section. If all questions in a section have the same marks, also specify the marks per question. Examples: 'Section A: Multiple Choice Questions (Total Marks: 10 | 1 Mark Each)' or 'Section B: Short Answer Questions (Total Marks: 15)'.
+    3.  **Strict Chapter Adherence:** For each chapter listed above, you MUST generate the specified number and type of questions using content ONLY from that specific chapter. Do not mix content from different chapters.
+    4.  **Source Chapter Attribution:** For EACH question generated, you MUST include the 'chapter' property in the JSON, specifying which of the source chapters it was derived from. The chapter name must be an exact match from the input.
+    5.  **Accurate Marks:** The marks for each question must be exactly as specified. The sum of marks for all questions must equal the **Total Marks**.
+    6.  **Logical Sectioning:** Group the generated questions into logical sections (e.g., 'Section A: MCQs'). You can group questions of the same type from different chapters into the same section.
+    7.  **Question Type Formatting:**
         - **MCQs:** Provide exactly 4 distinct options.
         - **True/False:** The answer must be 'True' or 'False'.
         - **Fill in the Blanks:** Provide the missing word(s) as the answer.
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
         - **Statistics Questions (Mathematics):** When generating questions for the 'Statistics' chapter, if the question asks to calculate mean, median, or mode, you MUST present the data in a clear text-based table within the \`question_text\`.
-        - **Graph Questions (Social Science):** Describe a data set or scenario in 'question_text' and ask an analytical question. You do not need to generate a visual graph.
+        - **Map-based Questions (Social Science only):** Provide a descriptive scenario and ask the student to identify, locate, or mark specific geographical features, historical places, or routes. You do not need to generate a visual map. The question should be answerable with text.
+        - **Point-wise Questions (Social Science only):** Frame a question where the answer is expected as a series of distinct points. The model answer should also be structured in points.
         - **Diagram Questions (Mathematics):** For topics like Geometry, Mensuration, or Data Handling (e.g., pie charts), you MUST generate a valid SVG string for the 'diagram_svg' property. The SVG must be clear, well-formatted, and accurately represent the problem. For pie charts, ensure all sectors are clearly labeled. **Crucially, ensure that all text labels (like angle measures, side lengths, or percentages) are placed clearly and do not overlap with lines, arcs, or other labels.** The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme.
-        - **Short/Long Answers:** Provide a model correct answer.
-    7.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
+        - **Short/Long Answers:** Provide a model correct answer that reflects the depth required by the allocated marks.
+    8.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
     `;
 };
 
@@ -156,6 +163,7 @@ export const createRegenerationPrompt = (
     - Difficulty Level: ${paperContext.difficulty}
     - Marks: ${questionToReplace.marks}
     - Structure: ${getQuestionStructurePrompt(questionToReplace)}
+    - **Depth:** The complexity and expected answer detail MUST match the allocated marks.
 
     **Instructions:**
     1.  Generate ONE new question that meets all the above specifications, ensuring it is sourced from the specified chapter.

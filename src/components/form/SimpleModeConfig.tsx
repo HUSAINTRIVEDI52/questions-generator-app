@@ -102,8 +102,12 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
                     <QuestionConfigRow label="Fill in the Blanks" count={formState.fillInTheBlanksCount} onCountChange={formHandlers.setFillInTheBlanksCount} marks={formState.fillInTheBlanksMarks} onMarksChange={formHandlers.setFillInTheBlanksMarks} />
                     <QuestionConfigRow label="One Word Answer" count={formState.oneWordAnswerCount} onCountChange={formHandlers.setOneWordAnswerCount} marks={formState.oneWordAnswerMarks} onMarksChange={formHandlers.setOneWordAnswerMarks} />
                     <QuestionConfigRow label="Match the Following" count={formState.matchTheFollowingCount} onCountChange={formHandlers.setMatchTheFollowingCount} marks={formState.matchTheFollowingMarks} onMarksChange={formHandlers.setMatchTheFollowingMarks} />
+                    {/* UPDATE: Replaced graph with map and pointwise questions for social science */}
                     {formState.subject.toLowerCase().includes('social science') && (
-                         <QuestionConfigRow label="Graph-based" count={formState.graphQuestionCount} onCountChange={formHandlers.setGraphQuestionCount} marks={formState.graphQuestionMarks} onMarksChange={formHandlers.setGraphQuestionMarks} />
+                        <>
+                            <QuestionConfigRow label="Map-based" count={formState.mapQuestionCount} onCountChange={formHandlers.setMapQuestionCount} marks={formState.mapQuestionMarks} onMarksChange={formHandlers.setMapQuestionMarks} />
+                            <QuestionConfigRow label="Point-wise" count={formState.pointwiseQuestionCount} onCountChange={formHandlers.setPointwiseQuestionCount} marks={formState.pointwiseQuestionMarks} onMarksChange={formHandlers.setPointwiseQuestionMarks} />
+                        </>
                     )}
                     {formState.subject.toLowerCase().includes('math') && (formState.grade === 'Class 8' || formState.grade === 'Class 9') && (
                         <QuestionConfigRow label="Diagram-based" count={formState.diagramQuestionCount} onCountChange={formHandlers.setDiagramQuestionCount} marks={formState.diagramQuestionMarks} onMarksChange={formHandlers.setDiagramQuestionMarks} />
