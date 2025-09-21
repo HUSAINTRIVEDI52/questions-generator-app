@@ -33,69 +33,75 @@ export const PaperContent: React.FC<PaperContentProps> = ({ paper, showAnswers, 
                         <div className="h-[2px] bg-slate-400" aria-hidden="true"></div>
                     </div>
                     <ol className="list-decimal list-inside space-y-6">
-                        {section.questions.map((q) => (
-                            <li key={q.id} className="break-words">
-                                <div className="flex justify-between items-start">
-                                    <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
-                                    {!showAnswers && (
-                                        <div className="ml-4 flex-shrink-0">
-                                            <button
-                                                onClick={() => onRegenerateQuestion(q.id, sectionIndex)}
-                                                disabled={regeneratingQuestionId !== null}
-                                                className="p-1 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-                                                aria-label="Regenerate question"
-                                            >
-                                                {regeneratingQuestionId === q.id ? <SpinnerIcon /> : <RegenerateIcon />}
-                                            </button>
+                        {section.questions.map((q) => {
+                            // Determine if MCQ options are short enough for a two-column layout.
+                            // Options longer than 40 characters will force a single-column layout for better readability.
+                            const useTwoColumnsForOptions = q.options ? !q.options.some(opt => opt.length > 40) : false;
+
+                            return (
+                                <li key={q.id} className="break-words">
+                                    <div className="flex justify-between items-start">
+                                        <p className="font-medium text-slate-800 pr-4">{q.question_text}</p>
+                                        {!showAnswers && (
+                                            <div className="ml-4 flex-shrink-0">
+                                                <button
+                                                    onClick={() => onRegenerateQuestion(q.id, sectionIndex)}
+                                                    disabled={regeneratingQuestionId !== null}
+                                                    className="p-1 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                                                    aria-label="Regenerate question"
+                                                >
+                                                    {regeneratingQuestionId === q.id ? <SpinnerIcon /> : <RegenerateIcon />}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {q.diagram_svg && (
+                                        <div className="my-4 max-w-xs mx-auto p-2 border border-slate-200 rounded-md bg-slate-50/50 flex justify-center items-center text-slate-800">
+                                            <div
+                                                style={{ width: '100%', height: 'auto' }}
+                                                dangerouslySetInnerHTML={{ __html: q.diagram_svg }}
+                                                aria-label="Geometric diagram for the question"
+                                            />
                                         </div>
                                     )}
-                                </div>
 
-                                {q.diagram_svg && (
-                                    <div className="my-4 max-w-xs mx-auto p-2 border border-slate-200 rounded-md bg-slate-50/50 flex justify-center items-center text-slate-800">
-                                        <div
-                                            style={{ width: '100%', height: 'auto' }}
-                                            dangerouslySetInnerHTML={{ __html: q.diagram_svg }}
-                                            aria-label="Geometric diagram for the question"
-                                        />
-                                    </div>
-                                )}
-
-                                {q.options && (
-                                    <ul className="list-none pl-6 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                                        {q.options.map((option, optIndex) => (
-                                            <li key={optIndex} className={`text-slate-700 flex items-start ${showAnswers && option === q.correct_answer ? 'font-bold text-green-700' : ''}`}>
-                                                <span className="mr-2 font-semibold">{String.fromCharCode(97 + optIndex)})</span>
-                                                <span>{option}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                                {q.match_a && q.match_b && (
-                                    <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 pl-6">
-                                        <div>
-                                            <h4 className="font-semibold mb-2 border-b">Column A</h4>
-                                            <ol className="list-decimal list-inside space-y-1">
-                                                {q.match_a.map((item, idx) => <li key={idx} className="pl-2">{item}</li>)}
-                                            </ol>
+                                    {q.options && (
+                                        <ul className={`list-none pl-6 mt-4 grid grid-cols-1 ${useTwoColumnsForOptions ? 'sm:grid-cols-2' : ''} gap-x-8 gap-y-2`}>
+                                            {q.options.map((option, optIndex) => (
+                                                <li key={optIndex} className={`text-slate-700 flex items-start ${showAnswers && option === q.correct_answer ? 'font-bold text-green-700' : ''}`}>
+                                                    <span className="mr-2 font-semibold">{String.fromCharCode(97 + optIndex)})</span>
+                                                    <span>{option}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    {q.match_a && q.match_b && (
+                                        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 pl-6">
+                                            <div>
+                                                <h4 className="font-semibold mb-2 border-b">Column A</h4>
+                                                <ol className="list-decimal list-inside space-y-1">
+                                                    {q.match_a.map((item, idx) => <li key={idx} className="pl-2">{item}</li>)}
+                                                </ol>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold mb-2 border-b">Column B</h4>
+                                                <ol className="list-[lower-alpha] list-inside space-y-1">
+                                                    {q.match_b.map((item, idx) => <li key={idx} className="pl-2">{item}</li>)}
+                                                </ol>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-semibold mb-2 border-b">Column B</h4>
-                                            <ol className="list-[lower-alpha] list-inside space-y-1">
-                                                {q.match_b.map((item, idx) => <li key={idx} className="pl-2">{item}</li>)}
-                                            </ol>
+                                    )}
+                                    {showAnswers && (
+                                        <div className="mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md printable-answer">
+                                            <p className="text-sm font-semibold text-green-800">
+                                                Correct Answer: <span className="font-normal">{q.correct_answer}</span>
+                                            </p>
                                         </div>
-                                    </div>
-                                )}
-                                {showAnswers && (
-                                    <div className="mt-3 ml-6 p-2 bg-green-50 border border-green-200 rounded-md printable-answer">
-                                        <p className="text-sm font-semibold text-green-800">
-                                            Correct Answer: <span className="font-normal">{q.correct_answer}</span>
-                                        </p>
-                                    </div>
-                                )}
-                            </li>
-                        ))}
+                                    )}
+                                </li>
+                            );
+                        })}
                     </ol>
                 </section>
             ))}

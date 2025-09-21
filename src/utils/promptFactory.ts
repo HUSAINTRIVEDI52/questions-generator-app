@@ -20,7 +20,7 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
     { name: 'Long Answer Questions (1-2 paragraphs)', count: longAnswerCount, marks: longAnswerMarks },
     { name: 'Match the Following Questions', count: matchTheFollowingCount, marks: matchTheFollowingMarks },
     { name: 'Map-based Questions (Social Science only)', count: mapQuestionCount, marks: mapQuestionMarks },
-    { name: 'Point-wise Questions (Social Science only)', count: pointwiseQuestionCount, marks: pointwiseQuestionMarks },
+    { name: 'Point-wise Questions', count: pointwiseQuestionCount, marks: pointwiseQuestionMarks },
     { name: 'Diagram-based Questions (Mathematics only)', count: diagramQuestionCount, marks: diagramQuestionMarks }
   ]
   .filter(q => q.count > 0)
@@ -59,9 +59,15 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
         - **Fill in the Blanks:** Provide the missing word(s) as the answer.
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
-        - **Statistics Questions (Mathematics):** When generating questions for the 'Statistics' chapter, if the question asks to calculate mean, median, or mode, you MUST present the data in a clear text-based table within the \`question_text\`.
-        - **Map-based Questions (Social Science only):** Provide a descriptive scenario and ask the student to identify, locate, or mark specific geographical features, historical places, or routes. You do not need to generate a visual map. The question should be answerable with text.
-        - **Point-wise Questions (Social Science only):** Frame a question where the answer is expected as a series of distinct points. The model answer should also be structured in points.
+        - **Statistics Questions (Mathematics):** For questions from the 'Statistics' chapter involving data sets (e.g., calculating mean, median, mode), you MUST present the data in a clear, multi-line, text-based table within the \`question_text\`. Do not use comma-separated lists for tabular data. Example format:
+          "Calculate the mean for the following data:
+          Class Interval | Frequency
+          ----------------|-----------
+          0-10            | 7
+          10-20           | 10
+          20-30           | 15"
+        - **Map-based Questions (Social Science only):** Generate a question that asks the student to locate and label a set of items on an outline map (e.g., "India" or "World", as relevant). The \`question_text\` MUST start with a directive like "Locate and label the following on an outline map of India:" followed by a numbered or bulleted list of items. The number of items in the list MUST be equal to the marks allocated for this question. The \`correct_answer\` should provide the correct location for each item in the list, formatted clearly (e.g., "1. Black Soil - Deccan Plateau region, 2. Periyar Sanctuary - Kerala, ..."). You do not need to generate a visual map.
+        - **Point-wise Questions:** Frame questions that require an answer in distinct points. These should be modeled after typical textbook questions asking for reasons, effects, characteristics, types, advantages, disadvantages, or to state/list specific items. For example: "State the technical reforms in the Indian agricultural sector," "Explain the main forms of unemployment," or "List the rights of children given in the constitution." The model answer must be structured as a numbered or bulleted list. The number of points in the answer should directly correspond to the marks allocated (e.g., a 4-mark question must have at least 4 distinct points in the answer).
         - **Diagram Questions (Mathematics):** For topics like Geometry, Mensuration, or Data Handling (e.g., pie charts), you MUST generate a valid SVG string for the 'diagram_svg' property. The SVG must be clear, well-formatted, and accurately represent the problem. For pie charts, ensure all sectors are clearly labeled. **Crucially, ensure that all text labels (like angle measures, side lengths, or percentages) are placed clearly and do not overlap with lines, arcs, or other labels.** The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme.
         - **Short/Long Answers:** Provide a model correct answer that reflects the depth required by the allocated marks.
     8.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
@@ -113,9 +119,15 @@ const createAdvancedGenerationPrompt = (formData: FormState): string => {
         - **Fill in the Blanks:** Provide the missing word(s) as the answer.
         - **One Word Answer:** Provide a concise one or two-word answer.
         - **Match the Following:** Provide two arrays of strings in 'match_a' and 'match_b' properties. The 'correct_answer' should be a string mapping items, e.g., '1-c, 2-a, 3-d'.
-        - **Statistics Questions (Mathematics):** When generating questions for the 'Statistics' chapter, if the question asks to calculate mean, median, or mode, you MUST present the data in a clear text-based table within the \`question_text\`.
-        - **Map-based Questions (Social Science only):** Provide a descriptive scenario and ask the student to identify, locate, or mark specific geographical features, historical places, or routes. You do not need to generate a visual map. The question should be answerable with text.
-        - **Point-wise Questions (Social Science only):** Frame a question where the answer is expected as a series of distinct points. The model answer should also be structured in points.
+        - **Statistics Questions (Mathematics):** For questions from the 'Statistics' chapter involving data sets (e.g., calculating mean, median, mode), you MUST present the data in a clear, multi-line, text-based table within the \`question_text\`. Do not use comma-separated lists for tabular data. Example format:
+          "Calculate the mean for the following data:
+          Class Interval | Frequency
+          ----------------|-----------
+          0-10            | 7
+          10-20           | 10
+          20-30           | 15"
+        - **Map-based Questions (Social Science only):** Generate a question that asks the student to locate and label a set of items on an outline map (e.g., "India" or "World", as relevant). The \`question_text\` MUST start with a directive like "Locate and label the following on an outline map of India:" followed by a numbered or bulleted list of items. The number of items in the list MUST be equal to the marks allocated for this question. The \`correct_answer\` should provide the correct location for each item in the list, formatted clearly (e.g., "1. Black Soil - Deccan Plateau region, 2. Periyar Sanctuary - Kerala, ..."). You do not need to generate a visual map.
+        - **Point-wise Questions:** Frame questions that require an answer in distinct points. These should be modeled after typical textbook questions asking for reasons, effects, characteristics, types, advantages, disadvantages, or to state/list specific items. For example: "State the technical reforms in the Indian agricultural sector," "Explain the main forms of unemployment," or "List the rights of children given in the constitution." The model answer must be structured as a numbered or bulleted list. The number of points in the answer should directly correspond to the marks allocated (e.g., a 4-mark question must have at least 4 distinct points in the answer).
         - **Diagram Questions (Mathematics):** For topics like Geometry, Mensuration, or Data Handling (e.g., pie charts), you MUST generate a valid SVG string for the 'diagram_svg' property. The SVG must be clear, well-formatted, and accurately represent the problem. For pie charts, ensure all sectors are clearly labeled. **Crucially, ensure that all text labels (like angle measures, side lengths, or percentages) are placed clearly and do not overlap with lines, arcs, or other labels.** The SVG should be responsive by setting a viewBox and not fixing width and height attributes. It should not have a fixed background color (transparent is best) and should use 'currentColor' for strokes and fills to ensure it adapts to the UI's theme.
         - **Short/Long Answers:** Provide a model correct answer that reflects the depth required by the allocated marks.
     8.  **Output Format:** The entire output must be in a single valid JSON object that strictly adheres to the provided schema. Do not include any text, markdown, or explanations before or after the JSON object.
