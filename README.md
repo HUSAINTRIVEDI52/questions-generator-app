@@ -17,7 +17,7 @@ This is an intelligent tool to generate customized question papers for the GSEB 
     ```
 
 ### Environment Variables
-1.  Create a new file in the root of the project named `.env.local`.
+1.  Create a new file in the root of the project named `.env`.
 2.  Add your Google Gemini API key to this file. **Do not** share this file or commit it to version control.
     ```
     VITE_API_KEY=YOUR_API_KEY_HERE
