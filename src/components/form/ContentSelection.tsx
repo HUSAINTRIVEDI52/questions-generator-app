@@ -1,6 +1,7 @@
 import React from 'react';
 import type { useFormState } from '../../hooks/useFormState';
 import { QuestionStructure } from './QuestionStructure';
+// FIX: Import ChapterQuestionConfig from the correct types file.
 import type { ChapterQuestionConfig } from '../../types';
 
 type UseFormStateReturn = ReturnType<typeof useFormState>;

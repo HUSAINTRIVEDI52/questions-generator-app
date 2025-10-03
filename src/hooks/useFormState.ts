@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+// FIX: Import all necessary types from the central types file.
 import type { FormState, ChapterQuestionConfig, MarksDistribution } from '../types';
 import { GSEB_CURRICULUM } from '../constants';
 
 const grades = Object.keys(GSEB_CURRICULUM).sort((a, b) => parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1]));
 
+// FIX: Initialize all properties of FormState to avoid type errors.
 const initialFormState: FormState = {
     institutionName: 'GSEB Academy',
     title: 'Periodic Test - 1',

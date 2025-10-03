@@ -1,18 +1,16 @@
-import type { QuestionType } from './constants';
-
-// Re-export QuestionType so it can be imported from this module by other components.
-export type { QuestionType } from './constants';
+// FIX: Consolidate QuestionType here to be the single source of truth.
+export type QuestionType = 'MCQ' | 'Short Answer' | 'Long Answer' | 'True/False' | 'Fill in the Blanks' | 'One Word Answer' | 'Match the Following' | 'Map Question' | 'Point-wise Question' | 'Diagram Question';
 
 export interface Question {
-  id: string;
-  chapter: string; // The source chapter of the question
+  id: string; // FIX: Add unique identifier for questions
   question_text: string;
-  diagram_svg?: string; // An SVG string for geometric diagrams
-  options?: string[]; // For MCQ
-  match_a?: string[]; // For Match the Following - Column A
-  match_b?: string[]; // For Match the Following - Column B
+  options?: string[];
   correct_answer: string;
   marks: number;
+  chapter?: string; // FIX: Add source chapter for regeneration and tracking
+  diagram_svg?: string; // FIX: Add property for SVG diagrams (Math)
+  match_a?: string[]; // FIX: Add property for "Match the Following"
+  match_b?: string[]; // FIX: Add property for "Match the Following"
 }
 
 export interface QuestionSection {
@@ -39,29 +37,27 @@ export interface MarksDistribution {
   type: QuestionType;
 }
 
+// FIX: Define and export ChapterQuestionConfig for advanced generation mode.
 export interface ChapterQuestionConfig {
-  chapter: string;
-  enabled: boolean;
-  distribution: MarksDistribution[];
+    chapter: string;
+    enabled: boolean;
+    distribution: MarksDistribution[];
 }
 
 export interface FormState {
-    // Common fields
     institutionName: string;
-    title: string;
+    title: string; // FIX: Add title for the paper
     grade: string;
     medium: string;
     subject: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
     totalMarks: number;
-
-    // Mode specific fields
-    generationMode: 'simple' | 'advanced';
+    generationMode: 'simple' | 'advanced'; // FIX: Add generation mode
     
-    // For Simple Mode
+    // Simple mode fields
     chapters: string[];
     simpleModeDistribution: MarksDistribution[];
-
-    // For Advanced Mode
-    chapterConfigs: ChapterQuestionConfig[];
+    
+    // Advanced mode fields
+    chapterConfigs: ChapterQuestionConfig[]; // FIX: Add configs for advanced mode
 }

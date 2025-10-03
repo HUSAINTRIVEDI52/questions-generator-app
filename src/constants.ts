@@ -1,6 +1,5 @@
-// Define and export the QuestionType enum
-// UPDATE: Replaced 'Graph Question' with 'Map Question' and added 'Point-wise Question'.
-export type QuestionType = 'MCQ' | 'True/False' | 'Fill in the Blanks' | 'One Word Answer' | 'Short Answer' | 'Long Answer' | 'Match the Following' | 'Map Question' | 'Point-wise Question' | 'Diagram Question';
+// FIX: Import QuestionType from the single source of truth in types.ts
+import type { QuestionType } from './types';
 
 // Define and export the marks scheme for Simple Mode
 // UPDATE: Replaced graphQuestionCount with mapQuestionCount and added pointwiseQuestionCount.
@@ -244,7 +243,7 @@ export const GSEB_CURRICULUM: Record<string, Record<string, Record<string, strin
         // ઇતિહાસ
         "1. શું, ક્યાં, કેવી રીતે અને ક્યારે?", "2. સૌથી પહેલાના લોકોના પગલે", "3. સંગ્રહથી ખોરાક ઉગાડવા સુધી", "4. સૌથી પહેલાના શહેરોમાં", "5. પુસ્તકો અને દફન શું કહે છે", "6. રાજ્યો, રાજાઓ અને પ્રારંભિક ગણરાજ્ય", "7. નવા પ્રશ્નો અને વિચારો", "8. અશોક, જે સમ્રાટે યુદ્ધ છોડી દીધું", "9. મહત્વપૂર્ણ ગામડાઓ, સમૃદ્ધ નગરો", "10. વેપારીઓ, રાજાઓ અને યાત્રાળુઓ", "11. નવા સામ્રાજ્યો અને રાજ્યો", "12. ઇમારતો, ચિત્રો અને પુસ્તકો",
         // ભૂગોળ
-        "13. સૌરમંડળમાં પૃથ્વી", "14. ਗ્લોબ: ਅਕਸ਼ਾਂਸ਼ ਅਤੇ ਰੇਖਾਂਸ਼", "15. પૃથ્વીની ગતિઓ", "16. ਨਕਸ਼ੇ", "17. પૃથ્વીના મુખ્ય ક્ષેત્રો", "18. પૃથ્વીના મુખ્ય ભૂમિ સ્વરૂપો", "19. આપણો દેશ - ભારત", "20. ભારત: ਆਬੋਹਵਾ, ਵਨਸਪਤੀ ਅਤੇ ਜੰਗਲੀ ਜੀਵ",
+        "13. સૌરમંડળમાં પૃથ્વી", "14. ਗ્ਲੋબ: ਅਕਸ਼ਾਂਸ਼ ਅਤੇ ਰੇਖਾਂਸ਼", "15. પૃથ્વીની ગતિઓ", "16. ਨਕਸ਼ੇ", "17. પૃથ્વીના મુખ્ય ક્ષેત્રો", "18. પૃથ્વીના મુખ્ય ભૂમિ સ્વરૂપો", "19. આપણો દેશ - ભારત", "20. ભારત: ਆਬੋਹਵਾ, ਵਨਸਪਤੀ ਅਤੇ ਜੰਗਲੀ ਜੀਵ",
         // નાગરિક શાસ્ત્ર
         "21. વિવિધતાને સમજવી", "22. વિવિધતા અને ભેદભાવ", "23. સરકાર શું છે?", "24. ਲੋਕਤੰਤਰੀ ਸਰਕਾਰ ਦੇ ਮੁੱਖ ਤੱਤ", "25. ਪੰਚਾਇਤੀ ਰਾਜ", "26. ਗ੍ਰਾਮੀਣ ਪ੍ਰਸ਼ਾਸਨ", "27. ਸ਼ਹਿਰੀ ਪ੍ਰਸ਼ਾਸਨ"
         ]
