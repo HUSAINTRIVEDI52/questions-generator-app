@@ -107,10 +107,11 @@ export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
             if (q.diagram_svg) {
                 try {
                     const { buffer, width, height } = await svgToPngBlob(q.diagram_svg);
-                    // FIX: Explicitly set the image type to "buffer" in the ImageRun constructor to resolve a TypeScript error. The `docx` library requires a `type` property to correctly identify the image data format when using an object for options.
+                    // FIX: Changed property `data` to `buffer`. The `docx` library has a history of API changes
+                    // for images, causing ambiguity that can lead to TypeScript errors. For some versions, `buffer`
+                    // is the expected property for binary image data, resolving the type conflict.
                     const image = new ImageRun({
-                        type: "buffer",
-                        data: buffer,
+                        buffer: buffer,
                         transformation: { width, height },
                     });
                     docChildren.push(new Paragraph({ children: [image], alignment: AlignmentType.CENTER, spacing: { before: 100, after: 100 } }));

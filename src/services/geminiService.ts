@@ -76,7 +76,7 @@ export const generateQuestionPaper = async (formData: FormState): Promise<Questi
         }
     });
     
-    const jsonText = response.text.trim();
+    const jsonText = (response.text ?? '').trim();
     if (!jsonText.startsWith('{') || !jsonText.endsWith('}')) {
         console.error("Received non-JSON response:", jsonText);
         throw new Error("The model returned a non-JSON response. Please try again.");
@@ -123,7 +123,7 @@ export const regenerateQuestion = async (
             }
         });
 
-        const jsonText = response.text.trim();
+        const jsonText = (response.text ?? '').trim();
         if (!jsonText.startsWith('{') || !jsonText.endsWith('}')) {
             console.error("Received non-JSON response for regeneration:", jsonText);
             throw new Error("The model returned a non-JSON response for the new question.");
