@@ -156,14 +156,18 @@ export const createRegenerationPrompt = (
     const sourceChapter = chapters[0]; // The new question must come from the same chapter as the original.
 
     return `
-    You are an expert academic content creator for the GSEB curriculum.
+    You are an expert academic content creator for the GSEB curriculum, known for your creativity and ability to generate diverse and unique questions.
     **ABSOLUTE CRITICAL RULE on Curriculum:** The new question MUST be 100% based on the content and syllabus from the **latest, most current NCERT textbook** for the specified grade and subject. Do NOT use any information from outdated syllabuses.
 
-    Your task is to generate a SINGLE new question to replace an existing one.
-    The new question MUST be different from the original one provided below.
+    Your task is to generate a SINGLE, completely NEW and UNIQUE question to replace an existing one. The goal is to maximize variety and avoid repetition.
 
     **Original Question Text to Replace:** "${questionToReplace.question_text}"
     **Original Question's Chapter:** "${questionToReplace.chapter}"
+
+    **CRITICAL INSTRUCTIONS FOR THE NEW QUESTION:**
+    1.  **Maximize Novelty:** The new question MUST be substantially different from the original. Do not simply rephrase the old question. Explore a completely different concept, sub-topic, or application of knowledge from within the same source chapter.
+    2.  **Creative Framing:** Frame the question in an innovative way if possible. For example, instead of a direct "Define X," ask "Explain the significance of X with a real-world example."
+    3.  **Avoid Repetition:** Ensure the new question does not test the exact same knowledge point as the original question.
 
     **Specifications for the NEW question:**
     - Grade: ${paperContext.grade}
@@ -175,11 +179,10 @@ export const createRegenerationPrompt = (
     - Structure: ${getQuestionStructurePrompt(questionToReplace)}
     - **Depth:** The complexity and expected answer detail MUST match the allocated marks.
 
-    **Instructions:**
-    1.  Generate ONE new question that meets all the above specifications, ensuring it is sourced from the specified chapter.
-    2.  The new question's topic or focus must be different from the original. Do not just rephrase the old question.
-    3.  In the JSON response, you MUST set the 'chapter' field to "${sourceChapter}".
-    4.  If it is a diagram-based question, ensure labels do not overlap with diagram lines.
-    5.  The response must be a single, valid JSON object that adheres to the provided schema for a single question. Do not include any extra text or markdown.
+    **Output Instructions:**
+    1.  Generate ONE new question that meets all the above specifications.
+    2.  In the JSON response, you MUST set the 'chapter' field to "${sourceChapter}".
+    3.  If it is a diagram-based question, ensure labels do not overlap with diagram lines.
+    4.  The response must be a single, valid JSON object that adheres to the provided schema for a single question. Do not include any extra text or markdown.
     `;
 };

@@ -17,6 +17,8 @@ const MinusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" heigh
 export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) => {
   // State for form inputs
   const [institutionName, setInstitutionName] = useState<string>('GSEB Academy');
+  // FIX: Add state for the new 'title' field to align with the FormState type.
+  const [title, setTitle] = useState<string>('Periodic Test - 1');
   const [grade, setGrade] = useState<string>(grades[0]);
   const [medium, setMedium] = useState<string>('');
   const [subject, setSubject] = useState<string>('');
@@ -108,15 +110,19 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
         alert("Please add at least one question.");
         return;
     }
+    // FIX: Pass the complete FormState object to satisfy the type, including new properties.
     onGenerate({
       institutionName,
+      title,
       grade,
       medium,
       subject,
       chapters: selectedChapters,
       difficulty,
       totalMarks,
-      simpleModeDistribution
+      generationMode: 'simple',
+      simpleModeDistribution,
+      chapterConfigs: []
     });
   };
 
@@ -134,6 +140,12 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
         <div>
           <label htmlFor="institutionName" className="block text-sm font-semibold text-slate-600 mb-1">Institution Name</label>
           <input type="text" id="institutionName" value={institutionName} onChange={e => setInstitutionName(e.target.value)} className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+        </div>
+
+        {/* Paper Title Input */}
+        <div>
+          <label htmlFor="title" className="block text-sm font-semibold text-slate-600 mb-1">Paper Title</label>
+          <input type="text" id="title" value={title} onChange={e => setTitle(e.target.value)} className="w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="e.g., Annual Examination" />
         </div>
 
         {/* Grade */}

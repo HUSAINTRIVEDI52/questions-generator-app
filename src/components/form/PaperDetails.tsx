@@ -1,5 +1,5 @@
 import React from 'react';
-import type { useFormState } from '../../hooks/useFormState';
+import { useFormState } from '../../hooks/useFormState';
 
 type UseFormStateReturn = ReturnType<typeof useFormState>;
 
