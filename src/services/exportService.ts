@@ -68,7 +68,6 @@ const svgToPngBlob = (svgString: string, desiredWidth: number = 400): Promise<{ 
 export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
     const { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableCell, TableRow, WidthType, ImageRun } = docx;
 
-    // FIX: Use `docx.Paragraph` and `docx.Table` to correctly reference the types from the imported module, as `Paragraph` and `Table` in this scope are values (classes).
     const docChildren: (docx.Paragraph | docx.Table)[] = [];
 
     // Header information
@@ -108,9 +107,9 @@ export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
             if (q.diagram_svg) {
                 try {
                     const { buffer, width, height } = await svgToPngBlob(q.diagram_svg);
-                    // FIX: The 'type' property for ImageRun must be a valid image format. Since the buffer contains PNG data, "png" is the correct value. For docx v9+, this property may not be required when using a buffer, but providing it ensures compatibility.
+                    // FIX: Explicitly set the image type to "buffer" in the ImageRun constructor to resolve a TypeScript error. The `docx` library requires a `type` property to correctly identify the image data format when using an object for options.
                     const image = new ImageRun({
-                        type: "png",
+                        type: "buffer",
                         data: buffer,
                         transformation: { width, height },
                     });
