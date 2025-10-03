@@ -58,30 +58,9 @@ export interface FormState {
     // Mode specific fields
     generationMode: 'simple' | 'advanced';
     
-    // For Simple Mode - Counts
+    // For Simple Mode
     chapters: string[];
-    mcqCount: number;
-    shortAnswerCount: number;
-    longAnswerCount: number;
-    trueFalseCount: number;
-    fillInTheBlanksCount: number;
-    oneWordAnswerCount: number;
-    matchTheFollowingCount: number;
-    mapQuestionCount: number;
-    pointwiseQuestionCount: number;
-    diagramQuestionCount: number;
-
-    // For Simple Mode - Marks per question
-    mcqMarks: number;
-    shortAnswerMarks: number;
-    longAnswerMarks: number;
-    trueFalseMarks: number;
-    fillInTheBlanksMarks: number;
-    oneWordAnswerMarks: number;
-    matchTheFollowingMarks: number;
-    mapQuestionMarks: number;
-    pointwiseQuestionMarks: number;
-    diagramQuestionMarks: number;
+    simpleModeDistribution: MarksDistribution[];
 
     // For Advanced Mode
     chapterConfigs: ChapterQuestionConfig[];

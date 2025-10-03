@@ -1,5 +1,6 @@
 import React from 'react';
 import type { useFormState } from '../../hooks/useFormState';
+import { QuestionStructure } from './QuestionStructure';
 
 type UseFormStateReturn = ReturnType<typeof useFormState>;
 
@@ -10,42 +11,6 @@ interface SimpleModeConfigProps {
 }
 
 const labelStyles = "block text-sm font-semibold text-slate-600 mb-1";
-const inputStyles = "w-full p-2 bg-white text-slate-800 border border-slate-300 rounded-md shadow-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
-
-const QuestionConfigRow: React.FC<{
-    label: string;
-    count: number;
-    onCountChange: (value: number) => void;
-    marks: number;
-    onMarksChange: (value: number) => void;
-}> = ({ label, count, onCountChange, marks, onMarksChange }) => (
-    <div className="grid grid-cols-5 items-center gap-2">
-        <label htmlFor={`${label}-count`} className="text-sm col-span-3">{label}</label>
-        <div className="col-span-1">
-             <input
-                type="number"
-                id={`${label}-count`}
-                value={count}
-                onChange={e => onCountChange(Number(e.target.value))}
-                min="0"
-                className={inputStyles}
-                aria-label={`${label} count`}
-            />
-        </div>
-        <div className="col-span-1">
-             <input
-                type="number"
-                id={`${label}-marks`}
-                value={marks}
-                onChange={e => onMarksChange(Number(e.target.value))}
-                min="0"
-                className={inputStyles}
-                aria-label={`${label} marks`}
-            />
-        </div>
-    </div>
-);
-
 
 export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, formHandlers, derivedState }) => {
     const { chapters } = formState;
@@ -86,35 +51,19 @@ export const SimpleModeConfig: React.FC<SimpleModeConfigProps> = ({ formState, f
                 </div>
             </div>
 
-            {/* Question Counts */}
+            {/* Question Structure */}
             <div>
-                <p className={labelStyles}>Number of Questions</p>
-                <div className="space-y-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="grid grid-cols-5 items-center gap-2 text-xs text-slate-500 font-semibold px-1">
-                        <span className="col-span-3">Question Type</span>
-                        <span className="col-span-1 text-center">Count</span>
-                        <span className="col-span-1 text-center">Marks/Q</span>
-                    </div>
-                    <QuestionConfigRow label="MCQs" count={formState.mcqCount} onCountChange={formHandlers.setMcqCount} marks={formState.mcqMarks} onMarksChange={formHandlers.setMcqMarks} />
-                    <QuestionConfigRow label="Short Answers" count={formState.shortAnswerCount} onCountChange={formHandlers.setShortAnswerCount} marks={formState.shortAnswerMarks} onMarksChange={formHandlers.setShortAnswerMarks} />
-                    <QuestionConfigRow label="Long Answers" count={formState.longAnswerCount} onCountChange={formHandlers.setLongAnswerCount} marks={formState.longAnswerMarks} onMarksChange={formHandlers.setLongAnswerMarks} />
-                    <QuestionConfigRow label="True/False" count={formState.trueFalseCount} onCountChange={formHandlers.setTrueFalseCount} marks={formState.trueFalseMarks} onMarksChange={formHandlers.setTrueFalseMarks} />
-                    <QuestionConfigRow label="Fill in the Blanks" count={formState.fillInTheBlanksCount} onCountChange={formHandlers.setFillInTheBlanksCount} marks={formState.fillInTheBlanksMarks} onMarksChange={formHandlers.setFillInTheBlanksMarks} />
-                    <QuestionConfigRow label="One Word Answer" count={formState.oneWordAnswerCount} onCountChange={formHandlers.setOneWordAnswerCount} marks={formState.oneWordAnswerMarks} onMarksChange={formHandlers.setOneWordAnswerMarks} />
-                    <QuestionConfigRow label="Match the Following" count={formState.matchTheFollowingCount} onCountChange={formHandlers.setMatchTheFollowingCount} marks={formState.matchTheFollowingMarks} onMarksChange={formHandlers.setMatchTheFollowingMarks} />
-                    {/* UPDATE: Replaced graph with map and pointwise questions for social science */}
-                    {formState.subject.toLowerCase().includes('social science') && (
-                        <>
-                            <QuestionConfigRow label="Map-based" count={formState.mapQuestionCount} onCountChange={formHandlers.setMapQuestionCount} marks={formState.mapQuestionMarks} onMarksChange={formHandlers.setMapQuestionMarks} />
-                            <QuestionConfigRow label="Point-wise" count={formState.pointwiseQuestionCount} onCountChange={formHandlers.setPointwiseQuestionCount} marks={formState.pointwiseQuestionMarks} onMarksChange={formHandlers.setPointwiseQuestionMarks} />
-                        </>
-                    )}
-                    {formState.subject.toLowerCase().includes('math') && (formState.grade === 'Class 8' || formState.grade === 'Class 9') && (
-                        <QuestionConfigRow label="Diagram-based" count={formState.diagramQuestionCount} onCountChange={formHandlers.setDiagramQuestionCount} marks={formState.diagramQuestionMarks} onMarksChange={formHandlers.setDiagramQuestionMarks} />
-                    )}
+                <label className={labelStyles}>Question Structure</label>
+                <p className="text-xs text-slate-500 mb-2">Define the types of questions, how many of each, and their marks. You can add multiple rows for the same question type (e.g., 5-mark and 3-mark long questions).</p>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                     <QuestionStructure
+                        marksDistribution={formState.simpleModeDistribution}
+                        onDistributionChange={formHandlers.setSimpleModeDistribution}
+                        subject={formState.subject}
+                        grade={formState.grade}
+                    />
                 </div>
             </div>
-
         </div>
     );
 };

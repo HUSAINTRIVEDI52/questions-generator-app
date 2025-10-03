@@ -1,36 +1,33 @@
-import type { FormState, Question, QuestionPaper } from '../types';
+import type { FormState, Question, QuestionPaper, QuestionType } from '../types';
+
+const questionTypeToNameMap: Record<QuestionType, string> = {
+    'MCQ': 'Multiple Choice Questions (MCQs)',
+    'True/False': 'True/False Questions',
+    'Fill in the Blanks': 'Fill in the Blanks Questions',
+    'One Word Answer': 'One Word Answer Questions',
+    'Short Answer': 'Short Answer Questions (2-3 sentences)',
+    'Long Answer': 'Long Answer Questions (1-2 paragraphs)',
+    'Match the Following': 'Match the Following Questions',
+    'Map Question': 'Map-based Questions (Social Science only)',
+    'Point-wise Question': 'Point-wise Questions',
+    'Diagram Question': 'Diagram-based Questions (Mathematics only)',
+};
 
 const createSimpleGenerationPrompt = (formData: FormState): string => {
   const { 
     institutionName, title, grade, medium, subject, chapters, difficulty, totalMarks, 
-    mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, 
-    trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, 
-    oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, 
-    mapQuestionCount, mapQuestionMarks, pointwiseQuestionCount, pointwiseQuestionMarks,
-    diagramQuestionCount, diagramQuestionMarks
+    simpleModeDistribution
   } = formData;
 
-  // UPDATE: Replaced graph with map and pointwise questions.
-  const questionBreakdown = [
-    { name: 'Multiple Choice Questions (MCQs)', count: mcqCount, marks: mcqMarks },
-    { name: 'True/False Questions', count: trueFalseCount, marks: trueFalseMarks },
-    { name: 'Fill in the Blanks Questions', count: fillInTheBlanksCount, marks: fillInTheBlanksMarks },
-    { name: 'One Word Answer Questions', count: oneWordAnswerCount, marks: oneWordAnswerMarks },
-    { name: 'Short Answer Questions (2-3 sentences)', count: shortAnswerCount, marks: shortAnswerMarks },
-    { name: 'Long Answer Questions (1-2 paragraphs)', count: longAnswerCount, marks: longAnswerMarks },
-    { name: 'Match the Following Questions', count: matchTheFollowingCount, marks: matchTheFollowingMarks },
-    { name: 'Map-based Questions (Social Science only)', count: mapQuestionCount, marks: mapQuestionMarks },
-    { name: 'Point-wise Questions', count: pointwiseQuestionCount, marks: pointwiseQuestionMarks },
-    { name: 'Diagram-based Questions (Mathematics only)', count: diagramQuestionCount, marks: diagramQuestionMarks }
-  ]
-  .filter(q => q.count > 0)
-  .map(q => `- ${q.name}: ${q.count} questions, each worth ${q.marks} marks.`)
-  .join('\n');
+  const questionBreakdown = simpleModeDistribution
+    .filter(q => q.count > 0)
+    .map(q => `- ${questionTypeToNameMap[q.type] || q.type}: ${q.count} questions, each worth ${q.marks} marks.`)
+    .join('\n');
 
 
   return `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
-    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the syllabus of the latest **NCERT textbooks** for the specified grade and subject, as followed by the Gujarat State Education Board (GSEB). Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official NCERT curriculum is mandatory.
+    **ABSOLUTE CRITICAL RULE on Curriculum:** You are generating questions for the Gujarat State Education Board (GSEB) which strictly follows the **latest, most current NCERT textbooks**. Every single question you generate MUST be 100% based on the content and syllabus found within these latest NCERT books for the specified grade, subject, and chapters. Do NOT, under any circumstances, use topics, concepts, or questions from older, outdated syllabuses or other reference materials. Adherence to the current official NCERT curriculum is the most important instruction.
     Your task is to create a complete and well-structured question paper based on the following specifications.
 
     **Paper Details:**
@@ -91,7 +88,7 @@ const createAdvancedGenerationPrompt = (formData: FormState): string => {
 
   return `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
-    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the syllabus of the latest **NCERT textbooks** for the specified grade and subject, as followed by the Gujarat State Education Board (GSEB). Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official NCERT curriculum is mandatory.
+    **ABSOLUTE CRITICAL RULE on Curriculum:** You are generating questions for the Gujarat State Education Board (GSEB) which strictly follows the **latest, most current NCERT textbooks**. Every single question you generate MUST be 100% based on the content and syllabus found within these latest NCERT books for the specified grade, subject, and chapters. Do NOT, under any circumstances, use topics, concepts, or questions from older, outdated syllabuses or other reference materials. Adherence to the current official NCERT curriculum is the most important instruction.
     Your task is to create a complete and well-structured question paper based on the following chapter-specific instructions.
 
     **Paper Details:**
@@ -160,6 +157,8 @@ export const createRegenerationPrompt = (
 
     return `
     You are an expert academic content creator for the GSEB curriculum.
+    **ABSOLUTE CRITICAL RULE on Curriculum:** The new question MUST be 100% based on the content and syllabus from the **latest, most current NCERT textbook** for the specified grade and subject. Do NOT use any information from outdated syllabuses.
+
     Your task is to generate a SINGLE new question to replace an existing one.
     The new question MUST be different from the original one provided below.
 
@@ -171,7 +170,6 @@ export const createRegenerationPrompt = (
     - Medium: ${paperContext.medium}
     - Subject: ${paperContext.subject}
     - **Content Source:** The new question MUST be from the following chapter: "${sourceChapter}"
-    - Curriculum: The question must be strictly based on the syllabus of the latest NCERT textbooks for the specified grade and subject.
     - Difficulty Level: ${paperContext.difficulty}
     - Marks: ${questionToReplace.marks}
     - Structure: ${getQuestionStructurePrompt(questionToReplace)}

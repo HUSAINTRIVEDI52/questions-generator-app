@@ -16,32 +16,17 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
   const { formState, formHandlers, derivedState } = useFormState();
   const { areAnyChaptersEnabled } = derivedState;
 
-  // UPDATE: Updated to include map and pointwise questions in the validation logic.
   const submissionError = useMemo(() => {
     if (!areAnyChaptersEnabled) return "Please select at least one chapter.";
 
     let totalQuestions = 0;
 
     if (formState.generationMode === 'simple') {
-        const { mcqCount, mcqMarks, shortAnswerCount, shortAnswerMarks, longAnswerCount, longAnswerMarks, trueFalseCount, trueFalseMarks, fillInTheBlanksCount, fillInTheBlanksMarks, oneWordAnswerCount, oneWordAnswerMarks, matchTheFollowingCount, matchTheFollowingMarks, mapQuestionCount, mapQuestionMarks, pointwiseQuestionCount, pointwiseQuestionMarks } = formState;
-        
-        const questionTypes = [
-            { count: mcqCount, marks: mcqMarks, name: "MCQs" },
-            { count: shortAnswerCount, marks: shortAnswerMarks, name: "Short Answers" },
-            { count: longAnswerCount, marks: longAnswerMarks, name: "Long Answers" },
-            { count: trueFalseCount, marks: trueFalseMarks, name: "True/False" },
-            { count: fillInTheBlanksCount, marks: fillInTheBlanksMarks, name: "Fill in the Blanks" },
-            { count: oneWordAnswerCount, marks: oneWordAnswerMarks, name: "One Word Answers" },
-            { count: matchTheFollowingCount, marks: matchTheFollowingMarks, name: "Match the Following" },
-            { count: mapQuestionCount, marks: mapQuestionMarks, name: "Map-based" },
-            { count: pointwiseQuestionCount, marks: pointwiseQuestionMarks, name: "Point-wise" },
-        ];
-
-        for (const type of questionTypes) {
-            if (type.count > 0) {
-                totalQuestions += type.count;
-                if (type.marks <= 0) {
-                    return `${type.name} must have marks greater than 0.`;
+        for (const dist of formState.simpleModeDistribution) {
+            if (dist.count > 0) {
+                totalQuestions += dist.count;
+                if (dist.marks <= 0) {
+                    return `Questions of type '${dist.type}' must have marks greater than 0.`;
                 }
             }
         }

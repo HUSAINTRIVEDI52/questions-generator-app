@@ -82,12 +82,39 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
     return null;
   }, [selectedChapters, totalMarks, mcqCount, shortAnswerCount, longAnswerCount]);
 
+  // FIX: The onGenerate prop expects a FormState object. The previous implementation passed properties like `mcqCount` which are no longer part of FormState. This has been updated to construct the `simpleModeDistribution` array from the component state, matching the expected type.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading || submissionError) {
       return;
     }
-    // FIX: Add all missing properties to satisfy the FormState type.
+    
+    const simpleModeDistribution = [];
+    if (mcqCount > 0) {
+      simpleModeDistribution.push({
+        id: crypto.randomUUID(),
+        marks: SIMPLE_MODE_MARKS_SCHEME.mcqCount,
+        count: mcqCount,
+        type: 'MCQ' as const,
+      });
+    }
+    if (shortAnswerCount > 0) {
+      simpleModeDistribution.push({
+        id: crypto.randomUUID(),
+        marks: SIMPLE_MODE_MARKS_SCHEME.shortAnswerCount,
+        count: shortAnswerCount,
+        type: 'Short Answer' as const,
+      });
+    }
+    if (longAnswerCount > 0) {
+      simpleModeDistribution.push({
+        id: crypto.randomUUID(),
+        marks: SIMPLE_MODE_MARKS_SCHEME.longAnswerCount,
+        count: longAnswerCount,
+        type: 'Long Answer' as const,
+      });
+    }
+
     onGenerate({
       institutionName,
       title,
@@ -97,29 +124,8 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       chapters: selectedChapters,
       difficulty,
       totalMarks,
-      mcqCount,
-      shortAnswerCount,
-      longAnswerCount,
       generationMode: 'simple',
-      trueFalseCount: 0,
-      fillInTheBlanksCount: 0,
-      oneWordAnswerCount: 0,
-      matchTheFollowingCount: 0,
-      // FIX: Replace 'graphQuestionCount' with 'mapQuestionCount' and add 'pointwiseQuestionCount' to align with the FormState type.
-      mapQuestionCount: 0,
-      pointwiseQuestionCount: 0,
-      diagramQuestionCount: 0,
-      mcqMarks: SIMPLE_MODE_MARKS_SCHEME.mcqCount,
-      shortAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.shortAnswerCount,
-      longAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.longAnswerCount,
-      trueFalseMarks: SIMPLE_MODE_MARKS_SCHEME.trueFalseCount,
-      fillInTheBlanksMarks: SIMPLE_MODE_MARKS_SCHEME.fillInTheBlanksCount,
-      oneWordAnswerMarks: SIMPLE_MODE_MARKS_SCHEME.oneWordAnswerCount,
-      matchTheFollowingMarks: SIMPLE_MODE_MARKS_SCHEME.matchTheFollowingCount,
-      // FIX: Replace 'graphQuestionMarks' with 'mapQuestionMarks' and add 'pointwiseQuestionMarks' to align with the FormState type and constants.
-      mapQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.mapQuestionCount,
-      pointwiseQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.pointwiseQuestionCount,
-      diagramQuestionMarks: SIMPLE_MODE_MARKS_SCHEME.diagramQuestionCount,
+      simpleModeDistribution,
       chapterConfigs: [],
     });
   };
@@ -228,7 +234,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
       <button type="submit" disabled={isSubmitDisabled} className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center text-base shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
         {isLoading ? (
           <>
-             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
              </svg>
