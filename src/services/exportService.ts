@@ -107,8 +107,8 @@ export const exportToDocx = async (paper: QuestionPaper): Promise<void> => {
             if (q.diagram_svg) {
                 try {
                     const { buffer, width, height } = await svgToPngBlob(q.diagram_svg);
-                    // FIX: The property name for image data from an ArrayBuffer in docx v9+ is 'buffer'.
-                    // Using 'data' causes a TypeScript type error as it's meant for other formats like SVG strings.
+                    // The property for image data from an ArrayBuffer is `buffer`.
+                    // FIX: Changed property from `data` to `buffer` to fix type error with `ImageRun`.
                     const image = new ImageRun({
                         buffer: buffer,
                         transformation: { width, height },
