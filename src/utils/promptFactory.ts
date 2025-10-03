@@ -30,7 +30,7 @@ const createSimpleGenerationPrompt = (formData: FormState): string => {
 
   return `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
-    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the **latest updated GSEB/NCERT curriculum** for the specified grade and subject. Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official curriculum is mandatory.
+    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the syllabus of the latest **NCERT textbooks** for the specified grade and subject, as followed by the Gujarat State Education Board (GSEB). Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official NCERT curriculum is mandatory.
     Your task is to create a complete and well-structured question paper based on the following specifications.
 
     **Paper Details:**
@@ -91,7 +91,7 @@ const createAdvancedGenerationPrompt = (formData: FormState): string => {
 
   return `
     You are an expert academic content creator specializing in generating high-quality question papers for students under the Gujarat State Education Board (GSEB) curriculum.
-    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the **latest updated GSEB/NCERT curriculum** for the specified grade and subject. Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official curriculum is mandatory.
+    **Crucial Instruction on Curriculum:** All questions MUST be strictly based on the syllabus of the latest **NCERT textbooks** for the specified grade and subject, as followed by the Gujarat State Education Board (GSEB). Do not use outdated concepts or questions from previous syllabus versions. Adherence to the current, official NCERT curriculum is mandatory.
     Your task is to create a complete and well-structured question paper based on the following chapter-specific instructions.
 
     **Paper Details:**
@@ -171,7 +171,7 @@ export const createRegenerationPrompt = (
     - Medium: ${paperContext.medium}
     - Subject: ${paperContext.subject}
     - **Content Source:** The new question MUST be from the following chapter: "${sourceChapter}"
-    - Curriculum: The question must be strictly based on the latest updated GSEB/NCERT curriculum.
+    - Curriculum: The question must be strictly based on the syllabus of the latest NCERT textbooks for the specified grade and subject.
     - Difficulty Level: ${paperContext.difficulty}
     - Marks: ${questionToReplace.marks}
     - Structure: ${getQuestionStructurePrompt(questionToReplace)}
